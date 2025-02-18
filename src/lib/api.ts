@@ -2,9 +2,6 @@ import { supabase } from './supabase';
 import { Database } from './database.types';
 
 type Tables = Database['public']['Tables'];
-type Assessment = Tables['assessments']['Row'];
-type Framework = Tables['frameworks']['Row'];
-type AssessmentResponse = Tables['assessment_responses']['Row'];
 
 export const api = {
   assessments: {

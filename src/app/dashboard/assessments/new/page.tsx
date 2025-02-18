@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase";
 import { api } from "@/lib/api";
 import { Database } from "@/lib/database.types";
 import { useRouter } from "next/navigation";

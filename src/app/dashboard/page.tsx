@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -39,7 +40,7 @@ export default function DashboardPage() {
     };
 
     fetchUserData();
-  }, []);
+  }, [router]);
 
   const handleSignOut = async () => {
     try {
@@ -84,7 +85,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link href="/dashboard/assessments" className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+          <Link href="/dashboard/assessments" className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800" passHref>
             <h2 className="text-lg font-semibold">Assessments</h2>
             <p className="text-sm text-gray-500">Manage your compliance assessments</p>
           </Link>
