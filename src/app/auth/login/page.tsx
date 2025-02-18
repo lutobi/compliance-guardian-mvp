@@ -40,17 +40,37 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Check if we have Supabase configuration
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        console.error('Missing Supabase configuration');
+        console.log('URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log('Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Present' : 'Missing');
+        throw new Error('Application configuration error');
+      }
+
+      // Attempt to sign in
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase auth error:', error);
+        throw error;
+      }
       
+      if (!data.user) {
+        console.error('No user data returned');
+        throw new Error('Authentication failed');
+      }
+
+      console.log('Login successful, redirecting...');
       toast.success('Logged in successfully');
       
-      router.push('/dashboard');
+      // Use replace instead of push to prevent back navigation
+      router.replace('/dashboard');
     } catch (error) {
+      console.error('Login error:', error);
       const e = error as Error;
       toast.error(e.message || 'Failed to log in');
     } finally {

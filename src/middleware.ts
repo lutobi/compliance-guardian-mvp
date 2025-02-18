@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
+  console.log('Middleware - Request path:', req.nextUrl.pathname);
+  console.log('Middleware - Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
 
@@ -12,6 +14,8 @@ export async function middleware(req: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  console.log('Middleware - User:', user ? 'Authenticated' : 'Not authenticated');
 
   // Auth routes handling
   if (req.nextUrl.pathname.startsWith('/auth')) {
