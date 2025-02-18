@@ -30,7 +30,9 @@ export default function DashboardPage() {
         }
       } catch (error) {
         const e = error as Error;
-        toast.error(e.message || 'Failed to fetch user data');
+        console.error('Dashboard error:', e);
+        toast.error('Failed to fetch user data. Please check if you are logged in.');
+        router.push('/auth/login');
       } finally {
         setLoading(false);
       }
@@ -82,10 +84,10 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <button className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+          <Link href="/dashboard/assessments" className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
             <h2 className="text-lg font-semibold">Assessments</h2>
             <p className="text-sm text-gray-500">Manage your compliance assessments</p>
-          </button>
+          </Link>
           <button className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
             <h2 className="text-lg font-semibold">Frameworks</h2>
             <p className="text-sm text-gray-500">View available compliance frameworks</p>
