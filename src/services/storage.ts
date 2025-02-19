@@ -1,3 +1,5 @@
+'use client';
+
 import { Evidence, EvidenceMap, OperationResult } from '../types/evidence';
 
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB safety limit

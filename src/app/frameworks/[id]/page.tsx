@@ -1,6 +1,7 @@
 import { FrameworkDetailContent } from './framework-detail';
 import { frameworkData } from '@/data/frameworks';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 function getFramework(id: string) {
   return frameworkData[id as keyof typeof frameworkData] || null;
@@ -34,13 +35,28 @@ export default function Page({
       <div className="p-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Framework Not Found</h1>
-          <a href="/frameworks" className="text-blue-600 hover:underline">
+          <Link href="/frameworks" className="text-blue-600 hover:underline">
             Back to Frameworks
-          </a>
+          </Link>
         </div>
       </div>
     );
   }
 
-  return <FrameworkDetailContent params={params} />;
+  try {
+    return <FrameworkDetailContent params={params} />;
+  } catch (error) {
+    console.error('Error rendering framework detail:', error);
+    return (
+      <div className="p-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Error Loading Framework</h1>
+          <p className="text-red-600 mb-4">Something went wrong while loading the framework details.</p>
+          <Link href="/frameworks" className="text-blue-600 hover:underline">
+            Back to Frameworks
+          </Link>
+        </div>
+      </div>
+    );
+  }
 }

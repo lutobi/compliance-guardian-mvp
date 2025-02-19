@@ -23,28 +23,30 @@ export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
 
   // Load evidence data
   useEffect(() => {
-    const loadEvidence = async () => {
-      const result = await storageService.getEvidence(params.id);
-      if (result.success) {
-        setEvidenceMap(result.data);
-      } else {
-        setError(result.error?.message);
-      }
-    };
-    loadEvidence();
+    if (typeof window !== 'undefined') {
+      const loadEvidence = async () => {
+        const result = await storageService.getEvidence(params.id);
+        if (result.success) {
+          setEvidenceMap(result.data);
+        } else {
+          setError(result.error?.message);
+        }
+      };
+      loadEvidence();
+    }
   }, [params.id]);
 
   // Save evidence data
   useEffect(() => {
-    const saveEvidence = async () => {
-      if (Object.keys(evidenceMap).length > 0) {
+    if (typeof window !== 'undefined' && Object.keys(evidenceMap).length > 0) {
+      const saveEvidence = async () => {
         const result = await storageService.setEvidence(params.id, evidenceMap);
         if (!result.success) {
           setError(result.error?.message);
         }
-      }
-    };
-    saveEvidence();
+      };
+      saveEvidence();
+    }
   }, [evidenceMap, params.id]);
   
   if (!framework) {

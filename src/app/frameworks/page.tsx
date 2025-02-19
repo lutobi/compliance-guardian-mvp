@@ -1,30 +1,7 @@
 import Link from 'next/link';
+import { frameworks } from '@/data/frameworks';
 
-const frameworks = [
-  {
-    id: 'nist-800-53',
-    name: 'NIST 800-53',
-    description: 'Security and Privacy Controls for Information Systems and Organizations',
-    version: 'Rev. 5',
-    categories: ['Access Control', 'Audit and Accountability', 'Security Assessment']
-  },
-  {
-    id: 'iso-27001',
-    name: 'ISO 27001',
-    description: 'Information Security Management System (ISMS) Standard',
-    version: '2013',
-    categories: ['Information Security Policies', 'Asset Management', 'Access Control']
-  },
-  {
-    id: 'pci-dss',
-    name: 'PCI DSS',
-    description: 'Payment Card Industry Data Security Standard',
-    version: '4.0',
-    categories: ['Build and Maintain a Secure Network', 'Protect Cardholder Data', 'Maintain Vulnerability Management Program']
-  }
-];
-
-export default async function FrameworksPage() {
+export default function FrameworksPage() {
   return (
     <div className="p-8">
       <header className="mb-8">
