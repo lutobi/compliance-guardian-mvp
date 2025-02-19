@@ -1,8 +1,16 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
-export const supabase = createClientComponentClient()
+import type { Database } from './database.types'
 
-export type Database = {
+export type { Database }
+
+export const supabase = createClientComponentClient<Database>({
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+})
+
+// Legacy type definition - to be removed
+export type LegacyDatabase = {
   public: {
     Tables: {
       frameworks: {

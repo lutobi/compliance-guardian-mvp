@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ToastProvider } from "@/components/ui/toast-context";
 
 import "./globals.css";
 
@@ -12,6 +11,9 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "Compliance Guardian",
   description: "Simplified compliance management system",
+  icons: {
+    icon: '/icon'
+  }
 };
 
 export default function RootLayout({
@@ -22,9 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geist.variable} font-sans antialiased`}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        {children}
       </body>
     </html>
   );

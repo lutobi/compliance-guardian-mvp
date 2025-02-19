@@ -1,29 +1,39 @@
 import { supabase } from './supabase';
 import { Database } from './database.types';
+import { withCache, clearCache } from './api-wrapper';
+import { cacheData } from './cache';
 
 type Tables = Database['public']['Tables'];
 
 export const api = {
   assessments: {
     list: async () => {
-      const { data, error } = await supabase
-        .from('assessments')
-        .select('*, frameworks(name)')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
+      return withCache(
+        async () => {
+          const { data, error } = await supabase
+            .from('assessments')
+            .select('*, frameworks(name)')
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          return data;
+        },
+        { key: 'assessments_list' }
+      );
     },
     
     get: async (id: string) => {
-      const { data, error } = await supabase
-        .from('assessments')
-        .select('*, frameworks(*, assessment_responses(*))')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      return data;
+      return withCache(
+        async () => {
+          const { data, error } = await supabase
+            .from('assessments')
+            .select('*, frameworks(*)')
+            .eq('id', id)
+            .single();
+          if (error) throw error;
+          return data;
+        },
+        { key: `assessment_${id}` }
+      );
     },
     
     create: async (assessment: Omit<Tables['assessments']['Insert'], 'id' | 'created_at' | 'updated_at'>) => {
@@ -32,6 +42,11 @@ export const api = {
         .insert(assessment)
         .select()
         .single();
+      
+      if (error) throw error;
+      // Clear related caches
+      clearCache('assessments_list');
+      return data;
 
       if (error) throw error;
       return data;
@@ -61,6 +76,9 @@ export const api = {
 
   frameworks: {
     list: async () => {
+      const cached = cacheData.get<Tables['frameworks']['Row'][]>('frameworks_list');
+      if (cached) return cached;
+
       const { data, error } = await supabase
         .from('frameworks')
         .select('*')
@@ -71,6 +89,9 @@ export const api = {
     },
     
     get: async (id: string) => {
+      const cached = cacheData.get<Tables['frameworks']['Row']>(`framework_${id}`);
+      if (cached) return cached;
+
       const { data, error } = await supabase
         .from('frameworks')
         .select('*')
@@ -82,20 +103,16 @@ export const api = {
     }
   },
 
+  // Store responses in the controls table for now
   responses: {
-    upsert: async (response: Omit<Tables['assessment_responses']['Insert'], 'id' | 'created_at'>) => {
+    upsert: async (response: { assessment_id: string; control_id: string; response: string; status?: string }) => {
       const { data, error } = await supabase
-        .from('assessment_responses')
-        .upsert(
-          { 
-            ...response,
-            updated_at: new Date().toISOString()
-          },
-          { 
-            onConflict: 'assessment_id,control_id',
-            ignoreDuplicates: false
-          }
-        )
+        .from('controls')
+        .update({
+          status: response.status || 'in_progress',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', response.control_id)
         .select()
         .single();
 
@@ -105,9 +122,9 @@ export const api = {
     
     list: async (assessmentId: string) => {
       const { data, error } = await supabase
-        .from('assessment_responses')
+        .from('controls')
         .select('*')
-        .eq('assessment_id', assessmentId);
+        .eq('framework_id', assessmentId);
 
       if (error) throw error;
       return data;

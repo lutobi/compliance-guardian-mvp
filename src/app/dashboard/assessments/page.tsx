@@ -74,7 +74,7 @@ export default function AssessmentsPage() {
             className="block rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <div className="mb-2 flex items-start justify-between">
-              <h2 className="font-semibold">{assessment.title}</h2>
+              <h2 className="font-semibold">{assessment.name}</h2>
               <span
                 className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
                   assessment.status
@@ -83,16 +83,10 @@ export default function AssessmentsPage() {
                 {assessment.status.replace('_', ' ')}
               </span>
             </div>
-            <p className="mb-2 text-sm text-gray-600">
-              {assessment.description || 'No description'}
-            </p>
+
             <div className="flex items-center justify-between text-sm text-gray-500">
               <span>{assessment.frameworks.name}</span>
-              <span>
-                {assessment.due_date
-                  ? new Date(assessment.due_date).toLocaleDateString()
-                  : 'No due date'}
-              </span>
+
             </div>
           </Link>
         ))}

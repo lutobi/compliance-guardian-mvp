@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { api } from "@/lib/api";
-import type Database from "@/lib/database.types";
+import type { Database } from "@/lib/database.types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -16,10 +16,8 @@ export default function NewAssessmentPage() {
   const [loading, setLoading] = useState(false);
   const [frameworks, setFrameworks] = useState<Framework[]>([]);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    framework_id: '',
-    due_date: ''
+    name: '',
+    framework_id: ''
   });
 
   useEffect(() => {
@@ -48,7 +46,8 @@ export default function NewAssessmentPage() {
       if (!user) throw new Error('No user found');
 
       await api.assessments.create({
-        ...formData,
+        name: formData.name,
+        framework_id: formData.framework_id,
         user_id: user.id,
         status: 'draft'
       });
@@ -78,25 +77,11 @@ export default function NewAssessmentPage() {
             Title
           </label>
           <Input
-            id="title"
-            name="title"
-            value={formData.title}
+            id="name"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
             required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="mb-2 block text-sm font-medium">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            rows={3}
           />
         </div>
 
@@ -118,19 +103,6 @@ export default function NewAssessmentPage() {
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label htmlFor="due_date" className="mb-2 block text-sm font-medium">
-            Due Date
-          </label>
-          <Input
-            type="date"
-            id="due_date"
-            name="due_date"
-            value={formData.due_date}
-            onChange={handleChange}
-          />
         </div>
 
         <div className="flex justify-end space-x-4">

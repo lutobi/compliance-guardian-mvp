@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
@@ -107,7 +107,7 @@ export default function FrameworkDetailPage() {
         }, {} as Record<string, Control>);
 
         // Update section titles and sort subcontrols
-        Object.values(groupedControls).forEach(section => {
+        (Object.values(groupedControls) as Control[]).forEach(section => {
           if (section.subControls && section.subControls.length > 0) {
             // Sort subcontrols by control_id
             section.subControls.sort((a, b) => a.control_id.localeCompare(b.control_id));
@@ -118,7 +118,7 @@ export default function FrameworkDetailPage() {
         });
 
         // Convert to array and sort by control_id
-        const sortedControls = Object.values(groupedControls)
+        const sortedControls = (Object.values(groupedControls) as Control[])
           .sort((a, b) => a.control_id.localeCompare(b.control_id));
 
         if (!isMounted) return;
@@ -146,7 +146,7 @@ export default function FrameworkDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, supabase]);
 
   if (loading) {
     return (
