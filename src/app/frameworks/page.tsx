@@ -24,7 +24,7 @@ const frameworks = [
   }
 ];
 
-export default function FrameworksPage() {
+export default async function FrameworksPage() {
   return (
     <div className="p-8">
       <header className="mb-8">
