@@ -6,25 +6,34 @@ import { StorageService } from '@/services/storage';
 import { Evidence, EvidenceMap } from '@/types/evidence';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import EvidenceDialog from './evidence-dialog';
-import { frameworkData } from '@/data/frameworks';
-
-
+import { frameworkData } from '@/data/frameworks-complete';
 
 interface FrameworkDetailProps {
-  params: { id: string };
+  frameworkId: string;
 }
 
-export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
+export function FrameworkDetailContent({ frameworkId }: FrameworkDetailProps) {
   const [framework, setFramework] = useState<any>(null);
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     const loadFramework = async () => {
-      const data = frameworkData[params.id as keyof typeof frameworkData];
+      console.log('Loading framework with ID:', frameworkId);
+      console.log('Available frameworks:', Object.keys(frameworkData));
+      console.log('Framework data:', frameworkData[frameworkId]);
+      
+      const data = frameworkData[frameworkId];
+      if (!data) {
+        setDebugInfo(`Framework not found. ID: ${frameworkId}. Available IDs: ${Object.keys(frameworkData).join(', ')}`);
+      } else {
+        setDebugInfo(`Framework found: ${data.name}`);
+      }
       setFramework(data);
     };
     loadFramework();
-  }, [params.id]);
+  }, [frameworkId]);
   const [selectedSubcontrol, setSelectedSubcontrol] = useState<string | null>(null);
+  const [expandedControls, setExpandedControls] = useState<Set<string>>(new Set());
   const [evidenceMap, setEvidenceMap] = useState<EvidenceMap>({});
   const [error, setError] = useState<string>();
   const storageService = new StorageService();
@@ -33,7 +42,7 @@ export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const loadEvidence = async () => {
-        const result = await storageService.getEvidence(params.id);
+        const result = await storageService.getEvidence(frameworkId);
         if (result.success) {
           setEvidenceMap(result.data);
         } else {
@@ -42,25 +51,31 @@ export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
       };
       loadEvidence();
     }
-  }, [params.id]);
+  }, [frameworkId]);
 
   // Save evidence data
   useEffect(() => {
     if (typeof window !== 'undefined' && Object.keys(evidenceMap).length > 0) {
       const saveEvidence = async () => {
-        const result = await storageService.setEvidence(params.id, evidenceMap);
+        const result = await storageService.setEvidence(frameworkId, evidenceMap);
         if (!result.success) {
           setError(result.error?.message);
         }
       };
       saveEvidence();
     }
-  }, [evidenceMap, params.id]);
+  }, [evidenceMap, frameworkId]);
   
   if (!framework) {
     return (
       <div className="p-8">
         <h1 className="text-2xl font-bold mb-4">Framework not found</h1>
+        <p className="text-red-600 mb-4">{debugInfo}</p>
+        <div className="bg-gray-100 p-4 rounded mb-4">
+          <pre className="whitespace-pre-wrap text-sm">
+            {JSON.stringify({ frameworkId, frameworkKeys: Object.keys(frameworkData) }, null, 2)}
+          </pre>
+        </div>
         <Link href="/frameworks" className="text-blue-600 hover:underline">
           Back to Frameworks
         </Link>
@@ -92,12 +107,32 @@ export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
         <div className="space-y-8">
           {framework.controls.map((control: any) => (
             <div key={control.id} className="border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-2">
-                {control.id} - {control.name}
-              </h2>
-              <p className="text-gray-600 mb-6">{control.description}</p>
+              <div 
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() => {
+                  setExpandedControls(prev => {
+                    const newSet = new Set(prev);
+                    if (newSet.has(control.id)) {
+                      newSet.delete(control.id);
+                    } else {
+                      newSet.add(control.id);
+                    }
+                    return newSet;
+                  });
+                }}
+              >
+                <div>
+                  <h2 className="text-xl font-semibold mb-2">
+                    {control.id} - {control.name}
+                  </h2>
+                  <p className="text-gray-600">{control.description}</p>
+                </div>
+                <div className="text-2xl transform transition-transform duration-200" style={{ transform: expandedControls.has(control.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  ▼
+                </div>
+              </div>
 
-              <div className="space-y-4">
+              <div className={`space-y-4 mt-4 transition-all duration-200 ${expandedControls.has(control.id) ? 'block' : 'hidden'}`}>
                 {control.subcontrols.map((subcontrol: any) => (
                   <div 
                     key={subcontrol.id}

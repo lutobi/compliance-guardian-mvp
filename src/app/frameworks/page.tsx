@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { frameworks } from '@/data/frameworks';
+import { frameworks } from '@/data/frameworks-complete';
 
 export default function FrameworksPage() {
   return (

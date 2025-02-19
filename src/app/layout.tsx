@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-
 import "./globals.css";
 
 const geist = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Compliance Guardian",
   description: "Simplified compliance management system",
-  icons: {
-    icon: '/icon'
-  }
 };
 
 export default function RootLayout({
@@ -22,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geist.variable} font-sans antialiased`}>
+    <html lang="en">
+      <body className={`${geist.variable} font-sans bg-white`}>
         {children}
       </body>
     </html>
