@@ -3,32 +3,28 @@ import { frameworkData } from '@/data/frameworks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 
-function getFramework(id: string) {
-  return frameworkData[id as keyof typeof frameworkData] || null;
+type Props = {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
+
+async function getFramework(id: string) {
+  // Simulate async operation to satisfy Next.js requirements
+  return Promise.resolve(frameworkData[id as keyof typeof frameworkData] || null);
 }
 
-export async function generateMetadata({ 
-  params, 
-  searchParams 
-}: { 
-  params: { id: string }, 
-  searchParams: { [key: string]: string | string[] | undefined } 
-}): Promise<Metadata> {
-  const framework = getFramework(params.id);
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const framework = await getFramework(params.id);
   
   return {
     title: framework ? `${framework.name} - Framework Details` : 'Framework Not Found',
   };
 }
 
-export default function Page({ 
-  params, 
-  searchParams 
-}: { 
-  params: { id: string }, 
-  searchParams: { [key: string]: string | string[] | undefined } 
-}) {
-  const framework = getFramework(params.id);
+export default async function Page({ params }: Props) {
+  const framework = await getFramework(params.id);
   
   if (!framework) {
     return (

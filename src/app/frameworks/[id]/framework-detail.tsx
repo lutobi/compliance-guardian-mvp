@@ -15,7 +15,15 @@ interface FrameworkDetailProps {
 }
 
 export function FrameworkDetailContent({ params }: FrameworkDetailProps) {
-  const framework = frameworkData[params.id as keyof typeof frameworkData];
+  const [framework, setFramework] = useState<any>(null);
+
+  useEffect(() => {
+    const loadFramework = async () => {
+      const data = frameworkData[params.id as keyof typeof frameworkData];
+      setFramework(data);
+    };
+    loadFramework();
+  }, [params.id]);
   const [selectedSubcontrol, setSelectedSubcontrol] = useState<string | null>(null);
   const [evidenceMap, setEvidenceMap] = useState<EvidenceMap>({});
   const [error, setError] = useState<string>();
