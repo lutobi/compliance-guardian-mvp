@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { headers } from "next/headers";
 
-const geist = Geist({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
   display: "swap",
 });
 
@@ -15,22 +14,22 @@ export const metadata: Metadata = {
   description: "Simplified compliance management system",
 };
 
-function shouldHideSidebar() {
-  const headersList = headers();
-  const pathname = headersList.get("x-pathname") || "";
+async function shouldHideSidebar() {
+  const headersList = await headers();
+  const pathname = headersList.get("x-invoke-path") || "";
   return pathname === "/" || pathname.startsWith("/auth");
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const hideSidebar = shouldHideSidebar();
+  const hideSidebar = await shouldHideSidebar();
 
   return (
     <html lang="en">
-      <body className={`${geist.variable} font-sans bg-white`}>
+      <body className={`${inter.className} bg-white`}>
         {hideSidebar ? (
           children
         ) : (

@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const nist80053Learning: FrameworkLearning = {
   id: 'nist-800-53',
   name: 'NIST 800-53 - Security and Privacy Controls',
+  version: 'Rev. 5',
   overview: {
     description: 'NIST Special Publication 800-53 provides a comprehensive framework of security and privacy controls for information systems and organizations, designed to protect federal information systems.',
     importance: 'As cyber threats continue to evolve, NIST 800-53 provides organizations with a structured approach to implementing security controls that protect against these threats while ensuring compliance with federal regulations.',

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { frameworkData } from '@/data/frameworks-complete';
+import { frameworkData } from '@/data/frameworks';
 
 type Props = {
   id: string;

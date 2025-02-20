@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const iso42001Learning: FrameworkLearning = {
   id: 'iso-42001',
   name: 'ISO 42001 - AI Management Systems',
+  version: '2023',
   overview: {
     description: 'ISO 42001 is a management system standard for artificial intelligence, providing organizations with a framework to develop, implement, and improve their AI systems while ensuring responsibility, transparency, and ethical considerations.',
     importance: 'As AI becomes increasingly prevalent in business operations, ISO 42001 helps organizations establish robust governance frameworks for AI systems, ensuring they are developed and deployed responsibly while managing associated risks.',

@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const iso27001Learning: FrameworkLearning = {
   id: 'iso-27001',
   name: 'ISO 27001 - Information Security Management',
+  version: '2022',
   overview: {
     description: 'ISO/IEC 27001 is an international standard for managing information security. It provides a systematic approach to managing sensitive company information through risk management and implementing appropriate controls.',
     importance: 'As cyber threats continue to evolve and data breaches become more costly, ISO 27001 provides organizations with a proven framework for protecting their information assets and maintaining business continuity.',

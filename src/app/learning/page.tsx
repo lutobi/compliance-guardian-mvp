@@ -29,7 +29,7 @@ export default function LearningHub() {
       {/* Quick Start Guide */}
       <div className="bg-white rounded-lg shadow-lg p-6 mb-12">
         <h2 className="text-2xl font-semibold mb-4">Quick Start Guide</h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-4 gap-6">
           <div className="p-4 border rounded-lg">
             <h3 className="font-semibold mb-2">New to Compliance?</h3>
             <p className="text-gray-600 mb-4">Start here to understand the basics of compliance and why it matters.</p>
@@ -58,6 +58,16 @@ export default function LearningHub() {
               className="text-blue-600 hover:text-blue-800"
             >
               View Guides →
+            </Link>
+          </div>
+          <div className="p-4 border rounded-lg">
+            <h3 className="font-semibold mb-2">Compare Frameworks</h3>
+            <p className="text-gray-600 mb-4">Compare different frameworks to understand their similarities and differences.</p>
+            <Link 
+              href="/compare"
+              className="text-blue-600 hover:text-blue-800"
+            >
+              Framework Comparison →
             </Link>
           </div>
         </div>

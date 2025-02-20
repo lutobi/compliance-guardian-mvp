@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const hipaaLearning: FrameworkLearning = {
   id: 'hipaa',
   name: 'Health Insurance Portability and Accountability Act (HIPAA)',
+  version: '2013',
   overview: {
     description: 'HIPAA is a US federal law that protects sensitive patient health information from being disclosed without the patient\'s consent or knowledge.',
     importance: 'HIPAA compliance is crucial for healthcare providers, insurers, and their business associates to protect patient privacy and maintain trust in the healthcare system.',

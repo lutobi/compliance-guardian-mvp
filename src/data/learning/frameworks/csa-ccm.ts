@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const csaCcmLearning: FrameworkLearning = {
   id: 'csa-ccm',
   name: 'CSA CCM - Cloud Controls Matrix',
+  version: '4.0',
   overview: {
     description: 'The Cloud Security Alliance\'s Cloud Controls Matrix (CSA CCM) is a cybersecurity control framework for cloud computing. It provides organizations with detailed security concepts and principles to assess and improve their cloud security posture.',
     importance: 'As organizations increasingly move to cloud-based services, the CSA CCM provides a comprehensive framework for ensuring security controls are in place across cloud environments.',

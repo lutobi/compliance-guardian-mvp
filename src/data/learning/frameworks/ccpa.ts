@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const ccpaLearning: FrameworkLearning = {
   id: 'ccpa',
   name: 'CCPA - California Consumer Privacy Act',
+  version: '2020',
   overview: {
     description: 'The California Consumer Privacy Act (CCPA) is a state law that enhances privacy rights and consumer protection for residents of California. It establishes requirements for businesses to protect consumer data and provides California residents with specific data privacy rights.',
     importance: 'With increasing focus on consumer privacy rights and data protection, CCPA compliance is crucial for businesses handling California residents\' personal information. Non-compliance can result in significant fines and legal consequences.',

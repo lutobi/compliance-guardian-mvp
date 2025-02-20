@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const nistAiRmfLearning: FrameworkLearning = {
   id: 'nist-ai-rmf',
   name: 'NIST AI Risk Management Framework',
+  version: '1.0',
   overview: {
     description: 'The NIST AI Risk Management Framework (AI RMF) is a guidance document that helps organizations better understand and manage the risks associated with artificial intelligence systems.',
     importance: 'As AI systems become increasingly prevalent across industries, managing their risks becomes crucial for organizational success and societal trust. The NIST AI RMF provides a structured approach to identifying, assessing, and mitigating AI-specific risks.',

@@ -1,141 +1,126 @@
-// Keeping the old data as a reference
-const oldFrameworks = [
+import { nist80053 } from './frameworks/nist-800-53';
+import { iso27001Enhanced } from './enhanced-frameworks/iso27001';
+import { gdpr } from './frameworks/gdpr';
+import { hipaa } from './frameworks/hipaa';
+import { iso42001 } from './frameworks/iso42001';
+import { soc2 } from './frameworks/soc2';
+import { nistAiRmf } from './frameworks/nist-ai-rmf';
+import { csaStar, iso27017, iso27018 } from './frameworks/cloud-security';
+import { Framework, FrameworkData } from '../types/framework';
+
+export const frameworks: Framework[] = [
   {
-    id: 'nist-800-53',
-    name: 'NIST 800-53',
-    description: 'Security and Privacy Controls for Information Systems and Organizations',
-    version: 'Rev. 5',
-    categories: ['Access Control', 'Audit and Accountability', 'Security Assessment']
+    id: csaStar.id,
+    name: csaStar.name,
+    description: csaStar.description,
+    version: csaStar.version,
+    categories: csaStar.categories
   },
   {
-    id: 'iso-27001',
-    name: 'ISO 27001',
-    description: 'Information Security Management System (ISMS) Standard',
-    version: '2013',
-    categories: ['Information Security Policies', 'Asset Management', 'Access Control']
+    id: iso27017.id,
+    name: iso27017.name,
+    description: iso27017.description,
+    version: iso27017.version,
+    categories: iso27017.categories
+  },
+  {
+    id: iso27018.id,
+    name: iso27018.name,
+    description: iso27018.description,
+    version: iso27018.version,
+    categories: iso27018.categories
+  },
+  {
+    id: nist80053.id,
+    name: nist80053.name,
+    description: nist80053.description,
+    version: nist80053.version,
+    categories: nist80053.categories
+  },
+  {
+    id: gdpr.id,
+    name: gdpr.name,
+    description: gdpr.description,
+    version: gdpr.version,
+    categories: gdpr.categories
+  },
+  {
+    id: hipaa.id,
+    name: hipaa.name,
+    description: hipaa.description,
+    version: hipaa.version,
+    categories: hipaa.categories
+  },
+  {
+    id: iso42001.id,
+    name: iso42001.name,
+    description: iso42001.description,
+    version: iso42001.version,
+    categories: iso42001.categories
+  },
+  {
+    id: soc2.id,
+    name: soc2.name,
+    description: soc2.description,
+    version: soc2.version,
+    categories: soc2.categories
+  },
+  {
+    id: nistAiRmf.id,
+    name: nistAiRmf.name,
+    description: nistAiRmf.description,
+    version: nistAiRmf.version,
+    categories: nistAiRmf.categories
   },
   {
     id: 'pci-dss',
     name: 'PCI DSS',
-    description: 'Payment Card Industry Data Security Standard',
     version: '4.0',
-    categories: ['Build and Maintain a Secure Network', 'Protect Cardholder Data', 'Maintain Vulnerability Management Program']
+    description: 'Payment Card Industry Data Security Standard',
+    categories: ['Build and Maintain a Secure Network', 'Protect Cardholder Data', 'Maintain Vulnerability Management Program', 'Access Control Measures', 'Network Monitoring']
+  },
+  {
+    ...iso27001Enhanced,
+    id: 'iso-27001'
   }
 ];
 
-const oldFrameworkData = {
+export const frameworkData: { [key: string]: FrameworkData } = {
+  'iso-27001': iso27001Enhanced,
+  'csa-star': {
+    ...csaStar,
+    controls: csaStar.controls
+  },
+  'iso-27017': {
+    ...iso27017,
+    controls: iso27017.controls
+  },
+  'iso-27018': {
+    ...iso27018,
+    controls: iso27018.controls
+  },
   'nist-800-53': {
-    name: 'NIST 800-53',
-    version: 'Rev. 5',
-    description: 'Security and Privacy Controls for Information Systems and Organizations',
-    categories: ['Access Control', 'Audit and Accountability', 'Security Assessment'],
-    controls: [
-      {
-        id: 'AC',
-        name: 'Access Control',
-        description: 'Access Control family of controls',
-        subcontrols: [
-          {
-            id: 'AC-1',
-            name: 'Access Control Policy and Procedures',
-            description: 'The organization develops, documents, and disseminates an access control policy.'
-          },
-          {
-            id: 'AC-2',
-            name: 'Account Management',
-            description: 'The organization manages information system accounts.'
-          },
-          {
-            id: 'AC-3',
-            name: 'Access Enforcement',
-            description: 'The system enforces approved authorizations for access.'
-          }
-        ]
-      }
-    ]
+    ...nist80053,
+    controls: nist80053.controls
   },
-  'iso-27001': {
-    name: 'ISO 27001',
-    version: '2013',
-    description: 'Information Security Management System (ISMS) Standard',
-    categories: ['Information Security Policies', 'Asset Management', 'Access Control'],
-    controls: [
-      {
-        id: 'A.5',
-        name: 'Information Security Policies',
-        description: 'Management direction for information security',
-        subcontrols: [
-          {
-            id: 'A.5.1',
-            name: 'Management direction for information security',
-            description: 'To provide management direction and support for information security in accordance with business requirements and relevant laws and regulations.'
-          },
-          {
-            id: 'A.5.2',
-            name: 'Review of the policies for information security',
-            description: 'The policies for information security should be reviewed at planned intervals or if significant changes occur.'
-          }
-        ]
-      },
-      {
-        id: 'A.6',
-        name: 'Organization of Information Security',
-        description: 'Internal organization and mobile devices/teleworking',
-        subcontrols: [
-          {
-            id: 'A.6.1',
-            name: 'Internal Organization',
-            description: 'Framework for initiation and control of information security implementation.'
-          },
-          {
-            id: 'A.6.2',
-            name: 'Mobile devices and teleworking',
-            description: 'Security of teleworking and use of mobile devices.'
-          }
-        ]
-      }
-    ]
+  'gdpr': {
+    ...gdpr,
+    controls: gdpr.controls
   },
-  'pci-dss': {
-    name: 'PCI DSS',
-    version: '4.0',
-    description: 'Payment Card Industry Data Security Standard',
-    categories: ['Build and Maintain a Secure Network', 'Protect Cardholder Data', 'Maintain Vulnerability Management Program'],
-    controls: [
-      {
-        id: 'Req-1',
-        name: 'Install and Maintain Network Security Controls',
-        description: 'Network security controls (NSCs) are security policy enforcement points that typically are used to manage and control network traffic.',
-        subcontrols: [
-          {
-            id: '1.1',
-            name: 'Processes and mechanisms for NSCs',
-            description: 'Processes and procedures are defined and understood for managing and maintaining NSCs.'
-          },
-          {
-            id: '1.2',
-            name: 'Configure NSCs',
-            description: 'NSCs are configured to manage traffic between networks and systems.'
-          }
-        ]
-      },
-      {
-        id: 'Req-2',
-        name: 'Apply Secure Configurations',
-        description: 'Configuration standards and security parameters are defined and implemented to prevent misuse.',
-        subcontrols: [
-          {
-            id: '2.1',
-            name: 'Security Configuration Management',
-            description: 'Processes for managing security configurations are defined and understood.'
-          },
-          {
-            id: '2.2',
-            name: 'Vendor Defaults',
-            description: 'Vendor-supplied defaults are changed and unnecessary default accounts are removed before installing a system on the network.'
-          }
-        ]
-      }
-    ]
+  'hipaa': {
+    ...hipaa,
+    controls: hipaa.controls
+  },
+  'iso-42001': {
+    ...iso42001,
+    controls: iso42001.controls
+  },
+  'soc-2': {
+    ...soc2,
+    controls: soc2.controls
+  },
+  'nist-ai-rmf': {
+    ...nistAiRmf,
+    controls: nistAiRmf.controls
   }
 };

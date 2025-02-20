@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const cloudSecurityLearning: FrameworkLearning = {
   id: 'cloud-security',
   name: 'Cloud Security Framework',
+  version: '2023',
   overview: {
     description: 'A comprehensive framework for securing cloud infrastructure and applications, addressing the unique challenges and requirements of cloud computing environments.',
     importance: 'As organizations increasingly move their operations to the cloud, having a robust cloud security framework is essential for protecting data, ensuring compliance, and maintaining business continuity.',

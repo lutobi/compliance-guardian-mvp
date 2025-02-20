@@ -3,6 +3,7 @@ import { FrameworkLearning } from '@/types/learning';
 export const soc2Learning: FrameworkLearning = {
   id: 'soc2',
   name: 'SOC 2',
+  version: '2017',
   overview: {
     description: 'SOC 2 (Service Organization Control 2) is a framework that specifies how organizations should protect customer data based on five "trust service criteria": security, availability, processing integrity, confidentiality, and privacy.',
     importance: 'SOC 2 compliance demonstrates an organization\'s commitment to data security and privacy, making it essential for service providers handling customer data. It has become a de facto requirement for SaaS companies and data centers.',

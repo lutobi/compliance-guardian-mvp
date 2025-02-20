@@ -8,18 +8,20 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean;
   children: React.ReactNode;
   className?: string;
+  id?: string;
 }
 
 export function CollapsibleSection({
   title,
   defaultOpen = false,
   children,
-  className = ''
+  className = '',
+  id
 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`mb-8 ${className}`}>
+    <div className={`mb-8 ${className}`} id={id}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"

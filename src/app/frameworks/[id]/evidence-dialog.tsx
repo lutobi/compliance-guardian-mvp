@@ -33,11 +33,17 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const evidence: Evidence = {
-      id: crypto.randomUUID(),
+      type: 'document',
+      description: '',
+      frequency: 'as-needed',
+      retention: '1 year',
+      type: 'document',
       files: files ? Array.from(files).map(f => f.name) : [],
       notes: notes.trim() || '',
       timestamp: new Date().toISOString(),
-      version: 1
+      version: 1,
+      required: [],
+      optional: []
     };
     onSubmit(evidence);
     setFiles(null);
@@ -87,10 +93,10 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
             <h4 className="text-sm font-medium text-gray-700 mb-3">Existing Evidence</h4>
             <div className="space-y-3">
               {existingEvidence.map((evidence) => (
-                <div key={evidence.id} className="bg-gray-50 rounded-lg p-3 text-sm">
+                <div key={evidence.type} className="bg-gray-50 rounded-lg p-3 text-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-500">{new Date(evidence.timestamp).toLocaleDateString()}</span>
+                      <span className="text-gray-500">{evidence.frequency}</span>
                       {evidence.files && evidence.files.length > 0 && (
                         <span className="text-blue-600 text-xs px-2 py-0.5 bg-blue-50 rounded-full">
                           {evidence.files.length} {evidence.files.length === 1 ? 'file' : 'files'}
@@ -101,7 +107,7 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          setEditingId(evidence.id);
+                          setEditingId(evidence.type);
                           setEditingNotes(evidence.notes || '');
                         }}
                         className="text-gray-500 hover:text-blue-600 transition-colors"
@@ -110,14 +116,14 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
                       </button>
                       <button
                         type="button"
-                        onClick={() => onDelete(evidence.id)}
+                        onClick={() => onDelete(evidence.type)}
                         className="text-gray-500 hover:text-red-600 transition-colors"
                       >
                         ×
                       </button>
                     </div>
                   </div>
-                  {editingId === evidence.id ? (
+                  {editingId === evidence.type ? (
                     <div className="space-y-2">
                       <textarea
                         value={editingNotes}
@@ -136,7 +142,7 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            onUpdate(evidence.id, {
+                            onUpdate(evidence.type, {
                               ...evidence,
                               notes: editingNotes.trim() || ''
                             });
