@@ -1,10 +1,76 @@
-export const frameworks = [
+import { nist80053 } from './frameworks/nist-800-53';
+import { gdpr } from './frameworks/gdpr';
+import { hipaa } from './frameworks/hipaa';
+import { iso42001 } from './frameworks/iso42001';
+import { soc2 } from './frameworks/soc2';
+import { nistAiRmf } from './frameworks/nist-ai-rmf';
+import { csaStar, iso27017, iso27018 } from './frameworks/cloud-security';
+
+import { Framework, FrameworkData } from '../types/framework';
+
+export const frameworks: Framework[] = [
   {
-    id: 'nist-800-53',
-    name: 'NIST 800-53',
-    description: 'Security and Privacy Controls for Information Systems and Organizations',
-    version: 'Rev. 5',
-    categories: ['Access Control', 'Audit and Accountability', 'Security Assessment', 'Configuration Management', 'Identification and Authentication']
+    id: csaStar.id,
+    name: csaStar.name,
+    description: csaStar.description,
+    version: csaStar.version,
+    categories: csaStar.categories
+  },
+  {
+    id: iso27017.id,
+    name: iso27017.name,
+    description: iso27017.description,
+    version: iso27017.version,
+    categories: iso27017.categories
+  },
+  {
+    id: iso27018.id,
+    name: iso27018.name,
+    description: iso27018.description,
+    version: iso27018.version,
+    categories: iso27018.categories
+  },
+  {
+    id: soc2.id,
+    name: soc2.name,
+    description: soc2.description,
+    version: soc2.version,
+    categories: soc2.categories
+  },
+  {
+    id: nistAiRmf.id,
+    name: nistAiRmf.name,
+    description: nistAiRmf.description,
+    version: nistAiRmf.version,
+    categories: nistAiRmf.categories
+  },
+  {
+    id: iso42001.id,
+    name: iso42001.name,
+    description: iso42001.description,
+    version: iso42001.version,
+    categories: iso42001.categories
+  },
+  {
+    id: hipaa.id,
+    name: hipaa.name,
+    description: hipaa.description,
+    version: hipaa.version,
+    categories: hipaa.categories
+  },
+  {
+    id: gdpr.id,
+    name: gdpr.name,
+    description: gdpr.description,
+    version: gdpr.version,
+    categories: gdpr.categories
+  },
+  {
+    id: nist80053.id,
+    name: nist80053.name,
+    description: nist80053.description,
+    version: nist80053.version,
+    categories: nist80053.categories
   },
   {
     id: 'iso-27001',
@@ -22,90 +88,69 @@ export const frameworks = [
   }
 ];
 
-export const frameworkData = {
+export const frameworkData: { [key: string]: FrameworkData } = {
+  'csa-star': {
+    name: csaStar.name,
+    version: csaStar.version,
+    description: csaStar.description,
+    categories: csaStar.categories,
+    controls: csaStar.controls
+  },
+  'iso-27017': {
+    name: iso27017.name,
+    version: iso27017.version,
+    description: iso27017.description,
+    categories: iso27017.categories,
+    controls: iso27017.controls
+  },
+  'iso-27018': {
+    name: iso27018.name,
+    version: iso27018.version,
+    description: iso27018.description,
+    categories: iso27018.categories,
+    controls: iso27018.controls
+  },
+  'soc2': {
+    name: soc2.name,
+    version: soc2.version,
+    description: soc2.description,
+    categories: soc2.categories,
+    controls: soc2.controls
+  },
+  'nist-ai-rmf': {
+    name: nistAiRmf.name,
+    version: nistAiRmf.version,
+    description: nistAiRmf.description,
+    categories: nistAiRmf.categories,
+    controls: nistAiRmf.controls
+  },
+  'iso-42001': {
+    name: iso42001.name,
+    version: iso42001.version,
+    description: iso42001.description,
+    categories: iso42001.categories,
+    controls: iso42001.controls
+  },
+  'hipaa': {
+    name: hipaa.name,
+    version: hipaa.version,
+    description: hipaa.description,
+    categories: hipaa.categories,
+    controls: hipaa.controls
+  },
+  'gdpr': {
+    name: gdpr.name,
+    version: gdpr.version,
+    description: gdpr.description,
+    categories: gdpr.categories,
+    controls: gdpr.controls
+  },
   'nist-800-53': {
-    name: 'NIST 800-53',
-    version: 'Rev. 5',
-    description: 'Security and Privacy Controls for Information Systems and Organizations',
-    categories: ['Access Control', 'Audit and Accountability', 'Security Assessment', 'Configuration Management', 'Identification and Authentication'],
-    controls: [
-      {
-        id: 'AC',
-        name: 'Access Control',
-        description: 'Access Control family of controls',
-        subcontrols: [
-          {
-            id: 'AC-1',
-            name: 'Access Control Policy and Procedures',
-            description: 'The organization develops, documents, and disseminates an access control policy.'
-          },
-          {
-            id: 'AC-2',
-            name: 'Account Management',
-            description: 'The organization manages information system accounts.'
-          },
-          {
-            id: 'AC-3',
-            name: 'Access Enforcement',
-            description: 'The system enforces approved authorizations for access.'
-          },
-          {
-            id: 'AC-4',
-            name: 'Information Flow Enforcement',
-            description: 'The system enforces approved authorizations for controlling the flow of information.'
-          },
-          {
-            id: 'AC-5',
-            name: 'Separation of Duties',
-            description: 'The organization separates duties of individuals to prevent malicious activity.'
-          }
-        ]
-      },
-      {
-        id: 'AU',
-        name: 'Audit and Accountability',
-        description: 'Audit and Accountability family of controls',
-        subcontrols: [
-          {
-            id: 'AU-1',
-            name: 'Audit and Accountability Policy and Procedures',
-            description: 'The organization develops and maintains audit and accountability policies.'
-          },
-          {
-            id: 'AU-2',
-            name: 'Event Logging',
-            description: 'The system logs events to support security monitoring and investigations.'
-          },
-          {
-            id: 'AU-3',
-            name: 'Content of Audit Records',
-            description: 'The system generates audit records containing detailed information.'
-          }
-        ]
-      },
-      {
-        id: 'CA',
-        name: 'Security Assessment',
-        description: 'Security Assessment and Authorization family of controls',
-        subcontrols: [
-          {
-            id: 'CA-1',
-            name: 'Security Assessment Policy',
-            description: 'The organization develops security assessment and authorization policies.'
-          },
-          {
-            id: 'CA-2',
-            name: 'Security Assessments',
-            description: 'The organization conducts regular security assessments.'
-          },
-          {
-            id: 'CA-3',
-            name: 'System Interconnections',
-            description: 'The organization documents and controls system interconnections.'
-          }
-        ]
-      }
-    ]
+    name: nist80053.name,
+    version: nist80053.version,
+    description: nist80053.description,
+    categories: nist80053.categories,
+    controls: nist80053.controls
   },
   'iso-27001': {
     name: 'ISO 27001',

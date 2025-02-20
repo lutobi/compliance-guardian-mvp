@@ -4,7 +4,7 @@ type Props = {
   params: { id: string };
 };
 
-export default function Page({ params }: Props) {
+export default async function Page({ params }: Props) {
   console.log('Page params:', params); // Debug log
   
   if (!params?.id) {

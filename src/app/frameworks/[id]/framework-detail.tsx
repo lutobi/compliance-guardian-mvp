@@ -121,11 +121,11 @@ export function FrameworkDetailContent({ frameworkId }: FrameworkDetailProps) {
                   });
                 }}
               >
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold inline-block mr-2">
                     {control.id} - {control.name}
                   </h2>
-                  <p className="text-gray-600">{control.description}</p>
+                  <span className="text-gray-600 text-sm">{control.description}</span>
                 </div>
                 <div className="text-2xl transform transition-transform duration-200" style={{ transform: expandedControls.has(control.id) ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                   ▼
@@ -140,9 +140,10 @@ export function FrameworkDetailContent({ frameworkId }: FrameworkDetailProps) {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium">
+                        <h3 className="font-medium inline-block mr-2">
                           {subcontrol.id} - {subcontrol.name}
                         </h3>
+                        <span className="text-gray-600 text-sm">{subcontrol.description}</span>
                       </div>
                       <button
                         onClick={() => setSelectedSubcontrol(subcontrol.id)}
