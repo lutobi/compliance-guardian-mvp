@@ -7,7 +7,12 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true
-  }
+  },
+  output: 'standalone',
+  poweredByHeader: false,
+  generateEtags: false,
+  distDir: '.next',
+  assetPrefix: ''
 }
 
 module.exports = nextConfig
