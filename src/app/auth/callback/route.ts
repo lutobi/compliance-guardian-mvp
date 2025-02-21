@@ -21,17 +21,19 @@ export async function GET(request: Request) {
     }
 
     const supabase = createRouteHandlerClient({ cookies })
-    const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+    
+    // Exchange the code for a session
+    const { error: signInError } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (sessionError) {
-      console.error('Session error:', sessionError)
-      return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent(sessionError.message)}`)
+    if (signInError) {
+      console.error('Sign in error:', signInError)
+      return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent(signInError.message)}`)
     }
 
+    // Successful sign in/up, redirect to dashboard
     return NextResponse.redirect(`${requestUrl.origin}/dashboard`)
-  } catch (err) {
-    console.error('Callback error:', err)
-    const requestUrl = new URL(request.url)
+  } catch (error) {
+    console.error('Callback error:', error)
     return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent('An unexpected error occurred')}`)
   }
 }
