@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { User } from '@supabase/supabase-js';
+import { User, AuthError } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -68,19 +68,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
+
+      // First, check if user exists
+      const { data: existingUser } = await supabase
+        .from('auth.users')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existingUser) {
+        throw new Error('User already registered. Please sign in instead.');
+      }
+
+      // If user doesn't exist, proceed with signup
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            email_confirm: false,
+          }
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('rate limit')) {
+          throw new Error('Too many signup attempts. Please try again in a few minutes.');
+        }
+        throw error;
+      }
+
+      // Store email for verification page
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lastSignupEmail', email);
+      }
+
       router.push('/auth/verify-email');
     } catch (error) {
       console.error('Sign up error:', error);
-      throw error;
+      if (error instanceof AuthError) {
+        throw error;
+      } else if (error instanceof Error) {
+        throw new AuthError(error.message);
+      } else {
+        throw new AuthError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }

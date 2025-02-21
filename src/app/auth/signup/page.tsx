@@ -12,23 +12,29 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState(false);
   const { signUp } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (rateLimitError) {
+      toast.error('Please wait a few minutes before trying again.');
+      return;
+    }
+
     setLoading(true);
     try {
       await signUp(email, password);
-      // Store email for verification page
-      localStorage.setItem('lastSignupEmail', email);
-      toast.success('Account created! Please check your email to verify your account.');
-      router.push('/auth/verify-email');
+      // Success message and redirect are handled in auth context
     } catch (error: any) {
       console.error('Signup error:', error);
-      if (error.message?.includes('Email rate limit exceeded')) {
-        toast.error('Too many signup attempts. Please try again later.');
-      } else if (error.message?.includes('User already registered')) {
+      if (error.message?.toLowerCase().includes('rate limit')) {
+        setRateLimitError(true);
+        toast.error('Too many signup attempts. Please try again in a few minutes.');
+        // Reset rate limit after 5 minutes
+        setTimeout(() => setRateLimitError(false), 5 * 60 * 1000);
+      } else if (error.message?.includes('already registered')) {
         toast.error('An account with this email already exists. Please sign in instead.');
       } else {
         toast.error(error.message || 'Failed to create account. Please try again.');
@@ -60,7 +66,7 @@ export default function SignUpPage() {
                 required
                 placeholder="Enter your email"
                 className="mt-1"
-                disabled={loading}
+                disabled={loading || rateLimitError}
               />
             </div>
             <div>
@@ -75,7 +81,7 @@ export default function SignUpPage() {
                 required
                 placeholder="Enter your password"
                 className="mt-1"
-                disabled={loading}
+                disabled={loading || rateLimitError}
                 minLength={6}
               />
               <p className="mt-1 text-sm text-gray-500">
@@ -84,8 +90,18 @@ export default function SignUpPage() {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Sign Up'}
+          {rateLimitError && (
+            <div className="text-sm text-red-600">
+              Too many signup attempts. Please wait a few minutes before trying again.
+            </div>
+          )}
+
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={loading || rateLimitError}
+          >
+            {loading ? 'Creating Account...' : rateLimitError ? 'Please wait...' : 'Sign Up'}
           </Button>
 
           <div className="text-center text-sm">
