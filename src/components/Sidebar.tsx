@@ -2,11 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, BookOpen, ShieldCheck, ClipboardCheck, FileBarChart, GitCompare } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  ShieldCheck, 
+  ClipboardCheck, 
+  FileBarChart, 
+  GitCompare,
+  Activity 
+} from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Frameworks', href: '/frameworks', icon: ShieldCheck },
+  { 
+    name: 'Monitoring', 
+    href: '/dashboard/monitoring/setup', 
+    icon: Activity,
+    activePattern: '/dashboard/monitoring'
+  },
   { name: 'Compare', href: '/compare', icon: GitCompare },
   { name: 'Learning', href: '/learning', icon: BookOpen },
   { name: 'Assessments', href: '/dashboard/assessments', icon: ClipboardCheck },
@@ -25,7 +39,9 @@ export default function Sidebar() {
         <nav className="flex-1 px-2 py-4 space-y-1">
           {navigation.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname.startsWith(item.href);
+            const isActive = item.activePattern 
+              ? pathname.startsWith(item.activePattern)
+              : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.name}
