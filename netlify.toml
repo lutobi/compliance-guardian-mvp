@@ -6,16 +6,20 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_VERSION = "18"
   NPM_FLAGS = "--legacy-peer-deps"
+  NEXT_USE_NETLIFY_EDGE = "true"
+  NEXT_PRIVATE_TARGET = "server"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/plugin-nextjs"]
+  included_files = ["node_modules/@netlify/plugin-nextjs/**"]
+
 [[edge_functions]]
   function = "next-server"
   pattern = "/*"
-
-[functions]
-  included_files = ["node_modules/@netlify/plugin-nextjs/**"]
 
 [[redirects]]
   from = "/_next/static/*"
