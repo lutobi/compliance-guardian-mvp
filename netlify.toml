@@ -15,21 +15,29 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["@netlify/plugin-nextjs"]
-  included_files = ["node_modules/@netlify/plugin-nextjs/**"]
 
 [[edge_functions]]
   function = "next-server"
   pattern = "/*"
 
+# Handle Next.js static files
 [[redirects]]
   from = "/_next/static/*"
   to = "/static/:splat"
   status = 200
 
+# Handle Next.js public files
+[[redirects]]
+  from = "/public/*"
+  to = "/:splat"
+  status = 200
+
+# Handle all other routes - Important for client-side routing
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/next-server"
+  to = "/index.html"
   status = 200
+  force = true
 
 [[headers]]
   for = "/*"
