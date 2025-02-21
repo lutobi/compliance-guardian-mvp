@@ -10,6 +10,10 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[[edge_functions]]
+  function = "next-server"
+  pattern = "/*"
+
 [functions]
   included_files = ["node_modules/@netlify/plugin-nextjs/**"]
 
@@ -20,7 +24,7 @@
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/.netlify/functions/next-server"
   status = 200
 
 [[headers]]
