@@ -1,20 +1,48 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { setupA92Monitoring, getA92ComplianceStatus } from '@/examples/iso27001/access-control/setup-a92-monitoring';
 
-// This should be server-side rendered
-async function getInitialData() {
-  try {
-    await setupA92Monitoring();
-    return await getA92ComplianceStatus();
-  } catch (error) {
-    console.error('Failed to get compliance status:', error);
-    return [];
-  }
-}
+export default function A92Dashboard() {
+  const [complianceData, setComplianceData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default async function A92Dashboard() {
-  const complianceData = await getInitialData();
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        await setupA92Monitoring();
+        const data = await getA92ComplianceStatus();
+        setComplianceData(data);
+      } catch (err) {
+        console.error('Error fetching compliance data:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">ISO 27001 A.9.2 - User Access Management</h1>
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">ISO 27001 A.9.2 - User Access Management</h1>
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

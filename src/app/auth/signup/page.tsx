@@ -3,19 +3,27 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const { signUp, user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
 
   const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+    const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
     
     if (!email) {
       newErrors.email = 'Email is required';
@@ -29,6 +37,12 @@ export default function SignUpPage() {
       newErrors.password = 'Password must be at least 8 characters';
     }
 
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (confirmPassword !== password) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -37,18 +51,30 @@ export default function SignUpPage() {
     e.preventDefault();
     if (!validateForm()) return;
     
-    setLoading(true);
-
     try {
       await signUp(email, password);
       toast.success('Account created successfully!');
     } catch (error) {
-      toast.error('Failed to create account. Please try again.');
+      const message = error instanceof Error ? error.message : 'Failed to create account. Please try again.';
+      toast.error(message);
       console.error('Signup error:', error);
-    } finally {
-      setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -70,6 +96,7 @@ export default function SignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={errors.email ? "border-red-500" : ""}
+                disabled={authLoading}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-500">{errors.email}</p>
@@ -86,9 +113,27 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={errors.password ? "border-red-500" : ""}
+                disabled={authLoading}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={errors.confirmPassword ? "border-red-500" : ""}
+                disabled={authLoading}
+              />
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
               )}
             </div>
           </div>
@@ -96,17 +141,17 @@ export default function SignUpPage() {
           <Button
             type="submit"
             className="w-full"
-            disabled={loading}
+            disabled={authLoading}
           >
-            {loading ? 'Creating account...' : 'Sign up'}
+            {authLoading ? 'Creating account...' : 'Sign up'}
           </Button>
 
-          <p className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
+          <div className="text-center text-sm">
+            <span className="text-gray-600">Already have an account?</span>{' '}
             <Link href="/auth/login" className="text-blue-600 hover:underline">
               Sign in
             </Link>
-          </p>
+          </div>
         </form>
       </div>
     </div>

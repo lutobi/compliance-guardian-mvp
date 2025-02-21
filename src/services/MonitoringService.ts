@@ -7,6 +7,19 @@ import {
   MonitoringStatus
 } from '@/types/monitoring';
 
+// Helper function to generate UUID that works in both browser and Node.js
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback implementation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 class MonitoringService {
   private static instance: MonitoringService;
 
@@ -22,7 +35,7 @@ class MonitoringService {
   async createMonitoringPoint(point: Partial<MonitoringPoint>): Promise<MonitoringPoint> {
     // TODO: Implement API call to create monitoring point
     return {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       name: point.name || '',
       description: point.description || '',
       status: 'compliant',
@@ -42,7 +55,7 @@ class MonitoringService {
   async addEvidence(pointId: string, evidence: Partial<Evidence>): Promise<Evidence> {
     // TODO: Implement API call to add evidence
     return {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       type: evidence.type || 'document',
       title: evidence.title || '',
       description: evidence.description || '',

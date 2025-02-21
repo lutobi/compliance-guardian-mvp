@@ -15,6 +15,22 @@ export class FileSystemIntegration implements MonitoringIntegration {
         throw new Error('File path not configured for this metric');
       }
 
+      // In production, return mock data for demo purposes
+      if (process.env.NODE_ENV === 'production' && filePath.startsWith('/mock/')) {
+        return {
+          status: 'compliant',
+          timestamp: new Date().toISOString(),
+          evidence: {
+            type: 'file_analysis',
+            data: {
+              message: 'Mock file analysis passed',
+              details: 'This is mock data for demonstration purposes',
+              path: filePath
+            }
+          }
+        };
+      }
+
       // Make API call to our server endpoint
       const response = await fetch('/api/monitoring/filesystem', {
         method: 'POST',

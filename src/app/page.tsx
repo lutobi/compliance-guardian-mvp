@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -11,18 +12,20 @@ export default function Home() {
         </nav>
       </header>
       <main>
-        <h2 className="text-4xl font-bold mb-4">Simplified Compliance Management</h2>
-        <p className="text-gray-600 mb-8 max-w-2xl">
-          Streamline your compliance process with our intuitive platform.
-        </p>
-        <div>
-          <Link href="/auth/signup" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg mr-4 hover:bg-blue-700">
-            Get Started
-          </Link>
-          <Link href="/frameworks" className="inline-block border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50">
-            View Frameworks
-          </Link>
-        </div>
+        <section className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-4">Simplified Compliance Management</h2>
+          <p className="text-gray-600 mb-8 text-lg">
+            Streamline your compliance process with our intuitive platform.
+          </p>
+          <div className="space-x-4">
+            <Button asChild>
+              <Link href="/auth/signup">Get Started</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/frameworks">View Frameworks</Link>
+            </Button>
+          </div>
+        </section>
       </main>
     </div>
   );

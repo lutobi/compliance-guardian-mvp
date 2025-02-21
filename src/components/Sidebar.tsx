@@ -14,7 +14,10 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  UserCircleIcon
+  UserCircleIcon,
+  AcademicCapIcon,
+  DocumentChartBarIcon,
+  DocumentMagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -22,7 +25,12 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export default function Sidebar({ className, ...props }: SidebarProps) {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { signOut, user } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -31,6 +39,8 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
 
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setIsMobileMenuOpen(false);
@@ -40,111 +50,113 @@ export default function Sidebar({ className, ...props }: SidebarProps) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Handle server-side rendering
+  if (!mounted) return null;
+
+  // Hide sidebar on auth pages and home page
+  const shouldHideSidebar = !user || pathname === '/' || pathname?.startsWith('/auth');
+  if (shouldHideSidebar) {
+    return null;
+  }
+
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: ChartBarIcon },
     { name: 'Frameworks', href: '/frameworks', icon: BookOpenIcon },
-    { name: 'Compare', href: '/compare', icon: ClipboardDocumentCheckIcon },
-    { name: 'Learning', href: '/learning', icon: BookOpenIcon },
-    { name: 'Monitoring', href: '/monitoring', icon: ClipboardDocumentCheckIcon },
+    { name: 'Controls', href: '/controls', icon: ClipboardDocumentCheckIcon },
+    { name: 'Learning', href: '/learning', icon: AcademicCapIcon },
+    { name: 'Compare', href: '/compare', icon: DocumentChartBarIcon },
+    { name: 'Monitoring', href: '/monitoring', icon: DocumentMagnifyingGlassIcon },
     { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
   ];
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
-
   return (
     <>
-      {/* Mobile header */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center px-4 md:hidden z-40">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? (
-            <XMarkIcon className="h-6 w-6" />
-          ) : (
-            <Bars3Icon className="h-6 w-6" />
-          )}
-        </Button>
-        <span className="ml-4 text-lg font-semibold">Compliance Guardian</span>
-      </div>
+      {/* Mobile menu button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-4 left-4 md:hidden z-50"
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        {isMobileMenuOpen ? (
+          <XMarkIcon className="h-6 w-6" />
+        ) : (
+          <Bars3Icon className="h-6 w-6" />
+        )}
+      </Button>
 
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
-      <aside
+      {/* Sidebar for mobile and desktop */}
+      <div
         className={cn(
-          'fixed md:sticky top-0 h-screen w-64 bg-white border-r border-gray-200',
-          'transform transition-transform duration-300 ease-in-out md:transform-none',
-          'flex flex-col z-50',
-          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
-          className
+          "fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out md:translate-x-0",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
-        {...props}
       >
-        {/* Logo - hidden on mobile since it's in the top bar */}
-        <div className="hidden md:flex items-center h-16 px-4 border-b border-gray-200">
-          <Link href="/dashboard" className="text-xl font-bold">
-            Compliance Guardian
-          </Link>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  'flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                  isActive
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                )}
-              >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* User section */}
-        <div className="border-t border-gray-200 p-4">
-          <div className="flex items-center mb-4">
-            <UserCircleIcon className="h-8 w-8 text-gray-400" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+        <div className="h-full flex flex-col">
+          <div className="flex-1 overflow-y-auto pt-5 pb-4">
+            <div className="flex-shrink-0 flex items-center px-4 mb-5">
+              <h2 className="text-xl font-semibold">Compliance Guardian</h2>
+            </div>
+            <nav className="mt-5 px-2 space-y-1">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors",
+                    pathname === item.href
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      "mr-4 flex-shrink-0 h-6 w-6",
+                      pathname === item.href
+                        ? "text-gray-900"
+                        : "text-gray-400 group-hover:text-gray-500"
+                    )}
+                  />
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
+          
+          {/* User section */}
+          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+            <div className="flex items-center">
+              <div>
+                <UserCircleIcon className="inline-block h-9 w-9 rounded-full text-gray-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-700 truncate">
+                  {user.name || user.email}
+                </p>
+                <Button
+                  variant="ghost"
+                  className="text-sm text-gray-500 hover:text-gray-700 flex items-center"
+                  onClick={() => signOut()}
+                >
+                  <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+                  Sign out
+                </Button>
+              </div>
             </div>
           </div>
-          <Button
-            variant="outline"
-            className="w-full justify-start"
-            onClick={handleSignOut}
-          >
-            <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5" />
-            Sign out
-          </Button>
         </div>
-      </aside>
+      </div>
 
-      {/* Content padding for mobile */}
-      <div className="h-16 md:hidden" />
+      {/* Main content padding for desktop */}
+      <div className="hidden md:block w-64" />
     </>
   );
 }

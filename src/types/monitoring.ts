@@ -63,3 +63,21 @@ export interface Evidence {
   url?: string;
   metricId?: string;
 }
+
+export interface MonitorConfig {
+  id?: string;
+  name: string;
+  description: string;
+  frameworks: string[];
+  categories: string[];
+  controls: string[];
+  reviewCycle: ReviewCycle;
+  priority: Priority;
+  frequency: MonitoringFrequency;
+  automationLevel: AutomationLevel;
+  evidenceRequired: boolean;
+  evidenceType?: EvidenceType;
+  alertThreshold: string;
+  createdAt?: Date;
+  status?: 'active' | 'inactive';
+}

@@ -15,6 +15,21 @@ export class HttpEndpointIntegration implements MonitoringIntegration {
         throw new Error('Endpoint not configured for this metric');
       }
 
+      // In production, return mock data for demo purposes
+      if (process.env.NODE_ENV === 'production' && endpoint.startsWith('/api/mock')) {
+        return {
+          status: 'compliant',
+          timestamp: new Date().toISOString(),
+          evidence: {
+            type: 'api_response',
+            data: {
+              message: 'Mock compliance check passed',
+              details: 'This is mock data for demonstration purposes'
+            }
+          }
+        };
+      }
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
 

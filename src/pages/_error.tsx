@@ -1,6 +1,9 @@
+'use client';
+
 import { NextPageContext } from 'next';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface ErrorProps {
   statusCode?: number;
@@ -8,6 +11,16 @@ interface ErrorProps {
 }
 
 function Error({ statusCode, message }: ErrorProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg text-center">
@@ -51,8 +64,7 @@ function Error({ statusCode, message }: ErrorProps) {
 
 Error.getInitialProps = ({ res, err }: NextPageContext) => {
   const statusCode = res ? res.statusCode : err ? err.statusCode : 404;
-  const message = err?.message;
-  return { statusCode, message };
+  return { statusCode };
 };
 
 export default Error;

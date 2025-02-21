@@ -1,133 +1,99 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useEffect } from "react";
-import { toast } from "sonner";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      toast.error('Please sign in to access the dashboard');
+    if (!loading && !user) {
       router.push('/auth/login');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push('/');
-    } catch (error) {
-      const e = error as Error;
-      toast.error(e.message || 'Failed to sign out');
-    }
-  };
-
-  if (!user) {
+  if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-          <p className="mt-2 text-sm text-gray-500">Loading...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4">Loading...</p>
         </div>
       </div>
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen pt-16 md:pt-0">
-      <header className="fixed top-0 left-0 right-0 z-10 bg-white p-4 md:p-6 shadow-md">
-        <div className="flex items-center justify-between">
-          <h1 className="text-lg font-bold">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">{user.email}</span>
-            <Button onClick={handleSignOut} variant="outline" size="sm">
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-      <main className="p-4 md:p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Welcome back!</h1>
-          <p className="text-gray-500">
-            {user.email}
+    <div className="p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">Welcome back, {user.name || user.email}</h1>
+          <p className="mt-2 text-gray-600">
+            Here's an overview of your compliance status
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link 
-            href="/frameworks" 
-            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
-          >
-            <h2 className="text-lg font-semibold">Frameworks</h2>
-            <p className="text-sm text-gray-500">Browse compliance frameworks</p>
-          </Link>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Framework Status Card */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Framework Status</h2>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span>ISO 27001</span>
+                <span className="px-2 py-1 text-sm rounded bg-green-100 text-green-800">
+                  85% Complete
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>NIST CSF</span>
+                <span className="px-2 py-1 text-sm rounded bg-yellow-100 text-yellow-800">
+                  60% Complete
+                </span>
+              </div>
+            </div>
+          </div>
 
-          <Link 
-            href="/compare" 
-            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
-          >
-            <h2 className="text-lg font-semibold">Compare</h2>
-            <p className="text-sm text-gray-500">Compare different frameworks</p>
-          </Link>
-
-          <Link 
-            href="/monitoring" 
-            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
-          >
-            <h2 className="text-lg font-semibold">Monitoring</h2>
-            <p className="text-sm text-gray-500">Monitor compliance status</p>
-          </Link>
-
-          <Link 
-            href="/learning" 
-            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
-          >
-            <h2 className="text-lg font-semibold">Learning</h2>
-            <p className="text-sm text-gray-500">Learn about compliance</p>
-          </Link>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-4">Quick Stats</h2>
+          {/* Recent Activity Card */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
             <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Overall Compliance Score</p>
-                <p className="text-2xl font-bold">85%</p>
+              <div className="border-l-4 border-blue-500 pl-4">
+                <p className="text-sm text-gray-600">Today</p>
+                <p>Updated access control policy</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Active Frameworks</p>
-                <p className="text-2xl font-bold">3</p>
+              <div className="border-l-4 border-blue-500 pl-4">
+                <p className="text-sm text-gray-600">Yesterday</p>
+                <p>Completed risk assessment</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-3">
+          {/* Tasks Card */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-lg font-semibold mb-4">Pending Tasks</h2>
+            <div className="space-y-2">
               <div className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-                <p className="text-sm">Framework assessment completed</p>
+                <input type="checkbox" className="mr-3" />
+                <span>Review incident response plan</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
-                <p className="text-sm">New monitoring rule added</p>
+                <input type="checkbox" className="mr-3" />
+                <span>Update security training materials</span>
               </div>
               <div className="flex items-center">
-                <div className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
-                <p className="text-sm">Compliance alert resolved</p>
+                <input type="checkbox" className="mr-3" />
+                <span>Schedule vulnerability assessment</span>
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
