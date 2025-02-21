@@ -7,6 +7,9 @@ import { headers } from "next/headers";
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
+  fallback: ['system-ui', 'arial']
 });
 
 export const metadata: Metadata = {

@@ -16,13 +16,29 @@ export async function middleware(req: NextRequest) {
     '/compare',
     '/learning',
     '/profile',
-    '/settings'
+    '/settings',
+    '/monitoring'
   ]
 
+  // Public paths that should always be accessible
+  const publicPaths = [
+    '/',
+    '/auth/login',
+    '/auth/signup',
+    '/auth/verify-email',
+    '/auth/callback',
+    '/icon'
+  ]
+
+  const path = req.nextUrl.pathname
+
+  // Allow public paths
+  if (publicPaths.some(p => path === p || path.startsWith('/api/'))) {
+    return res
+  }
+
   // Check if the current path starts with any of the protected paths
-  const isProtectedPath = protectedPaths.some(path => 
-    req.nextUrl.pathname.startsWith(path)
-  )
+  const isProtectedPath = protectedPaths.some(p => path.startsWith(p))
 
   // If trying to access a protected path while not authenticated
   if (isProtectedPath && !session) {
@@ -44,12 +60,10 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
