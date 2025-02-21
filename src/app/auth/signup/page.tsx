@@ -6,19 +6,24 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       await signUp(email, password);
+      // Store email for verification page
+      localStorage.setItem('lastSignupEmail', email);
       toast.success('Account created! Please check your email to verify your account.');
+      router.push('/auth/verify-email');
     } catch (error: any) {
       console.error('Signup error:', error);
       if (error.message?.includes('Email rate limit exceeded')) {
@@ -71,7 +76,11 @@ export default function SignUpPage() {
                 placeholder="Enter your password"
                 className="mt-1"
                 disabled={loading}
+                minLength={6}
               />
+              <p className="mt-1 text-sm text-gray-500">
+                Password must be at least 6 characters
+              </p>
             </div>
           </div>
 

@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) throw error;
-      router.push('/auth/verify');
+      router.push('/auth/verify-email');
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
