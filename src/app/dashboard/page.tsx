@@ -1,51 +1,26 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
-
-type UserData = {
-  email: string;
-  created_at: string;
-};
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
-
-        if (user) {
-          setUserData({
-            email: user.email || '',
-            created_at: user.created_at,
-          });
-        }
-      } catch (error) {
-        const e = error as Error;
-        console.error('Dashboard error:', e);
-        toast.error('Failed to fetch user data. Please check if you are logged in.');
-        router.push('/auth/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [router]);
+    if (!user) {
+      toast.error('Please sign in to access the dashboard');
+      router.push('/auth/login');
+    }
+  }, [user, router]);
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await signOut();
       router.push('/');
     } catch (error) {
       const e = error as Error;
@@ -53,7 +28,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
+  if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -65,42 +40,92 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 items-center border-b px-4 md:px-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold">Dashboard</h1>
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <span className="text-sm text-gray-500">{userData?.email}</span>
-          <Button onClick={handleSignOut} variant="outline" size="sm">
-            Sign Out
-          </Button>
+    <div className="min-h-screen pt-16 md:pt-0">
+      <header className="fixed top-0 left-0 right-0 z-10 bg-white p-4 md:p-6 shadow-md">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">{user.email}</span>
+            <Button onClick={handleSignOut} variant="outline" size="sm">
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
-      <main className="flex-1 p-4 md:p-6">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold">Welcome back!</h2>
+      <main className="p-4 md:p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Welcome back!</h1>
           <p className="text-gray-500">
-            Member since {new Date(userData?.created_at || '').toLocaleDateString()}
+            {user.email}
           </p>
         </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link href="/dashboard/assessments" className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800" passHref>
-            <h2 className="text-lg font-semibold">Assessments</h2>
-            <p className="text-sm text-gray-500">Manage your compliance assessments</p>
-          </Link>
-          <button className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+          <Link 
+            href="/frameworks" 
+            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
+          >
             <h2 className="text-lg font-semibold">Frameworks</h2>
-            <p className="text-sm text-gray-500">View available compliance frameworks</p>
-          </button>
-          <button className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
-            <h2 className="text-lg font-semibold">Reports</h2>
-            <p className="text-sm text-gray-500">Generate compliance reports</p>
-          </button>
-          <button className="rounded-lg border p-4 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
-            <h2 className="text-lg font-semibold">Settings</h2>
-            <p className="text-sm text-gray-500">Manage your account settings</p>
-          </button>
+            <p className="text-sm text-gray-500">Browse compliance frameworks</p>
+          </Link>
+
+          <Link 
+            href="/compare" 
+            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
+          >
+            <h2 className="text-lg font-semibold">Compare</h2>
+            <p className="text-sm text-gray-500">Compare different frameworks</p>
+          </Link>
+
+          <Link 
+            href="/monitoring" 
+            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
+          >
+            <h2 className="text-lg font-semibold">Monitoring</h2>
+            <p className="text-sm text-gray-500">Monitor compliance status</p>
+          </Link>
+
+          <Link 
+            href="/learning" 
+            className="block rounded-lg border p-4 hover:border-blue-500 hover:shadow-lg transition-all"
+          >
+            <h2 className="text-lg font-semibold">Learning</h2>
+            <p className="text-sm text-gray-500">Learn about compliance</p>
+          </Link>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border p-6">
+            <h2 className="text-xl font-semibold mb-4">Quick Stats</h2>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500">Overall Compliance Score</p>
+                <p className="text-2xl font-bold">85%</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Active Frameworks</p>
+                <p className="text-2xl font-bold">3</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
+                <p className="text-sm">Framework assessment completed</p>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
+                <p className="text-sm">New monitoring rule added</p>
+              </div>
+              <div className="flex items-center">
+                <div className="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div>
+                <p className="text-sm">Compliance alert resolved</p>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
     </div>

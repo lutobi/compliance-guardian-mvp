@@ -48,7 +48,7 @@ export default function LearningHubContent() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-20 md:pt-8">
       {/* Header */}
       <div className="mb-12">
         <h1 className="text-4xl font-bold mb-4">Learning Hub</h1>

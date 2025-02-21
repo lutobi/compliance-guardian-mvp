@@ -3,18 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
+  const { signUp } = useAuth();
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -42,33 +40,11 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) throw error;
-      
-      // Check if email confirmation was sent
-      if (data?.user?.identities?.length === 0) {
-        toast.error('This email is already registered. Please try logging in.');
-        router.push('/auth/login');
-        return;
-      }
-
-      if (data?.user?.identities?.[0]?.identity_data?.email_verified) {
-        toast.success('Account created successfully!');
-        router.push('/auth/login');
-      } else {
-        toast.success('Please check your email to verify your account');
-        router.push('/auth/verify-email');
-      }
+      await signUp(email, password);
+      toast.success('Account created successfully!');
     } catch (error) {
-      const e = error as Error;
-      toast.error(e.message || 'Failed to sign up');
+      toast.error('Failed to create account. Please try again.');
+      console.error('Signup error:', error);
     } finally {
       setLoading(false);
     }
@@ -76,48 +52,59 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Create an Account</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Enter your details to create your account
-          </p>
+      <div className="w-full max-w-md space-y-8 p-8 bg-white rounded-xl shadow-lg">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold">Create an Account</h2>
+          <p className="mt-2 text-gray-600">Sign up to get started with Compliance Guardian</p>
         </div>
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={errors.email}
-              required
-            />
+
+        <form onSubmit={handleSignUp} className="mt-8 space-y-6">
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={errors.password ? "border-red-500" : ""}
+              />
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+              )}
+            </div>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={errors.password}
-              required
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create Account'}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+          >
+            {loading ? 'Creating account...' : 'Sign up'}
           </Button>
-          <p className="text-center text-sm text-gray-500">
+
+          <p className="text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary hover:underline">
-              Log in
+            <Link href="/auth/login" className="text-blue-600 hover:underline">
+              Sign in
             </Link>
           </p>
         </form>

@@ -1,11 +1,13 @@
 'use client';
 
-import { KindeProvider } from "@kinde-oss/kinde-auth-nextjs";
+import { Toaster } from 'sonner';
+import { AuthProvider } from '@/lib/auth-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <KindeProvider>
+    <AuthProvider>
+      <Toaster />
       {children}
-    </KindeProvider>
+    </AuthProvider>
   );
 }

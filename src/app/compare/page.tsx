@@ -46,7 +46,7 @@ export default function ComparePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-20 md:pt-8">
       <h1 className="text-3xl font-bold mb-8">Framework Comparison</h1>
 
       <div className="space-y-8">
