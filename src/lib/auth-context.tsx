@@ -2,54 +2,85 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useKindeAuth } from "@kinde-oss/kinde-auth-nextjs";
-
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-}
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { User } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: () => Promise<void>;
-  signUp: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useKindeAuth();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    if (!isLoading) {
-      setLoading(false);
-    }
-  }, [isLoading]);
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (error) {
+        console.error('Error getting user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const signIn = async () => {
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    getUser();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase.auth]);
+
+  const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      router.push('/api/auth/login');
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      router.push('/dashboard');
+      router.refresh();
     } catch (error) {
       console.error('Sign in error:', error);
-      throw new Error('Failed to sign in. Please try again.');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const signUp = async () => {
+  const signUp = async (email: string, password: string) => {
     try {
       setLoading(true);
-      router.push('/api/auth/register');
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+      router.push('/auth/verify');
     } catch (error) {
       console.error('Sign up error:', error);
-      throw new Error('Failed to sign up. Please try again.');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -58,29 +89,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       setLoading(true);
-      router.push('/api/auth/logout');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push('/');
+      router.refresh();
     } catch (error) {
       console.error('Sign out error:', error);
-      throw new Error('Failed to sign out. Please try again.');
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const value = {
-    user: isAuthenticated ? {
-      id: user?.id || '',
-      email: user?.email || '',
-      name: user?.given_name
-    } : null,
-    loading: isLoading,
-    signIn,
-    signUp,
-    signOut
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
