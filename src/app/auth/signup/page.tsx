@@ -5,19 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await signUp(email, password);
-      toast.success('Check your email to verify your account!');
+      toast.success('Account created! Please check your email to verify your account.');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign up');
+      console.error('Signup error:', error);
+      if (error.message?.includes('Email rate limit exceeded')) {
+        toast.error('Too many signup attempts. Please try again later.');
+      } else if (error.message?.includes('User already registered')) {
+        toast.error('An account with this email already exists. Please sign in instead.');
+      } else {
+        toast.error(error.message || 'Failed to create account. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,6 +55,7 @@ export default function SignUpPage() {
                 required
                 placeholder="Enter your email"
                 className="mt-1"
+                disabled={loading}
               />
             </div>
             <div>
@@ -57,13 +70,21 @@ export default function SignUpPage() {
                 required
                 placeholder="Enter your password"
                 className="mt-1"
+                disabled={loading}
               />
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            Sign Up
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </Button>
+
+          <div className="text-center text-sm">
+            <span className="text-gray-600">Already have an account?</span>{' '}
+            <Link href="/auth/login" className="text-blue-600 hover:underline">
+              Sign in
+            </Link>
+          </div>
         </form>
       </div>
     </div>

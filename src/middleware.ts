@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
   const supabase = createMiddlewareClient({ req, res })
 
   // Refresh session if expired - required for Server Components
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { session }, error } = await supabase.auth.getSession()
 
   // Define protected paths that require authentication
   const protectedPaths = [
@@ -32,19 +32,20 @@ export async function middleware(req: NextRequest) {
 
   const path = req.nextUrl.pathname
 
-  // Allow public paths
-  if (publicPaths.some(p => path === p || path.startsWith('/api/'))) {
-    return res
-  }
-
   // Check if the current path starts with any of the protected paths
   const isProtectedPath = protectedPaths.some(p => path.startsWith(p))
+  const isPublicPath = publicPaths.some(p => path === p || path.startsWith('/api/'))
 
   // If trying to access a protected path while not authenticated
   if (isProtectedPath && !session) {
     const redirectUrl = new URL('/auth/login', req.url)
     redirectUrl.searchParams.set('returnUrl', req.url)
     return NextResponse.redirect(redirectUrl)
+  }
+
+  // If already authenticated and trying to access auth pages
+  if (session && (path === '/auth/login' || path === '/auth/signup')) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
   // Add security headers
