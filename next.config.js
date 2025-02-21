@@ -1,18 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
   images: {
-    domains: ['nrfpsbbkynykubcaarpg.supabase.co'],
     unoptimized: true
   },
   typescript: {
     ignoreBuildErrors: true
-  },
-  output: 'standalone',
-  poweredByHeader: false,
-  generateEtags: false,
-  distDir: '.next',
-  assetPrefix: ''
+  }
 }
 
 module.exports = nextConfig

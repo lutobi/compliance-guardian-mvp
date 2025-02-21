@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@netlify/plugin-nextjs": "^4.41.3",
+    "@netlify/plugin-nextjs": "^5.9.4",
     "@shadcn/ui": "^0.0.4",
     "@types/node": "^20",
     "@types/react": "^19",
