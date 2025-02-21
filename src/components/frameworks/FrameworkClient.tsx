@@ -7,6 +7,8 @@ import { CoverageAnalysis } from '@/components/analysis/CoverageAnalysis';
 import { DevOnlyWrapper } from '@/components/development/DevOnlyWrapper';
 import EvidenceDialog from '@/app/frameworks/[id]/evidence-dialog';
 import { ImplementationPlanManager } from '@/utils/implementation-plan';
+import { ChevronDown, ChevronRight, Paperclip } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FrameworkClientProps {
   id: string;
@@ -16,10 +18,68 @@ interface FrameworkClientProps {
   categories: string[];
 }
 
+interface ControlProps {
+  control: any;
+  evidenceMap: Record<string, Evidence[]>;
+  onAddEvidence: (controlId: string, subControlName?: string) => void;
+  frameworkId: string;
+}
+
+const Control: React.FC<ControlProps> = ({ control, evidenceMap, onAddEvidence, frameworkId }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="border rounded-lg mb-4 overflow-hidden">
+      <div 
+        className="flex items-center justify-between p-4 bg-gray-50 cursor-pointer hover:bg-gray-100"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center space-x-2">
+          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          <h3 className="font-medium">{control.name}</h3>
+        </div>
+      </div>
+      {isExpanded && (
+        <div className="p-4">
+          <p className="text-gray-600 mb-4">{control.description}</p>
+          {control.subcontrols?.map((subControl: any) => {
+            const evidenceCount = (evidenceMap[subControl.id] || []).length;
+            return (
+              <div key={subControl.id} className="ml-4 mb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm">{subControl.name}</h4>
+                    <p className="text-sm text-gray-600">{subControl.description}</p>
+                  </div>
+                  <button 
+                    className="flex items-center space-x-2 cursor-pointer ml-4 p-2 hover:bg-gray-100 rounded-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddEvidence(subControl.id, subControl.name);
+                    }}
+                  >
+                    <Paperclip className="w-4 h-4 text-blue-600" />
+                    {evidenceCount > 0 && (
+                      <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-blue-600 rounded-full">
+                        {evidenceCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export function FrameworkClient({ id, name, description, version, categories }: FrameworkClientProps) {
   const { data: framework, error, loading } = useFrameworkData(id);
   const [evidenceMap, setEvidenceMap] = useState<Record<string, Evidence[]>>({});
-  const [selectedSubcontrol, setSelectedSubcontrol] = useState<string | null>(null);
+  const [selectedControl, setSelectedControl] = useState<string | null>(null);
+  const [selectedControlName, setSelectedControlName] = useState<string>('');
   const [isEvidenceDialogOpen, setIsEvidenceDialogOpen] = useState(false);
 
   if (loading) {
@@ -43,133 +103,94 @@ export function FrameworkClient({ id, name, description, version, categories }: 
   const handleAddEvidence = (evidence: Evidence) => {
     setEvidenceMap(prev => ({
       ...prev,
-      [selectedSubcontrol!]: [...(prev[selectedSubcontrol!] || []), evidence]
+      [selectedControl!]: [...(prev[selectedControl!] || []), evidence]
     }));
     setIsEvidenceDialogOpen(false);
   };
 
+  const handleControlClick = (controlId: string, controlName?: string) => {
+    setSelectedControl(controlId);
+    setSelectedControlName(controlName || '');
+    setIsEvidenceDialogOpen(true);
+  };
+
   const handleDeleteEvidence = (evidenceId: string) => {
+    if (!selectedControl) return;
     setEvidenceMap(prev => ({
       ...prev,
-      [selectedSubcontrol!]: prev[selectedSubcontrol!].filter(e => e.type !== evidenceId)
+      [selectedControl]: prev[selectedControl].filter(e => e.id !== evidenceId)
     }));
   };
 
   const handleUpdateEvidence = (evidenceId: string, updatedEvidence: Evidence) => {
+    if (!selectedControl) return;
     setEvidenceMap(prev => ({
       ...prev,
-      [selectedSubcontrol!]: prev[selectedSubcontrol!].map(e => 
-        e.type === evidenceId ? updatedEvidence : e
+      [selectedControl]: prev[selectedControl].map(e => 
+        e.id === evidenceId ? updatedEvidence : e
       )
     }));
   };
 
   return (
-    <div>
-      <div className="mb-8">
-        <p className="text-gray-600 mb-4">{description}</p>
-        <div className="flex items-center gap-4 text-sm text-gray-500">
-          <span>Version: {version}</span>
-          <span>Categories: {categories.join(', ')}</span>
-        </div>
-      </div>
-
-      {/* Controls Section */}
-      <div className="space-y-8">
-        {framework.controls.map(control => (
-          <div key={control.id} className="border rounded-lg p-6">
-            <h3 className="text-lg font-semibold mb-4">{control.name}</h3>
-            <p className="text-gray-600 mb-6">{control.description}</p>
-            
-            {/* Subcontrols */}
-            <div className="space-y-4">
-              {control.subcontrols?.map((subcontrol) => (
-                <div key={subcontrol.id} className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-medium mb-2">{subcontrol.name}</h4>
-                  <p className="text-gray-600 mb-4">{subcontrol.description}</p>
-                  
-                  {/* Evidence Section */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h5 className="font-medium">Evidence</h5>
-                      <button
-                        onClick={() => {
-                          setSelectedSubcontrol(subcontrol.id);
-                          setIsEvidenceDialogOpen(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        + Add Evidence
-                      </button>
-                    </div>
-                    
-                    {/* Evidence List */}
-                    <div className="space-y-2">
-                      {evidenceMap[subcontrol.id]?.map(evidence => (
-                        <div key={evidence.id} className="bg-gray-50 p-3 rounded">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium">{evidence.type}</p>
-                              <p className="text-sm text-gray-600">{evidence.notes}</p>
-                            </div>
-                            <button
-                              onClick={() => handleDeleteEvidence(evidence.id)}
-                              className="text-red-600 hover:text-red-800 text-sm"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
+    <div className="space-y-8">
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
+          <h2 className="text-xl font-bold mb-4">Framework Details</h2>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium">Version</h3>
+              <p className="text-gray-600">{version}</p>
+            </div>
+            <div>
+              <h3 className="font-medium">Categories</h3>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {categories.map(category => (
+                  <span
+                    key={category}
+                    className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm"
+                  >
+                    {category}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium">Description</h3>
+              <p className="text-gray-600">{description}</p>
             </div>
           </div>
-        ))}
+        </div>
+        
+        <CoverageAnalysis framework={framework} evidenceMap={evidenceMap} />
       </div>
 
-      {/* Development Section */}
-      <DevOnlyWrapper>
-        <div className="mt-12 border-t pt-8">
-          <h2 className="text-xl font-bold mb-6">Development Tools</h2>
-          
-          {/* Coverage Analysis */}
-          <div className="mb-8">
-            <h3 className="text-lg font-bold mb-4">Coverage Analysis</h3>
-            <CoverageAnalysis controls={framework.controls} />
-          </div>
-          
-          {/* Implementation Plan */}
-          <div className="mt-8">
-            <h3 className="text-lg font-bold mb-4">Implementation Plan</h3>
-            <pre className="bg-gray-100 p-4 rounded-lg overflow-auto">
-              {JSON.stringify(
-                ImplementationPlanManager.generatePlan(
-                  framework.controls,
-                  framework.name
-                ),
-                null,
-                2
-              )}
-            </pre>
-          </div>
+      <div>
+        <h2 className="text-xl font-bold mb-4">Controls</h2>
+        <div className="space-y-4">
+          {framework.controls?.map(control => (
+            <Control
+              key={control.id}
+              control={control}
+              evidenceMap={evidenceMap}
+              onAddEvidence={handleControlClick}
+              frameworkId={id}
+            />
+          ))}
         </div>
-      </DevOnlyWrapper>
+      </div>
 
-      {/* Evidence Dialog */}
-      {selectedSubcontrol && (
-        <EvidenceDialog
-          subcontrolId={selectedSubcontrol}
-          isOpen={isEvidenceDialogOpen}
-          onClose={() => setIsEvidenceDialogOpen(false)}
-          onSubmit={handleAddEvidence}
-          onDelete={handleDeleteEvidence}
-          onUpdate={handleUpdateEvidence}
-          existingEvidence={evidenceMap[selectedSubcontrol]}
-        />
-      )}
+      <EvidenceDialog
+        isOpen={isEvidenceDialogOpen}
+        onClose={() => setIsEvidenceDialogOpen(false)}
+        subcontrolId={selectedControl || ''}
+        frameworkId={id}
+        subcontrolName={selectedControlName}
+        onSubmit={handleAddEvidence}
+        onDelete={handleDeleteEvidence}
+        onUpdate={handleUpdateEvidence}
+        existingEvidence={selectedControl ? evidenceMap[selectedControl] || [] : []}
+      />
     </div>
   );
 }

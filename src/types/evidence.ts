@@ -1,14 +1,23 @@
-export type Evidence = {
-  type: string;
-  description: string;
-  frequency: string;
-  retention: string;
-  validation?: string[];
-  files?: string[];
-  notes?: string;
-  timestamp?: string;   // ISO string format
-  version?: number;     // For future migrations
-};
+export interface Evidence {
+  id: string;
+  subcontrolId: string;
+  frameworkId: string;
+  files: Array<{
+    name: string;
+    size: number;
+  }>;
+  notes: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EvidenceFile {
+  name: string;
+  size: number;
+  type?: string;
+  url?: string;
+}
 
 export type EvidenceRequirement = {
   type: string;

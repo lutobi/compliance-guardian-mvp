@@ -1,10 +1,37 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
 
-  // Add basic security headers
+  // Refresh session if expired - required for Server Components
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Define protected paths that require authentication
+  const protectedPaths = [
+    '/dashboard',
+    '/frameworks',
+    '/compare',
+    '/learning',
+    '/profile',
+    '/settings'
+  ]
+
+  // Check if the current path starts with any of the protected paths
+  const isProtectedPath = protectedPaths.some(path => 
+    req.nextUrl.pathname.startsWith(path)
+  )
+
+  // If trying to access a protected path while not authenticated
+  if (isProtectedPath && !session) {
+    const redirectUrl = new URL('/auth/login', req.url)
+    redirectUrl.searchParams.set('returnUrl', req.url)
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Add security headers
   res.headers.set('X-Content-Type-Options', 'nosniff')
   res.headers.set('X-Frame-Options', 'DENY')
   res.headers.set('X-XSS-Protection', '1; mode=block')
@@ -15,6 +42,14 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 }

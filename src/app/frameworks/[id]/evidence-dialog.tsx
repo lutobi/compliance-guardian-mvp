@@ -2,6 +2,12 @@
 
 import { useState } from 'react';
 import { Evidence } from '@/types/evidence';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Paperclip, X, Edit2, Trash2, Save } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 interface EvidenceDialogProps {
   subcontrolId: string;
@@ -11,6 +17,8 @@ interface EvidenceDialogProps {
   onDelete: (evidenceId: string) => void;
   onUpdate: (evidenceId: string, evidence: Evidence) => void;
   existingEvidence?: Evidence[];
+  frameworkId?: string;
+  subcontrolName?: string;
 }
 
 const EvidenceDialog: React.FC<EvidenceDialogProps> = ({ 
@@ -20,36 +28,20 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   onSubmit,
   onDelete,
   onUpdate,
-  existingEvidence = []
+  existingEvidence = [],
+  frameworkId,
+  subcontrolName
 }) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [notes, setNotes] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [tags, setTags] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (!isOpen) return null;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const evidence: Evidence = {
-      type: 'document',
-      description: '',
-      frequency: 'as-needed',
-      retention: '1 year',
-      type: 'document',
-      files: files ? Array.from(files).map(f => f.name) : [],
-      notes: notes.trim() || '',
-      timestamp: new Date().toISOString(),
-      version: 1,
-      required: [],
-      optional: []
-    };
-    onSubmit(evidence);
-    setFiles(null);
-    setNotes('');
-    onClose();
-  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -63,182 +55,218 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files) {
-      setFiles(e.dataTransfer.files);
+    setFiles(e.dataTransfer.files);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!files && !notes) return;
+
+    const newEvidence: Evidence = {
+      id: Date.now().toString(),
+      subcontrolId,
+      frameworkId: frameworkId || '',
+      files: files ? Array.from(files).map(f => ({ name: f.name, size: f.size })) : [],
+      notes,
+      tags,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+
+    await onSubmit(newEvidence);
+    clearInterval(interval);
+    setFiles(null);
+    setNotes('');
+    setTags([]);
+    setUploadProgress(0);
+  };
+
+  const handleEdit = (evidence: Evidence) => {
+    setEditingId(evidence.id);
+    setEditingNotes(evidence.notes);
+  };
+
+  const handleUpdate = (evidenceId: string) => {
+    const evidence = existingEvidence.find(e => e.id === evidenceId);
+    if (evidence) {
+      onUpdate(evidenceId, {
+        ...evidence,
+        notes: editingNotes,
+        updatedAt: new Date().toISOString()
+      });
     }
+    setEditingId(null);
+    setEditingNotes('');
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-lg font-semibold">Upload Evidence for {subcontrolId}</h3>
-            {existingEvidence.length > 0 && (
-              <p className="text-sm text-gray-600">
-                {existingEvidence.length} existing {existingEvidence.length === 1 ? 'entry' : 'entries'}
-              </p>
-            )}
-          </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold">
+            {subcontrolName ? `Evidence for ${subcontrolName}` : 'Add Evidence'}
+          </DialogTitle>
+        </DialogHeader>
 
-        {existingEvidence.length > 0 && (
-          <div className="mb-6 border-b pb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Existing Evidence</h4>
-            <div className="space-y-3">
-              {existingEvidence.map((evidence) => (
-                <div key={evidence.type} className="bg-gray-50 rounded-lg p-3 text-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500">{evidence.frequency}</span>
-                      {evidence.files && evidence.files.length > 0 && (
-                        <span className="text-blue-600 text-xs px-2 py-0.5 bg-blue-50 rounded-full">
-                          {evidence.files.length} {evidence.files.length === 1 ? 'file' : 'files'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(evidence.type);
-                          setEditingNotes(evidence.notes || '');
-                        }}
-                        className="text-gray-500 hover:text-blue-600 transition-colors"
-                      >
-                        ✎
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onDelete(evidence.type)}
-                        className="text-gray-500 hover:text-red-600 transition-colors"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                  {editingId === evidence.type ? (
-                    <div className="space-y-2">
-                      <textarea
-                        value={editingNotes}
-                        onChange={(e) => setEditingNotes(e.target.value)}
-                        className="w-full border rounded p-2 text-sm"
-                        rows={3}
-                      />
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onUpdate(evidence.type, {
-                              ...evidence,
-                              notes: editingNotes.trim() || ''
-                            });
-                            setEditingId(null);
-                          }}
-                          className="px-2 py-1 text-sm text-blue-600 hover:text-blue-800"
-                        >
-                          Save
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    evidence.notes && <p className="text-gray-600 whitespace-pre-wrap">{evidence.notes}</p>
-                  )}
-                  {evidence.files && evidence.files.length > 0 && (
-                    <div className="mt-2">
-                      <div className="flex flex-wrap gap-2">
-                        {evidence.files.map((file, index) => (
-                          <span key={index} className="text-xs text-gray-600 px-2 py-1 bg-gray-100 rounded">
-                            {file}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-lg p-4 text-center ${
-              isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-            }`}
-          >
+        <div className="space-y-3">
+          {/* Existing Evidence Section */}
+          {existingEvidence.length > 0 && (
             <div className="space-y-2">
-              <div className="flex items-center justify-center">
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={(e) => setFiles(e.target.files)}
-                  />
-                  <span className="text-blue-600 hover:text-blue-700">Choose files</span>
-                </label>
-                <span className="mx-2">or drag them here</span>
+              <h3 className="font-medium text-sm">Existing Evidence</h3>
+              <div className="space-y-2">
+                {existingEvidence.map((evidence) => (
+                  <div
+                    key={evidence.id}
+                    className="p-2 border rounded-md bg-gray-50"
+                  >
+                    {editingId === evidence.id ? (
+                      <div className="space-y-2">
+                        <Textarea
+                          value={editingNotes}
+                          onChange={(e) => setEditingNotes(e.target.value)}
+                          className="w-full min-h-[60px] text-sm"
+                        />
+                        <div className="flex justify-end space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEditingId(null)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdate(evidence.id)}
+                          >
+                            Save
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <div className="flex items-start justify-between">
+                          <p className="text-sm flex-1">{evidence.notes}</p>
+                          <div className="flex items-center space-x-1 ml-2">
+                            <button
+                              onClick={() => handleEdit(evidence)}
+                              className="p-1 hover:bg-gray-200 rounded"
+                            >
+                              <Edit2 className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => onDelete(evidence.id)}
+                              className="p-1 hover:bg-gray-200 rounded text-red-500"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 text-xs text-gray-500">
+                          <time>
+                            {formatDistanceToNow(new Date(evidence.createdAt), {
+                              addSuffix: true,
+                            })}
+                          </time>
+                          {evidence.files?.length > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>{evidence.files.length} files</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-              {files && (
-                <div className="text-sm text-gray-600">
-                  {Array.from(files).map(file => file.name).join(', ')}
-                </div>
-              )}
             </div>
-          </div>
+          )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full border rounded-lg p-2"
-              rows={3}
-              placeholder="Add any relevant notes..."
-            />
-          </div>
+          {/* Add New Evidence Form */}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div
+              className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer transition-colors
+                ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById("file-input")?.click()}
+            >
+              <input
+                id="file-input"
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setFiles(e.target.files)}
+              />
+              <Paperclip className="mx-auto h-6 w-6 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-600">
+                Drop files here or click to upload
+              </p>
+            </div>
 
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:text-gray-900"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className={`px-4 py-2 rounded-lg ${
-                files || notes.trim()
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
-              disabled={!files && !notes.trim()}
-            >
-              Upload
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            {files && (
+              <div className="space-y-2">
+                {Array.from(files).map((file) => (
+                  <div
+                    key={file.name}
+                    className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded"
+                  >
+                    <span className="truncate flex-1">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setFiles(null)}
+                      className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Textarea
+                placeholder="Add notes about this evidence..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full min-h-[80px]"
+              />
+            </div>
+
+            {uploadProgress > 0 && (
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={!files && !notes}
+                className="w-full sm:w-auto"
+              >
+                Add Evidence
+              </Button>
+            </div>
+          </form>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

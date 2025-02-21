@@ -1,32 +1,55 @@
 'use client';
 
 import { supabase } from "@/lib/supabase";
-import { useRouter } from 'next/navigation';
-import { useState } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const urlError = searchParams?.get('error');
+    if (urlError) {
+      setError(decodeURIComponent(urlError));
+    }
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setDebugInfo(null);
     setLoading(true);
 
     try {
+      setDebugInfo('Attempting to sign in...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        setDebugInfo(`Auth error: ${error.message}`);
+        throw error;
+      }
 
       if (data.session) {
+        setDebugInfo('Session created, refreshing...');
         router.refresh(); // This forces a router refresh to update auth state
+        
+        // Add a small delay to ensure the session is properly set
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setDebugInfo('Redirecting to dashboard...');
         router.push('/dashboard');
+      } else {
+        setDebugInfo('No session data received');
+        throw new Error('No session data received');
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'An error occurred');
@@ -46,6 +69,12 @@ export default function LoginPage() {
         {error && (
           <div className="p-3 rounded bg-red-50 border border-red-200">
             <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {debugInfo && (
+          <div className="p-3 rounded bg-blue-50 border border-blue-200">
+            <p className="text-sm text-blue-600">{debugInfo}</p>
           </div>
         )}
 

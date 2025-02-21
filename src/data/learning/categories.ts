@@ -5,7 +5,7 @@ export const frameworkCategories: FrameworkCategory[] = [
     id: 'security',
     name: 'Security Frameworks',
     description: 'Frameworks focused on information security, data protection, and cybersecurity controls',
-    frameworks: ['soc2', 'nist-800-53', 'iso-27001'],
+    frameworks: ['soc2', 'nist-800-53', 'iso-27001', 'hipaa'],
     icon: 'ShieldCheck'
   },
   {

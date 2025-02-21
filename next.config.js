@@ -7,7 +7,15 @@ const nextConfig = {
   experimental: {
     // Enable required experimental features
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost:3003', 'localhost:3004', 'localhost:3005', 'localhost:3006', 'localhost:3007']
+      allowedOrigins: [
+        'localhost:3000',
+        'localhost:3003',
+        'localhost:3004',
+        'localhost:3005',
+        'localhost:3006',
+        'localhost:3007',
+        'compliance-guardian-fresh.vercel.app'
+      ]
     }
   },
   typescript: {

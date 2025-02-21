@@ -88,7 +88,7 @@ export const iso27017 = {
   id: 'iso-27017',
   name: 'ISO 27017',
   version: '2015',
-  description: 'Information security controls for cloud services',
+  description: 'Code of practice for information security controls for cloud services',
   categories: [
     'Cloud Service Provider Controls',
     'Cloud Customer Controls',
@@ -102,40 +102,72 @@ export const iso27017 = {
       subcontrols: [
         {
           id: 'CSP-01',
-          name: 'Shared Roles & Responsibilities',
-          description: 'Definition of shared security roles and responsibilities'
+          name: 'Resource Provisioning',
+          description: 'Controls for secure resource provisioning'
         },
         {
           id: 'CSP-02',
-          name: 'Customer Data Removal',
-          description: 'Procedures for removal of customer data'
+          name: 'Asset Management',
+          description: 'Management of cloud service assets'
         },
         {
           id: 'CSP-03',
-          name: 'Network Security',
-          description: 'Network segregation and security in cloud services'
+          name: 'Access Control',
+          description: 'Access control for cloud services'
+        },
+        {
+          id: 'CSP-04',
+          name: 'Encryption',
+          description: 'Encryption of cloud service data'
         }
       ]
     },
     {
-      id: 'CLC',
+      id: 'CUC',
       name: 'Cloud Customer Controls',
       description: 'Controls specific to cloud service customers',
       subcontrols: [
         {
-          id: 'CLC-01',
-          name: 'Cloud Service Agreement',
-          description: 'Review and understanding of cloud service agreements'
-        },
-        {
-          id: 'CLC-02',
+          id: 'CUC-01',
           name: 'Data Classification',
-          description: 'Classification of data for cloud services'
+          description: 'Classification of data in cloud services'
         },
         {
-          id: 'CLC-03',
-          name: 'Monitoring Requirements',
-          description: 'Monitoring of cloud service security'
+          id: 'CUC-02',
+          name: 'Data Protection',
+          description: 'Protection of data in cloud services'
+        },
+        {
+          id: 'CUC-03',
+          name: 'Access Management',
+          description: 'Management of access to cloud services'
+        }
+      ]
+    },
+    {
+      id: 'SHC',
+      name: 'Shared Controls',
+      description: 'Controls shared between provider and customer',
+      subcontrols: [
+        {
+          id: 'SHC-01',
+          name: 'Incident Management',
+          description: 'Management of security incidents'
+        },
+        {
+          id: 'SHC-02',
+          name: 'Business Continuity',
+          description: 'Business continuity management'
+        },
+        {
+          id: 'SHC-03',
+          name: 'Compliance',
+          description: 'Compliance with requirements'
+        },
+        {
+          id: 'SHC-04',
+          name: 'Audit',
+          description: 'Audit and assessment'
         }
       ]
     }
