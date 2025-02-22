@@ -6,14 +6,8 @@ import { useAuth } from '@/lib/auth-context';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
-    }
-  }, [user, loading, router]);
-
+  // Return early if loading
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -25,7 +19,11 @@ export default function DashboardPage() {
     );
   }
 
+  // Return early if no user
   if (!user) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth/login';
+    }
     return null;
   }
 

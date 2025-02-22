@@ -49,16 +49,15 @@ export async function middleware(req: NextRequest) {
   }
 
   // Add security headers
-  const response = NextResponse.next()
-  response.headers.set('X-Frame-Options', 'DENY')
-  response.headers.set('X-Content-Type-Options', 'nosniff')
-  response.headers.set('Referrer-Policy', 'same-origin')
-  response.headers.set(
+  res.headers.set('X-Frame-Options', 'DENY')
+  res.headers.set('X-Content-Type-Options', 'nosniff')
+  res.headers.set('Referrer-Policy', 'same-origin')
+  res.headers.set(
     'Permissions-Policy',
     'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
   )
 
-  return response
+  return res
 }
 
 export const config = {

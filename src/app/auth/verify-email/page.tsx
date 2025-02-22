@@ -9,6 +9,7 @@ import Link from "next/link";
 
 export default function VerifyEmailPage() {
   const [email, setEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClientComponentClient();
 
@@ -36,6 +37,7 @@ export default function VerifyEmailPage() {
       return;
     }
 
+    setLoading(true);
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -46,7 +48,13 @@ export default function VerifyEmailPage() {
       toast.success('Verification email resent! Please check your inbox.');
     } catch (error: any) {
       console.error('Error resending verification:', error);
-      toast.error(error.message || 'Failed to resend verification email');
+      if (error.message?.includes('rate limit')) {
+        toast.error('Too many attempts. Please try again in a few minutes.');
+      } else {
+        toast.error(error.message || 'Failed to resend verification email');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,8 +77,9 @@ export default function VerifyEmailPage() {
             onClick={handleResendEmail}
             variant="outline"
             className="w-full"
+            disabled={loading}
           >
-            Resend Verification Email
+            {loading ? 'Sending...' : 'Resend Verification Email'}
           </Button>
 
           <div className="text-sm text-gray-600">

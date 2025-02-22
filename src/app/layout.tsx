@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/auth-context";
-import { Toaster } from "sonner";
 import Sidebar from "@/components/Sidebar";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
+import ClientLayout from "@/components/ClientLayout";
 
 const inter = Inter({
   subsets: ["latin"],
-  display: "swap",
-  preload: false,
-  adjustFontFallback: true,
-  fallback: ['system-ui', 'arial'],
   variable: '--font-inter',
 });
 
@@ -20,10 +15,8 @@ export const metadata: Metadata = {
   title: "Compliance Guardian",
   description: "AI-powered compliance monitoring and management",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
-  themeColor: "#ffffff",
-  manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.png",
   },
 };
 
@@ -39,15 +32,14 @@ export default function RootLayout({
         "min-h-screen bg-background antialiased",
       )} suppressHydrationWarning>
         <Providers>
-          <AuthProvider>
-            <Toaster position="top-right" />
+          <ClientLayout>
             <div className="flex min-h-screen">
               <Sidebar />
-              <main className="flex-1 md:pl-64">
+              <main className="flex-1 p-8 md:p-12">
                 {children}
               </main>
             </div>
-          </AuthProvider>
+          </ClientLayout>
         </Providers>
       </body>
     </html>

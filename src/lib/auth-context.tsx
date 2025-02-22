@@ -1,141 +1,108 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { createContext, useContext, useCallback, useRef, useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { User, AuthError } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   loading: boolean;
+}
+
+interface AuthContextType extends AuthState {
+  supabase: ReturnType<typeof createClientComponentClient>;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [state, setState] = useState<AuthState>({
+    user: null,
+    loading: true,
+  });
+
   const supabase = createClientComponentClient();
+  const navigationLock = useRef(false);
 
   useEffect(() => {
-    const getUser = async () => {
+    let mounted = true;
+
+    const initializeAuth = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        if (mounted) {
+          setState(prev => ({ ...prev, user }));
+        }
       } catch (error) {
-        console.error('Error getting user:', error);
+        console.error('Error getting session:', error);
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setState(prev => ({ ...prev, loading: false }));
+        }
       }
     };
 
-    // Listen for auth state changes
+    initializeAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
+      if (mounted) {
+        setState(prev => ({ ...prev, user: session?.user ?? null }));
+      }
     });
 
-    getUser();
-
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [supabase.auth]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
-      setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
-      router.push('/dashboard');
-      router.refresh();
+
+      toast.success('Successfully signed in!');
+      
+      // Use window.location for navigation to force a full page reload
+      window.location.href = '/dashboard';
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('Error signing in:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in');
       throw error;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [supabase.auth]);
 
-  const signUp = async (email: string, password: string) => {
+  const signOut = useCallback(async () => {
+    if (navigationLock.current) return;
+    navigationLock.current = true;
+
     try {
-      setLoading(true);
-
-      // First, check if user exists
-      const { data: existingUser } = await supabase
-        .from('auth.users')
-        .select('id')
-        .eq('email', email)
-        .single();
-
-      if (existingUser) {
-        throw new Error('User already registered. Please sign in instead.');
-      }
-
-      // If user doesn't exist, proceed with signup
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            email_confirm: false,
-          }
-        },
-      });
-
-      if (error) {
-        if (error.message.includes('rate limit')) {
-          throw new Error('Too many signup attempts. Please try again in a few minutes.');
-        }
-        throw error;
-      }
-
-      // Store email for verification page
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('lastSignupEmail', email);
-      }
-
-      router.push('/auth/verify-email');
+      await supabase.auth.signOut();
+      window.location.href = '/';
     } catch (error) {
-      console.error('Sign up error:', error);
-      if (error instanceof AuthError) {
-        throw error;
-      } else if (error instanceof Error) {
-        throw new AuthError(error.message);
-      } else {
-        throw new AuthError('An unexpected error occurred');
-      }
-    } finally {
-      setLoading(false);
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+      navigationLock.current = false;
     }
-  };
+  }, [supabase.auth]);
 
-  const signOut = async () => {
-    try {
-      setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      router.push('/');
-      router.refresh();
-    } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  const value = {
+    user: state.user,
+    loading: state.loading,
+    supabase,
+    signIn,
+    signOut
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
