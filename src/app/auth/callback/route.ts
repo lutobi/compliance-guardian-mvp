@@ -2,6 +2,8 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   try {
     const requestUrl = new URL(request.url)
@@ -21,19 +23,11 @@ export async function GET(request: Request) {
     }
 
     const supabase = createRouteHandlerClient({ cookies })
-    
-    // Exchange the code for a session
-    const { error: signInError } = await supabase.auth.exchangeCodeForSession(code)
+    await supabase.auth.exchangeCodeForSession(code)
 
-    if (signInError) {
-      console.error('Sign in error:', signInError)
-      return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent(signInError.message)}`)
-    }
-
-    // Successful sign in/up, redirect to dashboard
     return NextResponse.redirect(`${requestUrl.origin}/dashboard`)
   } catch (error) {
-    console.error('Callback error:', error)
-    return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent('An unexpected error occurred')}`)
+    console.error('Auth callback error:', error)
+    return NextResponse.redirect(`${requestUrl.origin}/auth/login?error=${encodeURIComponent('Authentication failed')}`)
   }
 }
