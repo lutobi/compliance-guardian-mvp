@@ -34,10 +34,8 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 }) => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [notes, setNotes] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [tags, setTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -45,22 +43,18 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
+    e.stopPropagation();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
-    setFiles(e.dataTransfer.files);
+    e.stopPropagation();
+    const droppedFiles = e.dataTransfer.files;
+    setFiles(droppedFiles);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!files && !notes) return;
 
     const newEvidence: Evidence = {
       id: Date.now().toString(),
@@ -73,15 +67,9 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
       updatedAt: new Date().toISOString()
     };
 
-    setUploadProgress(0);
+    // Simulate file upload progress
     const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
+      console.log('Uploading files...');
     }, 200);
 
     await onSubmit(newEvidence);
@@ -89,12 +77,7 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
     setFiles(null);
     setNotes('');
     setTags([]);
-    setUploadProgress(0);
-  };
-
-  const handleEdit = (evidence: Evidence) => {
-    setEditingId(evidence.id);
-    setEditingNotes(evidence.notes);
+    onClose();
   };
 
   const handleUpdate = (evidenceId: string) => {
@@ -119,29 +102,29 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-6">
           {/* Existing Evidence Section */}
           {existingEvidence.length > 0 && (
             <div className="space-y-2">
               <h3 className="font-medium text-sm">Existing Evidence</h3>
               <div className="space-y-2">
-                {existingEvidence.map((evidence) => (
-                  <div
-                    key={evidence.id}
-                    className="p-2 border rounded-md bg-gray-50"
-                  >
+                {existingEvidence.map(evidence => (
+                  <div key={evidence.id} className="border rounded-lg p-4">
                     {editingId === evidence.id ? (
                       <div className="space-y-2">
                         <Textarea
                           value={editingNotes}
                           onChange={(e) => setEditingNotes(e.target.value)}
-                          className="w-full min-h-[60px] text-sm"
+                          className="w-full"
                         />
                         <div className="flex justify-end space-x-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setEditingId(null)}
+                            onClick={() => {
+                              setEditingId(null);
+                              setEditingNotes('');
+                            }}
                           >
                             Cancel
                           </Button>
@@ -154,38 +137,46 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-1">
-                        <div className="flex items-start justify-between">
-                          <p className="text-sm flex-1">{evidence.notes}</p>
-                          <div className="flex items-center space-x-1 ml-2">
+                      <>
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1 flex-grow">
+                            <p className="text-sm text-gray-600">{evidence.notes}</p>
+                            {evidence.files && evidence.files.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {evidence.files.map((file, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center space-x-1 text-xs text-gray-500"
+                                  >
+                                    <Paperclip className="w-3 h-3" />
+                                    <span>{file.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <p className="text-xs text-gray-400">
+                              Updated {formatDistanceToNow(new Date(evidence.updatedAt))} ago
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
                             <button
-                              onClick={() => handleEdit(evidence)}
-                              className="p-1 hover:bg-gray-200 rounded"
+                              onClick={() => {
+                                setEditingId(evidence.id);
+                                setEditingNotes(evidence.notes);
+                              }}
+                              className="text-gray-400 hover:text-gray-600"
                             >
-                              <Edit2 className="h-3 w-3" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => onDelete(evidence.id)}
-                              className="p-1 hover:bg-gray-200 rounded text-red-500"
+                              className="text-gray-400 hover:text-red-600"
                             >
-                              <Trash2 className="h-3 w-3" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 text-xs text-gray-500">
-                          <time>
-                            {formatDistanceToNow(new Date(evidence.createdAt), {
-                              addSuffix: true,
-                            })}
-                          </time>
-                          {evidence.files?.length > 0 && (
-                            <>
-                              <span>•</span>
-                              <span>{evidence.files.length} files</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                      </>
                     )}
                   </div>
                 ))}
@@ -195,73 +186,65 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 
           {/* Add New Evidence Form */}
           <form onSubmit={handleSubmit} className="space-y-3">
-            <div
-              className={`border-2 border-dashed rounded-md p-4 text-center cursor-pointer transition-colors
-                ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById("file-input")?.click()}
-            >
-              <input
-                id="file-input"
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(e) => setFiles(e.target.files)}
-              />
-              <Paperclip className="mx-auto h-6 w-6 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">
-                Drop files here or click to upload
-              </p>
-            </div>
-
-            {files && (
-              <div className="space-y-2">
-                {Array.from(files).map((file) => (
-                  <div
-                    key={file.name}
-                    className="flex items-center justify-between text-sm p-2 bg-gray-50 rounded"
-                  >
-                    <span className="truncate flex-1">{file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => setFiles(null)}
-                      className="ml-2 text-gray-500 hover:text-gray-700"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="space-y-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes
+              </label>
               <Textarea
-                placeholder="Add notes about this evidence..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full min-h-[80px]"
+                placeholder="Add your notes here..."
+                className="w-full"
               />
             </div>
 
-            {uploadProgress > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div
-                  className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={!files && !notes}
-                className="w-full sm:w-auto"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Files
+              </label>
+              <div
+                className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
               >
-                Add Evidence
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => setFiles(e.target.files)}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer text-blue-600 hover:text-blue-800"
+                >
+                  Choose files
+                </label>
+                <span className="text-gray-500"> or drag and drop</span>
+              </div>
+              {files && (
+                <div className="mt-2 space-y-1">
+                  {Array.from(files).map((file, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFiles(null)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
               </Button>
+              <Button type="submit">Add Evidence</Button>
             </div>
           </form>
         </div>

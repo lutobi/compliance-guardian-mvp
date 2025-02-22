@@ -10,22 +10,26 @@ export function useFrameworkData(frameworkId: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      // Simulate async data fetch to force client-side execution
-      const fetchData = async () => {
+    const fetchData = async () => {
+      try {
         setLoading(true);
+        setError(null);
+        
         const framework = frameworkData[frameworkId];
         if (!framework) {
-          throw new Error(`Framework ${frameworkId} not found`);
+          setError(new Error(`Framework ${frameworkId} not found`));
+          return;
         }
+        
         setData(framework);
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Unknown error'));
+      } finally {
         setLoading(false);
-      };
-      fetchData();
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'));
-      setLoading(false);
-    }
+      }
+    };
+
+    fetchData();
   }, [frameworkId]);
 
   return { data, error, loading };

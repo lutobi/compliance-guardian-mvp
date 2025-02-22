@@ -1,9 +1,15 @@
-import { frameworks } from '@/data/frameworks';
+import { frameworks, frameworkData } from '@/data/frameworks';
 import { FrameworkClient } from '@/components/frameworks/FrameworkClient';
 
 type Props = {
   params: { id: string };
 };
+
+export async function generateStaticParams() {
+  return frameworks.map((framework) => ({
+    id: framework.id,
+  }));
+}
 
 export default function Page({ params }: Props) {
   if (!params?.id) {
@@ -18,13 +24,13 @@ export default function Page({ params }: Props) {
   }
 
   // Server-side validation
-  const framework = frameworks.find(f => f.id === params.id);
-  
+  const framework = frameworkData[params.id];
+
   if (!framework) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="p-8 bg-red-50 text-red-700 rounded-lg">
-          <h1 className="text-2xl font-bold mb-4">Framework not found</h1>
+          <h1 className="text-2xl font-bold mb-4">Error: Framework Not Found</h1>
           <p>The framework with ID {params.id} does not exist.</p>
         </div>
       </div>
@@ -33,7 +39,6 @@ export default function Page({ params }: Props) {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">{framework.name}</h1>
       <FrameworkClient 
         id={params.id}
         name={framework.name}
