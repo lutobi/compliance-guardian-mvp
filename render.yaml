@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: compliance-guardian
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: ${SUPABASE_URL}
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: ${SUPABASE_ANON_KEY}
+    healthCheckPath: /api/health
+    autoDeploy: true
