@@ -33,9 +33,9 @@ export default function RootLayout({
       )} suppressHydrationWarning>
         <Providers>
           <ClientLayout>
-            <div className="flex min-h-screen">
+            <div className="min-h-screen">
               <Sidebar />
-              <main className="flex-1 p-8 md:p-12">
+              <main className="ml-0 md:ml-64 min-h-screen transition-all duration-200 ease-in-out p-8 md:p-12">
                 {children}
               </main>
             </div>

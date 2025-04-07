@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -13,7 +15,7 @@ export function DashboardNav() {
   return (
     <nav className="space-y-1 px-2">
       {navigation.map((item) => {
-        const isActive = pathname.startsWith(item.href);
+        const isActive = pathname?.startsWith(item.href) || false;
         const Icon = item.icon;
 
         return (
