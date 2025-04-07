@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
+import { FrameworkSummary } from '@/components/frameworks/FrameworkSummary';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { calculateControlProgress } from '@/utils/progress';
 import { useFrameworkData } from '@/hooks/useFrameworkData';
@@ -144,35 +145,16 @@ export function FrameworkClient({ id, name, description, version, categories }: 
 
   return (
     <div className="space-y-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-xl font-bold mb-4">Framework Details</h2>
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-medium">Version</h3>
-              <p className="text-gray-600">{version}</p>
-            </div>
-            <div>
-              <h3 className="font-medium">Categories</h3>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {categories.map(category => (
-                  <span
-                    key={category}
-                    className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm"
-                  >
-                    {category}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium">Description</h3>
-              <p className="text-gray-600">{description}</p>
-            </div>
+      <div className="space-y-8">
+        <div className="flex items-center space-x-8">
+          <div>
+            <h2 className="text-2xl font-bold">{framework.name}</h2>
+            <p className="text-gray-600 mt-1">Version {version}</p>
           </div>
+          <p className="text-gray-600 flex-1">{description}</p>
         </div>
         
-        <CoverageAnalysis framework={framework} evidenceMap={evidenceMap} />
+        <FrameworkSummary controls={framework.controls || []} />
       </div>
 
       <div>

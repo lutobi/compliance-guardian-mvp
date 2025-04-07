@@ -5,15 +5,17 @@ import { ControlVerification } from '@/utils/control-verification';
 import { EnhancedControl } from '@/types/enhanced-framework';
 
 interface CoverageAnalysisProps {
-  implementedControls: EnhancedControl[];
-  frameworkName: string;
+  framework: {
+    controls: any[];
+  };
+  evidenceMap: Record<string, any[]>;
 }
 
 export const CoverageAnalysis: React.FC<CoverageAnalysisProps> = ({
-  implementedControls,
-  frameworkName
+  framework,
+  evidenceMap
 }) => {
-  if (!implementedControls || !frameworkName) {
+  if (!framework?.controls) {
     return (
       <Card className="p-6">
         <p className="text-gray-600">No framework data available for analysis.</p>
@@ -23,10 +25,14 @@ export const CoverageAnalysis: React.FC<CoverageAnalysisProps> = ({
 
   let coverage;
   try {
+    const implementedControls = framework.controls.map(control => ({
+      ...control,
+      evidence: evidenceMap[control.id] || []
+    }));
     coverage = ControlVerification.verifyFrameworkCoverage(
-    implementedControls,
-    frameworkName
-  );
+      implementedControls,
+      'framework'
+    );
   } catch (error) {
     console.error('Coverage analysis error:', error);
     return (

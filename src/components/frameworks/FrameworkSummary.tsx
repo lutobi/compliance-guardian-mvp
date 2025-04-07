@@ -70,84 +70,84 @@ export function FrameworkSummary({ controls }: FrameworkSummaryProps) {
   );
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-          <ProgressRing
-            value={overallProgress}
-            size={40}
-            strokeWidth={4}
-            showPercentage
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.total}</div>
-          <p className="text-xs text-muted-foreground">Total Controls</p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Implementation Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Implemented</div>
-              <div className="font-medium">{stats.implemented}</div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Framework Implementation Status</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          {/* Main Progress Ring with Stats */}
+          <div className="flex items-center justify-center space-x-12">
+            <div className="text-center">
+              <ProgressRing
+                value={overallProgress}
+                size={120}
+                strokeWidth={8}
+                showPercentage
+                className="mb-2"
+              />
+              <p className="text-sm text-muted-foreground">Overall Progress</p>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm">In Progress</div>
-              <div className="font-medium">{stats.inProgress}</div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Not Implemented</div>
-              <div className="font-medium">{stats.notImplemented}</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+                <p className="text-sm text-blue-600">Total Controls</p>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{stats.implemented}</div>
+                <p className="text-sm text-green-600">Implemented</p>
+              </div>
+              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
+                <p className="text-sm text-yellow-600">In Progress</p>
+              </div>
+              <div className="text-center p-4 bg-red-50 rounded-lg">
+                <div className="text-2xl font-bold text-red-600">{stats.notImplemented}</div>
+                <p className="text-sm text-red-600">Not Started</p>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Subcontrol Progress</CardTitle>
-          <ProgressRing
-            value={subControlProgress}
-            size={40}
-            strokeWidth={4}
-            showPercentage
-          />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{stats.subControlStats.completed}</div>
-          <p className="text-xs text-muted-foreground">
-            of {stats.subControlStats.total} Subcontrols Complete
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Evidence Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
+          {/* Progress Bar */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Controls with Evidence</div>
-              <div className="font-medium">
+            <div className="flex justify-between text-sm">
+              <span>Implementation Progress</span>
+              <span className="font-medium">{overallProgress}%</span>
+            </div>
+            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 transition-all duration-500"
+                style={{ width: `${overallProgress}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Subcontrols and Evidence */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center space-x-4">
+              <ProgressRing
+                value={subControlProgress}
+                size={60}
+                strokeWidth={4}
+                showPercentage
+              />
+              <div>
+                <p className="font-medium">{stats.subControlStats.completed} / {stats.subControlStats.total}</p>
+                <p className="text-sm text-muted-foreground">Subcontrols Complete</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="h-[60px] w-[60px] rounded-full bg-blue-50 flex items-center justify-center text-xl font-bold text-blue-600">
                 {controls.filter(c => (c.evidence || []).length > 0).length}
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Total Evidence Items</div>
-              <div className="font-medium">
-                {controls.reduce((sum, c) => sum + ((c.evidence || []).length), 0)}
+              <div>
+                <p className="font-medium">{controls.reduce((sum, c) => sum + ((c.evidence || []).length), 0)} Items</p>
+                <p className="text-sm text-muted-foreground">Total Evidence</p>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
