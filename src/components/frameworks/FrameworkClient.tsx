@@ -154,7 +154,10 @@ export function FrameworkClient({ id, name, description, version, categories }: 
           <p className="text-gray-600 flex-1">{description}</p>
         </div>
         
-        <FrameworkSummary controls={framework.controls || []} />
+        <FrameworkSummary 
+          controls={framework.controls || []} 
+          evidenceMap={evidenceMap}
+        />
       </div>
 
       <div>

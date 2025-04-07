@@ -4,9 +4,11 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Control, ControlStatus } from '@/types/framework';
+import { Evidence } from '@/types/evidence';
 
 interface FrameworkSummaryProps {
   controls: Control[];
+  evidenceMap: Record<string, Evidence[]>;
 }
 
 interface ControlStats {
@@ -20,7 +22,7 @@ interface ControlStats {
   };
 }
 
-export function FrameworkSummary({ controls }: FrameworkSummaryProps) {
+export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProps) {
   const stats = useMemo(() => {
     const initialStats: ControlStats = {
       total: 0,
@@ -33,10 +35,23 @@ export function FrameworkSummary({ controls }: FrameworkSummaryProps) {
       }
     };
 
+    const getControlStatus = (control: Control) => {
+      if (!control.subcontrols?.length) return 'not-started';
+      
+      const completedSubcontrols = control.subcontrols.filter(
+        sub => (evidenceMap[sub.id]?.length || 0) > 0
+      ).length;
+      
+      if (completedSubcontrols === 0) return 'not-started';
+      if (completedSubcontrols === control.subcontrols.length) return 'implemented';
+      return 'in-progress';
+    };
+
     return controls.reduce((acc, control) => {
       // Count main control
       acc.total++;
-      switch (control.status) {
+      const status = getControlStatus(control);
+      switch (status) {
         case 'implemented':
           acc.implemented++;
           break;
@@ -53,7 +68,7 @@ export function FrameworkSummary({ controls }: FrameworkSummaryProps) {
       if (control.subcontrols) {
         acc.subControlStats.total += control.subcontrols.length;
         acc.subControlStats.completed += control.subcontrols.filter(
-          sub => sub.status === 'implemented'
+          sub => (evidenceMap[sub.id]?.length || 0) > 0
         ).length;
       }
 
