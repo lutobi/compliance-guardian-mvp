@@ -12,8 +12,8 @@ interface ProgressRingProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function ProgressRing({
   value,
-  size = 40,
-  strokeWidth = 4,
+  size = 48,
+  strokeWidth = 5,
   showPercentage = true,
   className,
   ...props
@@ -36,7 +36,7 @@ export function ProgressRing({
       >
         {/* Background circle */}
         <circle
-          className="text-gray-200"
+          className="text-gray-200/40"
           strokeWidth={strokeWidth}
           stroke="currentColor"
           fill="transparent"
@@ -46,7 +46,11 @@ export function ProgressRing({
         />
         {/* Progress circle */}
         <circle
-          className="text-blue-500 transition-all duration-300 ease-in-out"
+          className={cn(
+            'transition-all duration-300 ease-in-out',
+            normalizedValue === 100 ? 'text-green-500' : 'text-blue-600',
+            'stroke-[5]'
+          )}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -60,7 +64,7 @@ export function ProgressRing({
       </svg>
       {showPercentage && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-medium">
+          <span className="text-sm font-semibold">
             {Math.round(normalizedValue)}%
           </span>
         </div>

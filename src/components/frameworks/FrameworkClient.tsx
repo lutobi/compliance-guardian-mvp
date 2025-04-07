@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { ProgressRing } from '@/components/ui/progress-ring';
+import { calculateControlProgress } from '@/utils/progress';
 import { useFrameworkData } from '@/hooks/useFrameworkData';
 import { Evidence } from '@/types/evidence';
 import { CoverageAnalysis } from '@/components/analysis/CoverageAnalysis';
@@ -37,6 +39,14 @@ const Control: React.FC<ControlProps> = ({ control, evidenceMap, onAddEvidence, 
         <div className="flex items-center space-x-2">
           {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           <h3 className="font-medium">{control.name}</h3>
+        </div>
+        <div className="flex items-center space-x-4">
+          <ProgressRing
+            value={calculateControlProgress(control, evidenceMap)}
+            size={48}
+            strokeWidth={5}
+            className="text-blue-600"
+          />
         </div>
       </div>
       {isExpanded && (
