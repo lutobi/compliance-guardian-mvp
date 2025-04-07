@@ -10,6 +10,11 @@ export async function GET(request: Request) {
 
   console.log('Evidence API params:', { frameworkId, subcontrolId });
 
+  // Validate UUID format
+  if (frameworkId && !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(frameworkId)) {
+    return NextResponse.json({ error: 'Invalid framework ID format' }, { status: 400 });
+  }
+
   if (!frameworkId && !subcontrolId) {
     return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
   }

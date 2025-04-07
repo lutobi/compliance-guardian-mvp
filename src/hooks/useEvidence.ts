@@ -3,15 +3,17 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Evidence } from '@/types/evidence';
 import { toast } from 'sonner';
 
-export function useEvidence(frameworkId: string | null | undefined, subcontrolId?: string) {
-  console.log('useEvidence hook called with:', { frameworkId, subcontrolId });
+import { getFrameworkUuid } from '@/lib/framework-sync';
+
+export function useEvidence(frameworkSlug: string | null | undefined, subcontrolId?: string) {
+  console.log('useEvidence hook called with:', { frameworkSlug, subcontrolId });
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    if (!frameworkId && !subcontrolId) {
+    if (!frameworkSlug && !subcontrolId) {
       setLoading(false);
       return;
     }
@@ -19,7 +21,10 @@ export function useEvidence(frameworkId: string | null | undefined, subcontrolId
     const fetchEvidence = async () => {
       try {
         const params = new URLSearchParams();
-        if (frameworkId) params.append('frameworkId', frameworkId);
+        if (frameworkSlug) {
+          const frameworkId = getFrameworkUuid(frameworkSlug);
+          if (frameworkId) params.append('frameworkId', frameworkId);
+        }
         if (subcontrolId) params.append('subcontrolId', subcontrolId);
 
         console.log('Fetching evidence with params:', params.toString());
@@ -44,6 +49,8 @@ export function useEvidence(frameworkId: string | null | undefined, subcontrolId
 
     // Set up real-time subscription
     console.log('Setting up real-time subscription...');
+    const frameworkId = frameworkSlug ? getFrameworkUuid(frameworkSlug) : undefined;
+    
     const channel = supabase
       .channel('evidence_changes')
       .on(
@@ -52,13 +59,13 @@ export function useEvidence(frameworkId: string | null | undefined, subcontrolId
           event: '*',
           schema: 'public',
           table: 'evidence',
-          filter: frameworkId 
-            ? `framework_id=eq.${frameworkId}` 
+          filter: frameworkId
+            ? `framework_id=eq.${frameworkId}`
             : subcontrolId
               ? `subcontrol_id=eq.${subcontrolId}`
               : undefined
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Received real-time update:', payload);
           if (payload.eventType === 'INSERT') {
             setEvidence(prev => [...prev, payload.new as Evidence]);
@@ -76,7 +83,7 @@ export function useEvidence(frameworkId: string | null | undefined, subcontrolId
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [frameworkId, subcontrolId]);
+  }, [frameworkSlug, subcontrolId]);
 
   return { evidence, loading, error };
 }

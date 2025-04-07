@@ -24,28 +24,19 @@ export class EvidenceService {
     })) || [];
   }
 
-  private validateUUID(uuid: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  }
+
 
   async addEvidence(evidence: Omit<Evidence, 'id' | 'createdAt' | 'updatedAt'>): Promise<OperationResult<Evidence>> {
     try {
-      if (!evidence.frameworkId) {
-        throw new Error('Framework ID is required');
-      }
-
-      // Validate UUID format
-      if (!this.validateUUID(evidence.frameworkId)) {
-        console.error('Invalid framework ID:', evidence.frameworkId);
-        throw new Error('Invalid framework ID format. Must be a valid UUID.');
-      }
+      const { data: { user } } = await this.supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await this.supabase
         .from('evidence')
         .insert({
           subcontrol_id: evidence.subcontrolId,
           framework_id: evidence.frameworkId,
+          user_id: user.id,
           notes: evidence.notes || '',
           tags: evidence.tags || [],
           files: evidence.files || []
