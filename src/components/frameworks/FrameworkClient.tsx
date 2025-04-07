@@ -8,7 +8,7 @@ import { useFrameworkData } from '@/hooks/useFrameworkData';
 import { Evidence } from '@/types/evidence';
 import { CoverageAnalysis } from '@/components/analysis/CoverageAnalysis';
 import { DevOnlyWrapper } from '@/components/development/DevOnlyWrapper';
-import EvidenceDialog from '@/app/frameworks/[id]/evidence-dialog';
+import EvidenceDialog from '@/app/frameworks/[slug]/evidence-dialog';
 import { ImplementationPlanManager } from '@/utils/implementation-plan';
 import { ChevronDown, ChevronRight, Paperclip } from 'lucide-react';
 import { cn } from '@/lib/utils';

@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { frameworkData } from '@/data/frameworks';
-import { FrameworkData } from '@/types/framework';
+import { Framework } from '@/types/framework';
+import { FrameworkService } from '@/services/framework';
 
 type Props = {
-  id: string;
+  slug: string;
 };
 
-export function FrameworkPage({ id }: Props) {
-  const [framework, setFramework] = useState<FrameworkData | null>(null);
+export function FrameworkPage({ slug }: Props) {
+  const [framework, setFramework] = useState<Framework | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const frameworkService = new FrameworkService();
 
   useEffect(() => {
     const loadFramework = async () => {
@@ -20,9 +21,9 @@ export function FrameworkPage({ id }: Props) {
         setLoading(true);
         setError(null);
         
-        const data = frameworkData[id];
+        const data = await frameworkService.getFrameworkBySlug(slug);
         if (!data) {
-          setError(`Framework ${id} not found`);
+          setError(`Framework ${slug} not found`);
           return;
         }
         
@@ -35,7 +36,7 @@ export function FrameworkPage({ id }: Props) {
     };
 
     loadFramework();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (
@@ -72,26 +73,26 @@ export function FrameworkPage({ id }: Props) {
       </nav>
 
       <div className="bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6">{framework.name}</h1>
+        <h1 className="text-3xl font-bold mb-6">{framework.data.name}</h1>
         <div className="prose max-w-none">
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Overview</h2>
-            <p className="text-gray-700">{framework.description}</p>
+            <p className="text-gray-700">{framework.data.description}</p>
           </div>
 
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Key Information</h2>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Version:</strong> {framework.version}</li>
-              <li><strong>Categories:</strong> {framework.categories.join(', ')}</li>
-              <li><strong>Last Updated:</strong> {new Date(framework.updated_at).toLocaleDateString()}</li>
+              <li><strong>Version:</strong> {framework.data.version}</li>
+              <li><strong>Categories:</strong> {framework.data.categories.join(', ')}</li>
+              <li><strong>Last Updated:</strong> {new Date().toLocaleDateString()}</li>
             </ul>
           </div>
 
           <div>
             <h2 className="text-2xl font-semibold mb-4">Get Started</h2>
             <Link
-              href={`/dashboard/frameworks/${id}`}
+              href={`/dashboard/frameworks/${framework.slug}`}
               className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Start Assessment →

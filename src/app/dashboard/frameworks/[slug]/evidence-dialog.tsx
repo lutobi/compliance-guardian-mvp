@@ -43,24 +43,6 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   const [loading, setLoading] = useState(false);
   const evidenceService = new EvidenceService();
 
-  useEffect(() => {
-    if (isOpen && subcontrolId) {
-      loadEvidence();
-    }
-  }, [isOpen, subcontrolId]);
-
-  const loadEvidence = async () => {
-    try {
-      const evidence = await evidenceService.getEvidenceForSubcontrol(subcontrolId);
-      if (evidence && evidence.length > 0) {
-        // Update parent component with the loaded evidence
-        evidence.forEach(item => onSubmit(item));
-      }
-    } catch (error) {
-      console.error('Error loading evidence:', error);
-    }
-  };
-
   if (!isOpen) return null;
 
   const handleDragOver = (e: React.DragEvent) => {
