@@ -11,9 +11,6 @@ export default function Topbar() {
           
           <div className="flex items-center gap-4">
             {/* Placeholder for future features */}
-            <div className="text-sm text-gray-600">
-              Demo Version
-            </div>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ export interface Evidence {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  controlName?: string; // Optional control name for better titles
 }
 
 export interface EvidenceFile {

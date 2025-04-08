@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Evidence } from '@/types/evidence';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,20 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   const [editingNotes, setEditingNotes] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Reset form when dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setFiles(null);
+      setNotes('');
+      setTags([]);
+      setEditingId(null);
+      setEditingNotes('');
+    }
+  }, [isOpen, subcontrolId]);
 
+  // Don't render anything if dialog is closed
   if (!isOpen) return null;
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -55,42 +68,57 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const newEvidence: Evidence = {
-      id: Date.now().toString(),
-      subcontrolId,
-      frameworkId: frameworkId || '',
-      files: files ? Array.from(files).map(f => ({ name: f.name, size: f.size })) : [],
-      notes,
-      tags,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    // Simulate file upload progress
-    const interval = setInterval(() => {
-      console.log('Uploading files...');
-    }, 200);
-
-    await onSubmit(newEvidence);
-    clearInterval(interval);
-    setFiles(null);
-    setNotes('');
-    setTags([]);
-    onClose();
+    
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
+    try {
+      const newEvidence: Evidence = {
+        id: Date.now().toString(), // This will be replaced with the server-generated ID
+        subcontrolId,
+        frameworkId: frameworkId || '',
+        files: files ? Array.from(files).map(f => ({ name: f.name, size: f.size, type: f.type })) : [],
+        notes,
+        tags,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+  
+      // File upload handling would go here in a production app
+      // For now, we'll just pass the file metadata
+  
+      await onSubmit(newEvidence);
+      setFiles(null);
+      setNotes('');
+      setTags([]);
+    } catch (error) {
+      console.error('Error submitting evidence:', error);
+    } finally {
+      setIsSubmitting(false);
+      onClose();
+    }
   };
 
-  const handleUpdate = (evidenceId: string) => {
-    const evidence = existingEvidence.find(e => e.id === evidenceId);
-    if (evidence) {
-      onUpdate(evidenceId, {
-        ...evidence,
-        notes: editingNotes,
-        updatedAt: new Date().toISOString()
-      });
+  const handleUpdate = async (evidenceId: string) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    
+    try {
+      const evidence = existingEvidence.find(e => e.id === evidenceId);
+      if (evidence) {
+        await onUpdate(evidenceId, {
+          ...evidence,
+          notes: editingNotes,
+          updatedAt: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error updating evidence:', error);
+    } finally {
+      setEditingId(null);
+      setEditingNotes('');
+      setIsSubmitting(false);
     }
-    setEditingId(null);
-    setEditingNotes('');
   };
 
   return (
@@ -244,7 +272,9 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">Add Evidence</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Add Evidence'}
+              </Button>
             </div>
           </form>
         </div>

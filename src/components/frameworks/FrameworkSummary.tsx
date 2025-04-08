@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Control, ControlStatus } from '@/types/framework';
@@ -23,7 +23,23 @@ interface ControlStats {
 }
 
 export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProps) {
+  const [lastEvidenceMapKeys, setLastEvidenceMapKeys] = useState<string[]>([]);
+  const [forceUpdate, setForceUpdate] = useState<number>(0);
+  
+  // Force re-calculation when evidenceMap keys change
+  useEffect(() => {
+    const currentKeys = Object.keys(evidenceMap).sort().join(',');
+    const lastKeys = lastEvidenceMapKeys.sort().join(',');
+    
+    if (currentKeys !== lastKeys) {
+      setLastEvidenceMapKeys(Object.keys(evidenceMap));
+      setForceUpdate(prev => prev + 1);
+    }
+  }, [evidenceMap, lastEvidenceMapKeys]);
+  
   const stats = useMemo(() => {
+    console.log('Recalculating framework summary stats', { controls, evidenceMap, forceUpdate });
+    
     const initialStats: ControlStats = {
       total: 0,
       implemented: 0,
@@ -74,7 +90,7 @@ export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProp
 
       return acc;
     }, initialStats);
-  }, [controls]);
+  }, [controls, evidenceMap, forceUpdate]);
 
   const overallProgress = Math.round(
     ((stats.implemented + stats.inProgress * 0.5) / stats.total) * 100
