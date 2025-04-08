@@ -4,73 +4,119 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { monitoringService } from '@/services/MonitoringService';
-import { MonitoringStatus } from '@/types/monitoring';
+import { DashboardData, FrameworkStatusItem, RecentActivityItem, PendingTaskItem, RiskSummaryItem, VerificationSummary } from '@/types/dashboard';
+import { ComplianceChart } from '@/components/dashboard/ComplianceChart';
+import { RiskSummary } from '@/components/dashboard/RiskSummary';
+import { VerificationSummary as VerificationSummaryComponent } from '@/components/dashboard/VerificationSummary';
+import { ActivityList } from '@/components/dashboard/ActivityList';
+import { TaskList } from '@/components/dashboard/TaskList';
+import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [frameworkStatus, setFrameworkStatus] = useState<any[]>([]);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [pendingTasks, setPendingTasks] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
+    frameworkStatus: [],
+    recentActivity: [],
+    pendingTasks: [],
+    riskSummary: [],
+    verificationSummary: {
+      total: 0,
+      passed: 0,
+      pending: 0,
+      failed: 0,
+      completionRate: 0
+    },
+    lastUpdated: new Date().toISOString()
+  });
   const [loadingData, setLoadingData] = useState(true);
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        // Get active monitoring data
-        const monitoringData = await monitoringService.getActiveMonitoring();
+  const loadDashboardData = async () => {
+    setLoadingData(true);
+    try {
+      // Get active monitoring data
+      const monitoringData = await monitoringService.getActiveMonitoring();
+      
+      // Calculate framework status
+      const frameworkStats: FrameworkStatusItem[] = [];
+      monitoringData.forEach(monitoring => {
+        const compliantCount = monitoring.controls.filter(
+          c => c.status === 'compliant'
+        ).length;
+        const totalControls = monitoring.controls.length;
+        const complianceRate = totalControls > 0 
+          ? Math.round((compliantCount / totalControls) * 100) 
+          : 0;
         
-        // Calculate framework status
-        const frameworkStats = {};
-        monitoringData.forEach(monitoring => {
-          const compliantCount = monitoring.controls.filter(
-            c => c.status === 'compliant' // Using string literal instead of enum
-          ).length;
-          const totalControls = monitoring.controls.length;
-          const complianceRate = totalControls > 0 
-            ? Math.round((compliantCount / totalControls) * 100) 
-            : 0;
-          
-          frameworkStats[monitoring.framework.id] = {
-            name: monitoring.framework.name,
-            complianceRate,
-            totalControls,
-            compliantCount
-          };
+        frameworkStats.push({
+          id: monitoring.framework.id,
+          name: monitoring.framework.name,
+          complianceRate,
+          totalControls,
+          compliantCount,
+          trend: Math.floor(Math.random() * 10) - 5 // Random trend for demo purposes
         });
+      });
 
-        // Get recent activity
-        const recentActivityData = await monitoringService.getMonitoringMetrics(
-          monitoringData[0]?.id || '',
-          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          new Date()
-        );
+      // Get recent activities
+      const recentActivityData = await monitoringService.getRecentActivities(10);
 
-        // Get pending tasks
-        const pendingTasksData = monitoringData.flatMap(monitoring =>
-          monitoring.controls
-            .filter(c => c.status === 'pending') // Using string literal instead of enum
-            .map(control => ({
-              id: control.id,
-              name: control.control.name,
-              description: control.control.description,
-              category: control.control.category,
-              framework: monitoring.framework.name
-            }))
-        );
+      // Get pending tasks
+      const pendingTasksData = await monitoringService.getPendingTasks(10);
 
-        setFrameworkStatus(Object.values(frameworkStats));
-        setRecentActivity(recentActivityData.slice(0, 5));
-        setPendingTasks(pendingTasksData.slice(0, 5));
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      } finally {
-        setLoadingData(false);
-      }
-    };
+      // Get risk assessment data
+      const riskData = await monitoringService.getRiskAssessment();
 
+      // Get verification summary
+      const verificationData = await monitoringService.getVerificationSummary();
+
+      setDashboardData({
+        frameworkStatus: frameworkStats,
+        recentActivity: recentActivityData,
+        pendingTasks: pendingTasksData,
+        riskSummary: riskData,
+        verificationSummary: verificationData,
+        lastUpdated: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Handle task completion
+  const handleTaskComplete = async (taskId: string) => {
+    try {
+      await monitoringService.updateControlStatus(
+        dashboardData.pendingTasks.find(task => task.id === taskId)?.frameworkId || '',
+        taskId,
+        'compliant'
+      );
+      // Refresh dashboard data after a short delay
+      setTimeout(() => {
+        loadDashboardData();
+      }, 500);
+    } catch (error) {
+      console.error('Error completing task:', error);
+    }
+  };
+
+  // Handle export
+  const handleExport = () => {
+    const dataStr = JSON.stringify(dashboardData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = `dashboard-export-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
 
   // Return early if loading
   if (loading || loadingData) {
@@ -93,8 +139,16 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
+        {/* Dashboard Header */}
+        <DashboardHeader
+          lastUpdated={dashboardData.lastUpdated}
+          isLoading={loadingData}
+          onRefresh={loadDashboardData}
+          onExport={handleExport}
+        />
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Welcome back, {user.email}</h1>
           <p className="mt-2 text-gray-600">
@@ -102,57 +156,32 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Framework Status Card */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Framework Status</h2>
-            <div className="space-y-2">
-              {frameworkStatus.map((framework) => (
-                <div key={framework.name} className="flex justify-between items-center">
-                  <span>{framework.name}</span>
-                  <span className={`px-2 py-1 text-sm rounded ${
-                    framework.complianceRate >= 80 
-                      ? 'bg-green-100 text-green-800'
-                      : framework.complianceRate >= 60 
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}
-                  >
-                    {framework.compliantCount}/{framework.totalControls} ({framework.complianceRate}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          {/* Compliance Chart - Takes 2 columns */}
+          <ComplianceChart data={dashboardData.frameworkStatus} />
 
-          {/* Recent Activity Card */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="border-l-4 border-blue-500 pl-4">
-                  <p className="text-sm text-gray-600">
-                    {new Date(activity.timestamp).toLocaleDateString()}
-                  </p>
-                  <p>{activity.name}: {activity.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Risk Summary */}
+          <RiskSummary data={dashboardData.riskSummary} />
 
-          {/* Tasks Card */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-4">Pending Tasks</h2>
-            <div className="space-y-2">
-              {pendingTasks.map((task) => (
-                <div key={task.id} className="flex items-center">
-                  <input type="checkbox" className="mr-3" />
-                  <span>{task.name}</span>
-                  <span className="ml-2 text-sm text-gray-600">{task.framework}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Verification Summary */}
+          <VerificationSummaryComponent data={dashboardData.verificationSummary} />
+        </div>
+
+        {/* Secondary Dashboard Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Activity List */}
+          <ActivityList 
+            data={dashboardData.recentActivity} 
+            onViewMore={() => router.push('/activity')}
+          />
+
+          {/* Task List */}
+          <TaskList 
+            data={dashboardData.pendingTasks} 
+            onViewMore={() => router.push('/tasks')}
+            onTaskComplete={handleTaskComplete}
+          />
         </div>
       </div>
     </div>
