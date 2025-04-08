@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { monitoringService } from '@/services/MonitoringService';
+import { FileText, Edit, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,31 +16,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { MultiSelect } from "@/components/MultiSelect";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { MonitoringFrequency, ReviewCycle, Priority, AutomationLevel, EvidenceType } from '@/types/monitoring';
+import { frameworks, frameworkData } from '@/data/frameworks';
 
-// Mock data for frameworks and controls
-const frameworks = [
-  { id: 'iso27001', name: 'ISO 27001' },
-  { id: 'nist', name: 'NIST CSF' },
-  { id: 'pci', name: 'PCI DSS' },
-] as const;
-
-const categories = {
-  iso27001: [
-    { id: 'a5', name: 'A.5 Information Security Policies' },
-    { id: 'a6', name: 'A.6 Organization of Information Security' },
-    { id: 'a7', name: 'A.7 Human Resources Security' },
-  ],
-  nist: [
-    { id: 'id', name: 'Identify' },
-    { id: 'pr', name: 'Protect' },
-    { id: 'dt', name: 'Detect' },
-  ],
-  pci: [
-    { id: 'req1', name: 'Requirement 1: Network Security' },
-    { id: 'req2', name: 'Requirement 2: System Security' },
-    { id: 'req3', name: 'Requirement 3: Data Protection' },
-  ],
-} as const;
+// Use actual framework data from the framework data structure
+// Note: frameworks and frameworkData are imported from @/data/frameworks
 
 interface SubControl {
   id: string;
@@ -51,169 +34,7 @@ interface Control {
 }
 
 const controls = {
-  a5: [
-    { 
-      id: 'a5.1.1', 
-      name: 'A.5.1.1 Information Security Policies',
-      subcontrols: [
-        { id: 'a5.1.1.1', name: 'Document policies', progress: 0 },
-        { id: 'a5.1.1.2', name: 'Communicate policies', progress: 0 },
-        { id: 'a5.1.1.3', name: 'Management approval', progress: 0 },
-      ]
-    },
-    { 
-      id: 'a5.1.2', 
-      name: 'A.5.1.2 Review of Policies',
-      subcontrols: [
-        { id: 'a5.1.2.1', name: 'Regular review schedule', progress: 0 },
-        { id: 'a5.1.2.2', name: 'Update procedures', progress: 0 },
-      ]
-    },
-  ],
-  a6: [
-    { 
-      id: 'a6.1.1', 
-      name: 'A.6.1.1 Information Security Roles',
-      subcontrols: [
-        { id: 'a6.1.1.1', name: 'Define roles', progress: 0 },
-        { id: 'a6.1.1.2', name: 'Assign responsibilities', progress: 0 },
-      ]
-    },
-    { 
-      id: 'a6.1.2', 
-      name: 'A.6.1.2 Segregation of Duties',
-      subcontrols: [
-        { id: 'a6.1.2.1', name: 'Document segregation', progress: 0 },
-        { id: 'a6.1.2.2', name: 'Implement controls', progress: 0 },
-      ]
-    },
-  ],
-  a7: [
-    { 
-      id: 'a7.1.1', 
-      name: 'A.7.1.1 Screening',
-      subcontrols: [
-        { id: 'a7.1.1.1', name: 'Verification procedures', progress: 0 },
-        { id: 'a7.1.1.2', name: 'Background checks', progress: 0 },
-      ]
-    },
-    { 
-      id: 'a7.1.2', 
-      name: 'A.7.1.2 Terms and Conditions of Employment',
-      subcontrols: [
-        { id: 'a7.1.2.1', name: 'Contract terms', progress: 0 },
-        { id: 'a7.1.2.2', name: 'Security responsibilities', progress: 0 },
-      ]
-    },
-  ],
-  id: [
-    { 
-      id: 'id.am-1', 
-      name: 'ID.AM-1 Physical devices and systems inventoried',
-      subcontrols: [
-        { id: 'id.am-1.1', name: 'Asset inventory', progress: 0 },
-        { id: 'id.am-1.2', name: 'System documentation', progress: 0 },
-      ]
-    },
-    { 
-      id: 'id.am-2', 
-      name: 'ID.AM-2 Software platforms and applications inventoried',
-      subcontrols: [
-        { id: 'id.am-2.1', name: 'Software inventory', progress: 0 },
-        { id: 'id.am-2.2', name: 'License management', progress: 0 },
-      ]
-    },
-  ],
-  pr: [
-    { 
-      id: 'pr.ac-1', 
-      name: 'PR.AC-1 Identities and credentials are managed',
-      subcontrols: [
-        { id: 'pr.ac-1.1', name: 'Identity verification', progress: 0 },
-        { id: 'pr.ac-1.2', name: 'Access provisioning', progress: 0 },
-      ]
-    },
-    { 
-      id: 'pr.ac-2', 
-      name: 'PR.AC-2 Physical access to assets is managed',
-      subcontrols: [
-        { id: 'pr.ac-2.1', name: 'Physical security controls', progress: 0 },
-        { id: 'pr.ac-2.2', name: 'Access logs', progress: 0 },
-      ]
-    },
-  ],
-  dt: [
-    { 
-      id: 'de.ae-1', 
-      name: 'DE.AE-1 Network operations baseline',
-      subcontrols: [
-        { id: 'de.ae-1.1', name: 'Network mapping', progress: 0 },
-        { id: 'de.ae-1.2', name: 'Traffic analysis', progress: 0 },
-      ]
-    },
-    { 
-      id: 'de.ae-2', 
-      name: 'DE.AE-2 Detected events are analyzed',
-      subcontrols: [
-        { id: 'de.ae-2.1', name: 'Event correlation', progress: 0 },
-        { id: 'de.ae-2.2', name: 'Incident response', progress: 0 },
-      ]
-    },
-  ],
-  req1: [
-    { 
-      id: 'req1.1', 
-      name: 'Install and maintain a firewall configuration',
-      subcontrols: [
-        { id: 'req1.1.1', name: 'Firewall standards', progress: 0 },
-        { id: 'req1.1.2', name: 'Rule review', progress: 0 },
-      ]
-    },
-    { 
-      id: 'req1.2', 
-      name: 'Apply firewall rules for all transmissions',
-      subcontrols: [
-        { id: 'req1.2.1', name: 'Traffic filtering', progress: 0 },
-        { id: 'req1.2.2', name: 'Rule documentation', progress: 0 },
-      ]
-    },
-  ],
-  req2: [
-    { 
-      id: 'req2.1', 
-      name: 'Change vendor-supplied defaults',
-      subcontrols: [
-        { id: 'req2.1.1', name: 'Password policies', progress: 0 },
-        { id: 'req2.1.2', name: 'Security configuration', progress: 0 },
-      ]
-    },
-    { 
-      id: 'req2.2', 
-      name: 'Develop configuration standards',
-      subcontrols: [
-        { id: 'req2.2.1', name: 'Standard documentation', progress: 0 },
-        { id: 'req2.2.2', name: 'Configuration review', progress: 0 },
-      ]
-    },
-  ],
-  req3: [
-    { 
-      id: 'req3.1', 
-      name: 'Keep cardholder data storage to a minimum',
-      subcontrols: [
-        { id: 'req3.1.1', name: 'Data inventory', progress: 0 },
-        { id: 'req3.1.2', name: 'Retention policy', progress: 0 },
-      ]
-    },
-    { 
-      id: 'req3.2', 
-      name: 'Do not store sensitive authentication data',
-      subcontrols: [
-        { id: 'req3.2.1', name: 'Data classification', progress: 0 },
-        { id: 'req3.2.2', name: 'Storage audit', progress: 0 },
-      ]
-    },
-  ],
+  // Controls data here
 } as const;
 
 interface FrameworkSelection {
@@ -262,115 +83,27 @@ export default function MonitoringPage() {
     description: '',
     reviewCycle: 'monthly',
     priority: 'medium',
-    automationLevel: 'semi',
+    automationLevel: 'semi_automated',
     evidenceType: 'document',
     frequency: 'weekly',
     evidenceRequired: false,
-    alertThreshold: '',
+    alertThreshold: '80',
     reviewers: [],
   });
+  const [savedConfigurations, setSavedConfigurations] = useState<SavedMonitorConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [subcontrolSearch, setSubcontrolSearch] = useState<string>('');
+  const [editingConfigId, setEditingConfigId] = useState<string | null>(null);
 
-  const [savedConfigs, setSavedConfigs] = useState<SavedMonitorConfig[]>([]);
-
-  const handleFrameworkSelect = (frameworkId: string) => {
-    if (!selectedFrameworks.some(f => f.frameworkId === frameworkId)) {
-      setSelectedFrameworks([...selectedFrameworks, { 
-        frameworkId, 
-        categoryId: '', 
-        controlSelections: [] 
-      }]);
-    }
+  // Helper function to get progress color class based on percentage
+  const getProgressColorClass = (progress: number) => {
+    if (progress >= 80) return 'bg-green-500';
+    if (progress >= 60) return 'bg-blue-500';
+    if (progress >= 40) return 'bg-yellow-500';
+    if (progress >= 20) return 'bg-orange-500';
+    return 'bg-red-500';
   };
-
-  const handleCategorySelect = (frameworkId: string, categoryId: string) => {
-    setSelectedFrameworks(prev => prev.map(f => 
-      f.frameworkId === frameworkId 
-        ? { ...f, categoryId, controlSelections: [] }
-        : f
-    ));
-  };
-
-  const handleControlSelect = (frameworkId: string, controlId: string, subcontrolIds: string[]) => {
-    setSelectedFrameworks(prev => prev.map(f => {
-      if (f.frameworkId !== frameworkId) return f;
-      
-      const existingControlIndex = f.controlSelections.findIndex(c => c.controlId === controlId);
-      let controlSelections = [...f.controlSelections];
-      
-      if (existingControlIndex >= 0) {
-        if (subcontrolIds.length === 0) {
-          // Remove the control if no subcontrols are selected
-          controlSelections = controlSelections.filter((_, i) => i !== existingControlIndex);
-        } else {
-          // Update existing control selection
-          controlSelections[existingControlIndex] = {
-            ...controlSelections[existingControlIndex],
-            subcontrolIds,
-            progress: 0
-          };
-        }
-      } else if (subcontrolIds.length > 0) {
-        // Add new control selection
-        controlSelections.push({ controlId, subcontrolIds, progress: 0 });
-      }
-      
-      return { ...f, controlSelections };
-    }));
-  };
-
-  const updateSubcontrolProgress = (
-    frameworkId: string, 
-    controlId: string, 
-    subcontrolId: string, 
-    progress: number
-  ) => {
-    setSelectedFrameworks(prev => prev.map(f => {
-      if (f.frameworkId !== frameworkId) return f;
-      
-      const controlSelections = f.controlSelections.map(c => {
-        if (c.controlId !== controlId) return c;
-        
-        // Calculate average progress of all subcontrols
-        const subcontrolProgress = new Map(
-          c.subcontrolIds.map(id => [id, id === subcontrolId ? progress : 0])
-        );
-        const avgProgress = Math.round(
-          Array.from(subcontrolProgress.values()).reduce((a, b) => a + b, 0) / 
-          subcontrolProgress.size
-        );
-        
-        return { ...c, progress: avgProgress };
-      });
-      
-      return { ...f, controlSelections };
-    }));
-  };
-
-  const handleRemoveFramework = (frameworkId: string) => {
-    setSelectedFrameworks(prev => prev.filter(f => f.frameworkId !== frameworkId));
-  };
-
-  const handleConfigSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Convert selectedFrameworks to the format expected by MonitorConfig
-    const flattenedFrameworks = selectedFrameworks.map(f => f.frameworkId);
-    const flattenedControls = selectedFrameworks.flatMap(f => f.controlSelections);
-    
-    const newConfig: SavedMonitorConfig = {
-      ...monitorConfig,
-      selectedFrameworks: flattenedFrameworks,
-      controlSelections: flattenedControls,
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
-      status: 'active',
-      overallProgress: 0,
-    };
-    setSavedConfigs(prev => [...prev, newConfig]);
-    setIsConfigureOpen(false);
-    setSaveMessage(`Successfully created monitor: ${newConfig.name}`);
-    setTimeout(() => setSaveMessage(''), 3000);
-  };
-
+  
   return (
     <div className="container mx-auto py-6 px-4">
       {saveMessage && (
@@ -378,356 +111,542 @@ export default function MonitoringPage() {
           {saveMessage}
         </div>
       )}
-      
+
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Monitoring Configuration</h1>
-        <Dialog open={isConfigureOpen} onOpenChange={setIsConfigureOpen}>
-          <DialogTrigger asChild>
-            <Button>Configure New Monitor</Button>
-          </DialogTrigger>
-          <DialogContent className="w-[90vw] max-w-[1000px] h-[90vh] max-h-[900px] overflow-y-auto">
-            <DialogHeader className="sticky top-0 bg-background z-10 pb-4">
-              <DialogTitle>Configure Monitor</DialogTitle>
-              <DialogDescription>
-                Set up a new compliance monitoring configuration
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleConfigSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={monitorConfig.name}
-                    onChange={(e) => setMonitorConfig({ ...monitorConfig, name: e.target.value })}
-                    placeholder="Monitor name"
+        <h1 className="text-2xl font-bold">Compliance Monitoring</h1>
+        <Button onClick={() => setIsConfigureOpen(true)}>
+          Configure Monitoring
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Loading monitoring configurations...</p>
+        </div>
+      ) : savedConfigurations.length === 0 ? (
+        <div className="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
+          <h2 className="text-xl font-medium mb-2">No Monitoring Configurations</h2>
+          <p className="text-gray-600 mb-4">
+            Create your first monitoring configuration to start tracking compliance
+          </p>
+          <Button onClick={() => setIsConfigureOpen(true)}>
+            Configure Monitoring
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {savedConfigurations.map((config) => (
+            <Card key={config.id} className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <CardTitle className="text-lg">{config.name}</CardTitle>
+                  <div className="flex space-x-1">
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      setEditingConfigId(config.id);
+                      setIsConfigureOpen(true);
+                    }}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <CardDescription className="line-clamp-2">
+                  {config.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-2">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Status</span>
+                    <span className={`font-medium ${config.status === 'active' ? 'text-green-600' : 'text-gray-500'}`}>
+                      {config.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Priority</span>
+                    <span className="font-medium">{config.priority}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Review Cycle</span>
+                    <span className="font-medium">{config.reviewCycle}</span>
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-500">Overall Progress</span>
+                      <span className="font-medium">{config.overallProgress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div 
+                        className={`h-2.5 rounded-full ${getProgressColorClass(config.overallProgress)}`} 
+                        style={{ width: `${config.overallProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="border-t pt-4 flex justify-between">
+                <Button variant="outline" size="sm" onClick={() => {
+                  // Toggle status
+                  const newStatus = config.status === 'active' ? 'inactive' : 'active';
+                  monitoringService.updateMonitoringConfigurationStatus(config.id, newStatus)
+                    .then(() => {
+                      setSaveMessage(`Configuration ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`);
+                      setTimeout(() => setSaveMessage(''), 3000);
+                      // Refresh configurations
+                      monitoringService.getMonitoringConfigurations().then(configs => {
+                        setSavedConfigurations(configs);
+                      });
+                    });
+                }}>
+                  {config.status === 'active' ? 'Deactivate' : 'Activate'}
+                </Button>
+                <Link href={`/monitoring/${config.id}`} passHref>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                    <span>View Details</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={isConfigureOpen} onOpenChange={setIsConfigureOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingConfigId ? 'Edit Monitoring Configuration' : 'Configure Monitoring'}</DialogTitle>
+            <DialogDescription>
+              Set up which frameworks and controls you want to monitor for compliance
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form className="space-y-6" onSubmit={(e) => {
+            e.preventDefault();
+            
+            // Validate form
+            if (!monitorConfig.name) {
+              alert('Please enter a name for this configuration');
+              return;
+            }
+            
+            if (selectedFrameworks.length === 0) {
+              alert('Please select at least one framework');
+              return;
+            }
+            
+            // Calculate overall progress
+            let totalControls = 0;
+            let totalProgress = 0;
+            
+            selectedFrameworks.forEach(framework => {
+              framework.controlSelections.forEach(control => {
+                totalControls++;
+                totalProgress += control.progress;
+              });
+            });
+            
+            const overallProgress = totalControls > 0 
+              ? Math.round(totalProgress / totalControls) 
+              : 0;
+            
+            // Create config object
+            const config: MonitoringConfiguration = {
+              ...monitorConfig,
+              id: editingConfigId || undefined,
+              selectedFrameworks: selectedFrameworks.map(f => f.frameworkId),
+              controlSelections: selectedFrameworks.flatMap(f => 
+                f.controlSelections.map(c => ({
+                  frameworkId: f.frameworkId,
+                  controlId: c.controlId,
+                  subcontrolIds: c.subcontrolIds,
+                  progress: c.progress
+                }))
+              ),
+              overallProgress,
+              status: 'active'
+            };
+            
+            // Save configuration
+            monitoringService.saveMonitoringConfiguration(config)
+              .then((savedConfig) => {
+                setSaveMessage('Monitoring configuration saved successfully');
+                setTimeout(() => setSaveMessage(''), 3000);
+                setIsConfigureOpen(false);
+                
+                // Reset form
+                setMonitorConfig({
+                  name: '',
+                  description: '',
+                  reviewCycle: 'monthly',
+                  priority: 'medium',
+                  automationLevel: 'semi_automated',
+                  evidenceType: 'document',
+                  frequency: 'weekly',
+                  evidenceRequired: false,
+                  alertThreshold: '80',
+                  reviewers: [],
+                });
+                setSelectedFrameworks([]);
+                setEditingConfigId(null);
+                
+                // Refresh configurations
+                monitoringService.getMonitoringConfigurations().then(configs => {
+                  setSavedConfigurations(configs);
+                });
+              })
+              .catch(error => {
+                console.error('Error saving configuration:', error);
+                alert('Error saving configuration. Please try again.');
+              });
+          }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Configuration Name</Label>
+                  <Input 
+                    id="name" 
+                    value={monitorConfig.name} 
+                    onChange={(e) => setMonitorConfig({...monitorConfig, name: e.target.value})}
+                    placeholder="e.g., Monthly SOC 2 Monitoring"
                   />
                 </div>
-
-                <div className="space-y-2">
+                
+                <div>
                   <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={monitorConfig.description}
-                    onChange={(e) => setMonitorConfig({ ...monitorConfig, description: e.target.value })}
-                    placeholder="Describe the purpose of this monitor"
-                    className="h-[38px]"
+                  <Textarea 
+                    id="description" 
+                    value={monitorConfig.description} 
+                    onChange={(e) => setMonitorConfig({...monitorConfig, description: e.target.value})}
+                    placeholder="Describe the purpose of this monitoring configuration"
                   />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="reviewCycle">Review Cycle</Label>
+                    <Select 
+                      value={monitorConfig.reviewCycle} 
+                      onValueChange={(value) => setMonitorConfig({...monitorConfig, reviewCycle: value as ReviewCycle})}
+                    >
+                      <SelectTrigger id="reviewCycle">
+                        <SelectValue placeholder="Select review cycle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select 
+                      value={monitorConfig.priority} 
+                      onValueChange={(value) => setMonitorConfig({...monitorConfig, priority: value as Priority})}
+                    >
+                      <SelectTrigger id="priority">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="frequency">Check Frequency</Label>
+                    <Select 
+                      value={monitorConfig.frequency} 
+                      onValueChange={(value) => setMonitorConfig({...monitorConfig, frequency: value as MonitoringFrequency})}
+                    >
+                      <SelectTrigger id="frequency">
+                        <SelectValue placeholder="Select frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="evidenceType">Evidence Type</Label>
+                    <Select 
+                      value={monitorConfig.evidenceType} 
+                      onValueChange={(value) => setMonitorConfig({...monitorConfig, evidenceType: value as EvidenceType})}
+                    >
+                      <SelectTrigger id="evidenceType">
+                        <SelectValue placeholder="Select evidence type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="document">Document</SelectItem>
+                        <SelectItem value="test_result">Test Result</SelectItem>
+                        <SelectItem value="audit_report">Audit Report</SelectItem>
+                        <SelectItem value="screen_capture">Screen Capture</SelectItem>
+                        <SelectItem value="log_file">Log File</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="automationLevel">Automation Level</Label>
+                    <Select 
+                      value={monitorConfig.automationLevel} 
+                      onValueChange={(value) => setMonitorConfig({...monitorConfig, automationLevel: value as AutomationLevel})}
+                    >
+                      <SelectTrigger id="automationLevel">
+                        <SelectValue placeholder="Select automation level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual</SelectItem>
+                        <SelectItem value="semi_automated">Semi-Automated</SelectItem>
+                        <SelectItem value="fully_automated">Fully Automated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="alertThreshold">Alert Threshold (%)</Label>
+                    <Input 
+                      id="alertThreshold" 
+                      type="number" 
+                      min="0" 
+                      max="100" 
+                      value={monitorConfig.alertThreshold} 
+                      onChange={(e) => setMonitorConfig({...monitorConfig, alertThreshold: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="evidenceRequired" 
+                    checked={monitorConfig.evidenceRequired} 
+                    onCheckedChange={(checked) => 
+                      setMonitorConfig({...monitorConfig, evidenceRequired: checked as boolean})
+                    }
+                  />
+                  <Label htmlFor="evidenceRequired">Evidence Required</Label>
                 </div>
               </div>
               
               <div className="space-y-4">
-                <Label>Frameworks and Controls</Label>
-                <div className="space-y-4">
-                  {/* Framework Selection */}
-                  <Select onValueChange={handleFrameworkSelect}>
-                    <SelectTrigger className="w-full md:w-[300px]">
-                      <SelectValue placeholder="Select framework" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {frameworks.map(framework => (
-                        <SelectItem 
-                          key={framework.id} 
-                          value={framework.id}
-                          disabled={selectedFrameworks.some(f => f.frameworkId === framework.id)}
-                        >
-                          {framework.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* Selected Frameworks and their Controls */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedFrameworks.map(framework => {
-                      const frameworkData = frameworks.find(f => f.id === framework.frameworkId);
-                      return (
-                        <div key={framework.frameworkId} className="border rounded-lg p-4 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{frameworkData?.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveFramework(framework.frameworkId)}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                          
-                          {/* Category Selection */}
-                          <Select 
-                            value={framework.categoryId}
-                            onValueChange={(value) => handleCategorySelect(framework.frameworkId, value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {categories[framework.frameworkId as keyof typeof categories]?.map(category => (
-                                <SelectItem key={category.id} value={category.id}>
-                                  {category.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-
-                          {/* Control and Subcontrol Selection */}
-                          {framework.categoryId && controls[framework.categoryId as keyof typeof controls]?.map(control => (
-                            <div key={control.id} className="border rounded-lg p-3 space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="font-medium">{control.name}</span>
-                                <div className="text-sm text-muted-foreground">
-                                  {framework.controlSelections.find(c => c.controlId === control.id)?.progress || 0}% Complete
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                {control.subcontrols.map(subcontrol => {
-                                  const controlSelection = framework.controlSelections.find(c => c.controlId === control.id);
-                                  const isSelected = controlSelection?.subcontrolIds.includes(subcontrol.id) || false;
-                                  
-                                  return (
-                                    <div key={subcontrol.id} className="flex items-center justify-between gap-2 pl-4">
-                                      <div className="flex items-center gap-2">
-                                        <Checkbox
-                                          checked={isSelected}
-                                          onCheckedChange={(checked) => {
-                                            const currentSubcontrols = controlSelection?.subcontrolIds || [];
-                                            const newSubcontrols = checked
-                                              ? [...currentSubcontrols, subcontrol.id]
-                                              : currentSubcontrols.filter(id => id !== subcontrol.id);
-                                            
-                                            handleControlSelect(framework.frameworkId, control.id, newSubcontrols);
-                                          }}
-                                        />
-                                        <span className="text-sm">{subcontrol.name}</span>
-                                      </div>
-                                      {isSelected && (
-                                        <div className="flex items-center gap-2">
-                                          <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            className="w-20 h-7 text-sm"
-                                            placeholder="0%"
-                                            value={subcontrol.progress}
-                                            onChange={(e) => {
-                                              const progress = Math.min(100, Math.max(0, parseInt(e.target.value) || 0));
-                                              updateSubcontrolProgress(
-                                                framework.frameworkId,
-                                                control.id,
-                                                subcontrol.id,
-                                                progress
-                                              );
-                                            }}
-                                          />
-                                          <span className="text-sm">%</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
+                <div>
+                  <Label>Select Frameworks & Controls</Label>
+                  <div className="border rounded-md p-4 space-y-4 max-h-[400px] overflow-y-auto">
+                    {frameworks.map((framework) => (
+                      <div key={framework.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{framework.name}</span>
+                          <Checkbox 
+                            checked={selectedFrameworks.some(f => f.frameworkId === framework.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                // Add framework if not already selected
+                                if (!selectedFrameworks.some(f => f.frameworkId === framework.id)) {
+                                  setSelectedFrameworks([
+                                    ...selectedFrameworks,
+                                    {
+                                      frameworkId: framework.id,
+                                      categoryId: '',
+                                      controlSelections: []
+                                    }
+                                  ]);
+                                }
+                              } else {
+                                // Remove framework
+                                setSelectedFrameworks(
+                                  selectedFrameworks.filter(f => f.frameworkId !== framework.id)
+                                );
+                              }
+                            }}
+                          />
+                        </div>
+                        
+                        {selectedFrameworks.some(f => f.frameworkId === framework.id) && (
+                          <div className="pl-4 space-y-2">
+                            <div className="mb-2">
+                              <Input
+                                placeholder="Search subcontrols..."
+                                value={subcontrolSearch}
+                                onChange={(e) => setSubcontrolSearch(e.target.value)}
+                                className="mb-2"
+                              />
+                              <div className="flex space-x-2 mb-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    // Select all subcontrols for this framework
+                                    const updatedFrameworks = selectedFrameworks.map(f => {
+                                      if (f.frameworkId === framework.id) {
+                                        const allControls = [];
+                                        // This is where you'd get all controls for the framework
+                                        // For now, using placeholder data
+                                        for (const control of Object.values(controls)) {
+                                          allControls.push({
+                                            controlId: control.id,
+                                            subcontrolIds: control.subcontrols.map(sc => sc.id),
+                                            progress: 0
+                                          });
+                                        }
+                                        return { ...f, controlSelections: allControls };
+                                      }
+                                      return f;
+                                    });
+                                    setSelectedFrameworks(updatedFrameworks);
+                                  }}
+                                >
+                                  Select All
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    // Clear all subcontrols for this framework
+                                    const updatedFrameworks = selectedFrameworks.map(f => {
+                                      if (f.frameworkId === framework.id) {
+                                        return { ...f, controlSelections: [] };
+                                      }
+                                      return f;
+                                    });
+                                    setSelectedFrameworks(updatedFrameworks);
+                                  }}
+                                >
+                                  Clear All
+                                </Button>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      );
-                    })}
+                            
+                            {/* Display selected subcontrols */}
+                            <div className="space-y-2">
+                              {Object.entries(controls).map(([controlId, control]) => {
+                                // Filter subcontrols based on search
+                                const filteredSubcontrols = control.subcontrols.filter(sc => 
+                                  subcontrolSearch === '' || 
+                                  sc.name.toLowerCase().includes(subcontrolSearch.toLowerCase())
+                                );
+                                
+                                if (filteredSubcontrols.length === 0) return null;
+                                
+                                return (
+                                  <div key={controlId} className="border rounded p-2">
+                                    <div className="font-medium mb-1">{control.name}</div>
+                                    <div className="pl-2 space-y-1">
+                                      {filteredSubcontrols.map(subcontrol => {
+                                        const frameworkIndex = selectedFrameworks.findIndex(
+                                          f => f.frameworkId === framework.id
+                                        );
+                                        
+                                        const controlIndex = frameworkIndex !== -1 
+                                          ? selectedFrameworks[frameworkIndex].controlSelections.findIndex(
+                                              c => c.controlId === controlId
+                                            )
+                                          : -1;
+                                          
+                                        const isSelected = controlIndex !== -1 && 
+                                          selectedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds.includes(subcontrol.id);
+                                          
+                                        return (
+                                          <div key={subcontrol.id} className="flex items-center justify-between">
+                                            <div className="flex items-center">
+                                              <Checkbox 
+                                                checked={isSelected}
+                                                onCheckedChange={(checked) => {
+                                                  const updatedFrameworks = [...selectedFrameworks];
+                                                  
+                                                  if (frameworkIndex === -1) return;
+                                                  
+                                                  if (controlIndex === -1) {
+                                                    // Control not yet in selections, add it with this subcontrol
+                                                    if (checked) {
+                                                      updatedFrameworks[frameworkIndex].controlSelections.push({
+                                                        controlId,
+                                                        subcontrolIds: [subcontrol.id],
+                                                        progress: 0
+                                                      });
+                                                    }
+                                                  } else {
+                                                    // Control exists, update its subcontrolIds
+                                                    if (checked) {
+                                                      // Add subcontrol if not already included
+                                                      if (!updatedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds.includes(subcontrol.id)) {
+                                                        updatedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds.push(subcontrol.id);
+                                                      }
+                                                    } else {
+                                                      // Remove subcontrol
+                                                      updatedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds = 
+                                                        updatedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds.filter(
+                                                          id => id !== subcontrol.id
+                                                        );
+                                                        
+                                                      // If no subcontrols left, remove the control
+                                                      if (updatedFrameworks[frameworkIndex].controlSelections[controlIndex].subcontrolIds.length === 0) {
+                                                        updatedFrameworks[frameworkIndex].controlSelections = 
+                                                          updatedFrameworks[frameworkIndex].controlSelections.filter(
+                                                            (_, i) => i !== controlIndex
+                                                          );
+                                                      }
+                                                    }
+                                                  }
+                                                  
+                                                  setSelectedFrameworks(updatedFrameworks);
+                                                }}
+                                              />
+                                              <span className="ml-2 text-sm">{subcontrol.name}</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                              <div className="w-16 h-2 bg-gray-200 rounded-full mr-2">
+                                                <div 
+                                                  className={`h-2 rounded-full ${getProgressColorClass(subcontrol.progress)}`} 
+                                                  style={{ width: `${subcontrol.progress}%` }}
+                                                ></div>
+                                              </div>
+                                              <span className="text-xs text-gray-500">{subcontrol.progress}%</span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="reviewCycle">Review Cycle</Label>
-                  <Select
-                    value={monitorConfig.reviewCycle}
-                    onValueChange={(value) => setMonitorConfig({ ...monitorConfig, reviewCycle: value as ReviewCycle })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="quarterly">Quarterly</SelectItem>
-                      <SelectItem value="annually">Annually</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Priority</Label>
-                  <Select
-                    value={monitorConfig.priority}
-                    onValueChange={(value) => setMonitorConfig({ ...monitorConfig, priority: value as Priority })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="automationLevel">Automation Level</Label>
-                  <Select
-                    value={monitorConfig.automationLevel}
-                    onValueChange={(value) => setMonitorConfig({ ...monitorConfig, automationLevel: value as AutomationLevel })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">Manual</SelectItem>
-                      <SelectItem value="semi">Semi-Automated</SelectItem>
-                      <SelectItem value="full">Fully Automated</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="evidenceType">Evidence Type</Label>
-                  <Select
-                    value={monitorConfig.evidenceType}
-                    onValueChange={(value) => setMonitorConfig({ ...monitorConfig, evidenceType: value as EvidenceType })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="document">Document</SelectItem>
-                      <SelectItem value="screenshot">Screenshot</SelectItem>
-                      <SelectItem value="log">Log</SelectItem>
-                      <SelectItem value="report">Report</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="evidenceRequired"
-                    checked={monitorConfig.evidenceRequired}
-                    onCheckedChange={(checked) => setMonitorConfig({ ...monitorConfig, evidenceRequired: checked })}
-                  />
-                  <Label htmlFor="evidenceRequired">Evidence Required</Label>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="alertThreshold">Alert Threshold</Label>
-                  <Input
-                    id="alertThreshold"
-                    value={monitorConfig.alertThreshold}
-                    onChange={(e) => setMonitorConfig({ ...monitorConfig, alertThreshold: e.target.value })}
-                    placeholder="Set alert threshold"
-                  />
-                </div>
-              </div>
-
-              <div className="sticky bottom-0 bg-background pt-4 border-t flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsConfigureOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Save Configuration</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Display saved configurations */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {savedConfigs.map((config) => (
-          <Card key={config.id} className="relative">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle>{config.name}</CardTitle>
-                <Switch
-                  checked={config.status === 'active'}
-                  onCheckedChange={(checked) => {
-                    setSavedConfigs(prev =>
-                      prev.map(c =>
-                        c.id === config.id
-                          ? { ...c, status: checked ? 'active' : 'inactive' }
-                          : c
-                      )
-                    );
-                  }}
-                />
-              </div>
-              <CardDescription>{config.description}</CardDescription>
-              <div className="mt-2">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Overall Progress</span>
-                  <span>{config.overallProgress}%</span>
-                </div>
-                <div className="w-full bg-secondary rounded-full h-2">
-                  <div
-                    className="bg-primary rounded-full h-2 transition-all"
-                    style={{ width: `${config.overallProgress}%` }}
-                  />
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {config.selectedFrameworks.map(frameworkId => {
-                  const framework = frameworks.find(f => f.id === frameworkId);
-                  const frameworkControls = config.controlSelections.filter(c => c.frameworkId === frameworkId);
-                  const frameworkProgress = frameworkControls.reduce((acc, curr) => acc + curr.progress, 0) / 
-                    (frameworkControls.length || 1);
-                  
-                  return framework && (
-                    <div key={frameworkId} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-sm">{framework.name}</span>
-                        <span className="text-sm text-muted-foreground">{Math.round(frameworkProgress)}%</span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-1.5">
-                        <div
-                          className="bg-primary rounded-full h-1.5 transition-all"
-                          style={{ width: `${frameworkProgress}%` }}
-                        />
-                      </div>
-                      <div className="pl-4 space-y-2">
-                        {frameworkControls.map(control => {
-                          const controlData = Object.values(controls)
-                            .flat()
-                            .find(c => c.id === control.controlId);
-                          
-                          return controlData && (
-                            <div key={control.controlId} className="space-y-1">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm">{controlData.name}</span>
-                                <span className="text-sm text-muted-foreground">{control.progress}%</span>
-                              </div>
-                              <div className="w-full bg-secondary rounded-full h-1">
-                                <div
-                                  className="bg-primary rounded-full h-1 transition-all"
-                                  style={{ width: `${control.progress}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-            <CardFooter className="text-xs text-muted-foreground">
-              Created {config.createdAt.toLocaleDateString()}
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" type="button" onClick={() => {
+                setIsConfigureOpen(false);
+                setEditingConfigId(null);
+              }}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingConfigId ? 'Update' : 'Save'} Configuration
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
