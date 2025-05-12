@@ -1,24 +1,23 @@
-import { supabase } from './supabase';
 import { Database } from './database.types';
 import { withCache, clearCache } from './api-wrapper';
 import { cacheData } from './cache';
+import { supabase } from './supabase';
 
 type Tables = Database['public']['Tables'];
 
 export const api = {
   assessments: {
-    list: async () => {
-      return withCache(
-        async () => {
-          const { data, error } = await supabase
-            .from('assessments')
-            .select('*, frameworks(name)')
-            .order('created_at', { ascending: false });
-          if (error) throw error;
-          return data;
-        },
-        { key: 'assessments_list' }
-      );
+    /** List assessments filtered by optional workspaceId */
+    list: async (workspaceId?: string) => {
+      // Fetch assessments with full framework controls and subcontrols
+      let query = supabase
+        .from('assessments')
+        .select('*, framework:framework_id(*,controls(*,subcontrols(*)))')
+        .order('created_at', { ascending: false });
+      if (workspaceId) query = query.eq('workspace_id', workspaceId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
     },
     
     get: async (id: string) => {
@@ -26,13 +25,19 @@ export const api = {
         async () => {
           const { data, error } = await supabase
             .from('assessments')
-            .select('*, frameworks(*)')
+            .select(`
+              *,
+              framework:framework_id(
+                *,
+                controls(*,subcontrols(*))
+              )
+            `)
             .eq('id', id)
             .single();
           if (error) throw error;
           return data;
         },
-        { key: `assessment_${id}` }
+        { key: `assessment_full_${id}` }
       );
     },
     
@@ -42,13 +47,22 @@ export const api = {
         .insert(assessment)
         .select()
         .single();
-      
+ 
       if (error) throw error;
-      // Clear related caches
-      clearCache('assessments_list');
-      return data;
-
-      if (error) throw error;
+      // Assign all controls of the selected framework to this assessment
+      const { data: ctrlRows, error: ctrlError } = await supabase
+        .from('controls')
+        .select('id')
+        .eq('framework_id', data.framework_id as string);
+      if (ctrlError) throw ctrlError;
+      if (ctrlRows && ctrlRows.length > 0) {
+        const acRows = ctrlRows.map(c => ({ assessment_id: data.id, control_id: c.id }));
+        const { error: acError } = await supabase
+          .from('assessment_controls')
+          .insert(acRows);
+        if (acError) throw acError;
+      }
+      clearCache();
       return data;
     },
     
@@ -61,6 +75,7 @@ export const api = {
         .single();
 
       if (error) throw error;
+      clearCache();
       return data;
     },
     
@@ -71,6 +86,7 @@ export const api = {
         .eq('id', id);
 
       if (error) throw error;
+      clearCache();
     }
   },
 
@@ -98,6 +114,33 @@ export const api = {
         .eq('id', id)
         .single();
 
+      if (error) throw error;
+      return data;
+    },
+    
+    getFull: async (id: string) => {
+      const { data, error } = await supabase
+        .from('frameworks')
+        .select(`
+          *,
+          controls(*,subcontrols(*))
+        `)
+        .eq('id', id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    
+    /** Fetch all frameworks with their controls & subcontrols */
+    listFull: async () => {
+      const { data, error } = await supabase
+        .from('frameworks')
+        .select(
+          `
+            id,
+            controls(*,subcontrols(*))
+          `
+        );
       if (error) throw error;
       return data;
     }

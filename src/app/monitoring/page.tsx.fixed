@@ -1,0 +1,112 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
+import { monitoringService } from '@/services/MonitoringService';
+import { FileText, Edit, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { MultiSelect } from "@/components/MultiSelect";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { MonitoringFrequency, ReviewCycle, Priority, AutomationLevel, EvidenceType } from '@/types/monitoring';
+import { frameworks, frameworkData } from '@/data/frameworks';
+
+// Use actual framework data from the framework data structure
+// Note: frameworks and frameworkData are imported from @/data/frameworks
+
+interface SubControl {
+  id: string;
+  name: string;
+  progress: number;
+}
+
+interface Control {
+  id: string;
+  name: string;
+  subcontrols: SubControl[];
+}
+
+const controls = {
+  // Controls data here
+} as const;
+
+interface FrameworkSelection {
+  frameworkId: string;
+  categoryId: string;
+  controlSelections: {
+    controlId: string;
+    subcontrolIds: string[];
+    progress: number;
+  }[];
+}
+
+interface MonitorConfigState {
+  name: string;
+  description: string;
+  reviewCycle: ReviewCycle;
+  priority: Priority;
+  automationLevel: AutomationLevel;
+  evidenceType: EvidenceType;
+  frequency: MonitoringFrequency;
+  evidenceRequired: boolean;
+  alertThreshold: string;
+  reviewers: string[];
+}
+
+interface SavedMonitorConfig extends MonitorConfigState {
+  id: string;
+  createdAt: Date;
+  status: 'active' | 'inactive';
+  selectedFrameworks: string[];
+  controlSelections: {
+    frameworkId: string;
+    controlId: string;
+    subcontrolIds: string[];
+    progress: number;
+  }[];
+  overallProgress: number;
+}
+
+export default function MonitoringPage() {
+  const [isConfigureOpen, setIsConfigureOpen] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [selectedFrameworks, setSelectedFrameworks] = useState<FrameworkSelection[]>([]);
+  const [monitorConfig, setMonitorConfig] = useState<MonitorConfigState>({
+    name: '',
+    description: '',
+    reviewCycle: 'monthly',
+    priority: 'medium',
+    automationLevel: 'semi_automated',
+    evidenceType: 'document',
+    frequency: 'weekly',
+    evidenceRequired: false,
+    alertThreshold: '80',
+    reviewers: [],
+  });
+  const [savedConfigurations, setSavedConfigurations] = useState<SavedMonitorConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [subcontrolSearch, setSubcontrolSearch] = useState<string>('');
+  const [editingConfigId, setEditingConfigId] = useState<string | null>(null);
+
+  // Helper function to get progress color class based on percentage
+  const getProgressColorClass = (progress: number) => {
+    if (progress >= 80) return 'bg-green-500';
+    if (progress >= 60) return 'bg-blue-500';
+    if (progress >= 40) return 'bg-yellow-500';
+    if (progress >= 20) return 'bg-orange-500';
+    return 'bg-red-500';
+  };
+  
+  return (
+    <div className="container mx-auto py-6 px-4">
+      {/* Rest of the component JSX */}
+    </div>
+  );
+}

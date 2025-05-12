@@ -1,9 +1,9 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Evidence, EvidenceFile, OperationResult } from '@/types/evidence';
 import { getBaseUrl } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import type { Evidence, EvidenceFile, OperationResult } from '@/types/evidence';
 
 export class EvidenceService {
-  private supabase = createClientComponentClient();
+  private supabase = supabase;
 
   async getEvidenceForSubcontrol(subcontrolId: string): Promise<Evidence[]> {
     try {
@@ -24,11 +24,11 @@ export class EvidenceService {
         id: item.id,
         subcontrolId: item.subcontrol_id,
         frameworkId: item.framework_id,
-        files: item.files || [],
+        files: Array.isArray(item.files) ? item.files as unknown as EvidenceFile[] : [],
         notes: item.notes || '',
         tags: item.tags || [],
-        createdAt: item.created_at,
-        updatedAt: item.updated_at
+        createdAt: item.created_at || '',
+        updatedAt: item.updated_at || ''
       })) || [];  
     } catch (error) {
       console.error('Failed to get evidence:', error);
@@ -38,22 +38,33 @@ export class EvidenceService {
 
 
 
-  async addEvidence(evidence: Omit<Evidence, 'id' | 'createdAt' | 'updatedAt'>): Promise<OperationResult<Evidence>> {
+  async addEvidence(
+    payload: {
+      controlId: string;
+      assessmentId: string;
+      subcontrolId: string;
+      frameworkId: string;
+      notes?: string;
+      tags?: string[];
+      files?: EvidenceFile[];
+      controlName?: string;
+    }
+  ): Promise<OperationResult<Evidence>> {
     try {
-      console.log('Adding evidence via API:', evidence);
+      console.log('Adding evidence via API:', payload);
       
       const response = await fetch(`${getBaseUrl()}/api/evidence`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subcontrolId: evidence.subcontrolId,
-          frameworkId: evidence.frameworkId,
-          notes: evidence.notes || '',
-          tags: evidence.tags || [],
-          files: evidence.files || [],
-          controlName: evidence.controlName || 'control'
+          controlId: payload.controlId,
+          assessmentId: payload.assessmentId,
+          subcontrolId: payload.subcontrolId,
+          frameworkId: payload.frameworkId,
+          notes: payload.notes || '',
+          tags: payload.tags || [],
+          files: payload.files || [],
+          controlName: payload.controlName || 'control'
         }),
       });
       
@@ -114,11 +125,11 @@ export class EvidenceService {
           id: data.id,
           subcontrolId: data.subcontrol_id,
           frameworkId: data.framework_id,
-          files: data.files || [],
+          files: Array.isArray(data.files) ? data.files as unknown as EvidenceFile[] : [],
           notes: data.notes || '',
           tags: data.tags || [],
-          createdAt: data.created_at,
-          updatedAt: data.updated_at
+          createdAt: data.created_at || '',
+          updatedAt: data.updated_at || ''
         }
       };
     } catch (error: any) {

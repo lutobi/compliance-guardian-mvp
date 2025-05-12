@@ -1,13 +1,25 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from './database.types';
 
-import type { Database } from './database.types'
+// Load local environment variables in Node/CLI (.env.local then .env)
+if (typeof window === 'undefined') {
+  dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+  dotenv.config();
+}
 
-export type { Database }
+export type { Database };
 
-export const supabase = createClientComponentClient<Database>({
-  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-})
+// Unified Supabase client instance
+export const supabase =
+  typeof window === 'undefined'
+    ? createClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+    : createClientComponentClient<Database>();
 
 // Legacy type definition - to be removed
 export type LegacyDatabase = {

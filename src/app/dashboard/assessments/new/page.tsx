@@ -8,10 +8,12 @@ import type { Database } from "@/lib/database.types";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useCustomerWorkspace } from "@/lib/workspace/customer-context";
 
 type Framework = Database['public']['Tables']['frameworks']['Row'];
 
 export default function NewAssessmentPage() {
+  const { workspace, loading: workspaceLoading } = useCustomerWorkspace();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [frameworks, setFrameworks] = useState<Framework[]>([]);
@@ -41,6 +43,11 @@ export default function NewAssessmentPage() {
     e.preventDefault();
     setLoading(true);
 
+    if (!workspace) {
+      toast.error("Workspace not selected");
+      return;
+    }
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
@@ -48,10 +55,10 @@ export default function NewAssessmentPage() {
       await api.assessments.create({
         name: formData.name,
         framework_id: formData.framework_id,
-        user_id: user.id,
-        status: 'draft'
+        created_by: user.id,
+        status: 'planned',
+        workspace_id: workspace.id
       });
-
       toast.success('Assessment created successfully');
       router.push('/dashboard/assessments');
     } catch (error) {

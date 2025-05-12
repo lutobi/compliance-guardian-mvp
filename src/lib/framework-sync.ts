@@ -1,6 +1,7 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { frameworkData } from '@/data/frameworks';
 import { Framework } from '@/types/framework';
+import { supabase } from '@/lib/supabase';
 
 // Cache for framework slug to UUID mapping
 let frameworkUuidCache: Record<string, string> = {};
@@ -22,7 +23,7 @@ export async function syncFrameworks() {
   // Start new sync
   syncPromise = (async () => {
   console.log('Starting framework sync...');
-  const supabase = createClientComponentClient();
+  // using shared Supabase client
   
   for (const [slug, data] of Object.entries(frameworkData)) {
     console.log('Syncing framework:', { slug, data });
@@ -78,7 +79,27 @@ export async function getFrameworkUuid(slug: string): Promise<string | undefined
   await syncFrameworks();
   console.log('Framework sync complete, cache:', frameworkUuidCache);
   console.log('Getting framework UUID for slug:', { slug, cache: frameworkUuidCache });
-  return frameworkUuidCache[slug];
+  // Direct match
+  let id = frameworkUuidCache[slug];
+  // Fallback: handle slugs with numeric suffix (e.g., iso27001-2022)
+  if (!id) {
+    const parts = slug.split('-');
+    const last = parts[parts.length - 1];
+    if (/^\d+$/.test(last) && parts.length > 1) {
+      const baseSlugNormalized = parts
+        .slice(0, -1)
+        .join('-')
+        .replace(/-/g, '');
+      for (const key in frameworkUuidCache) {
+        if (key.replace(/-/g, '') === baseSlugNormalized) {
+          id = frameworkUuidCache[key];
+          console.log('Fallback matched slug:', key, 'for', slug);
+          break;
+        }
+      }
+    }
+  }
+  return id;
 }
 
 // Initialize cache on module load

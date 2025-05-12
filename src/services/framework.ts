@@ -1,9 +1,10 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Framework, FrameworkData } from '@/types/framework';
 import { Database } from '@/lib/database.types';
+import { supabase } from '@/lib/supabase';
 
 export class FrameworkService {
-  private supabase = createClientComponentClient<Database>();
+  private supabase = supabase;
 
   async getFrameworkBySlug(slug: string): Promise<Framework | null> {
     const { data, error } = await this.supabase

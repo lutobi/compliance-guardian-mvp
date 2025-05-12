@@ -14,7 +14,9 @@ export const frameworkData: Record<string, FrameworkData> = {
   'csa-star': csaStar,
   'iso-27017': iso27017,
   'iso-27018': iso27018,
+  // ISO 27001 alias: support both slugs
   'iso-27001': iso27001Enhanced,
+  'iso27001-2022': iso27001Enhanced,
   'gdpr': gdpr,
   'hipaa': hipaa,
   'iso-42001': iso42001,

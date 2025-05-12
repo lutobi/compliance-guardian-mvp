@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 
 interface EvidenceDialogProps {
   subcontrolId: string;
+  controlId: string;
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (evidence: Evidence) => void;
@@ -20,11 +21,13 @@ interface EvidenceDialogProps {
   onUpdate: (evidenceId: string, evidence: Evidence) => void;
   existingEvidence?: Evidence[];
   frameworkId?: string;
+  assessmentId: string;
   subcontrolName?: string;
 }
 
 export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({ 
   subcontrolId, 
+  controlId,
   isOpen, 
   onClose,
   onSubmit,
@@ -32,6 +35,7 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   onUpdate,
   existingEvidence = [],
   frameworkId,
+  assessmentId,
   subcontrolName
 }) => {
   const [files, setFiles] = useState<FileList | null>(null);
@@ -109,11 +113,14 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 
       // Create the evidence record
       const result = await evidenceService.addEvidence({
+        controlId,
+        assessmentId,
         subcontrolId,
         frameworkId: frameworkId || '',
         files: uploadedFiles,
         notes: notes.trim(),
-        tags: tags.filter(tag => tag.trim() !== '')
+        tags: tags.filter(tag => tag.trim() !== ''),
+        controlName: subcontrolName || ''
       });
 
       if (result.success && result.data) {
@@ -144,8 +151,8 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
           notes: editingNotes
         });
 
-        if (result.success) {
-          await loadEvidence(); // Reload evidence to get the latest data
+        if (result.success && result.data) {
+          onUpdate(evidenceId, result.data);
         } else {
           throw new Error(result.error?.message || 'Failed to update evidence');
         }

@@ -1,4 +1,4 @@
-import { FrameworkData } from '../../types/framework';
+import { FrameworkData } from '../../../types/framework';
 
 export const iso27001Enhanced: FrameworkData = {
   id: 'iso-27001',

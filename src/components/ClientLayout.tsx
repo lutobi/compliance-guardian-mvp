@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { User } from '@supabase/supabase-js';
-import { AuthProvider } from '@/lib/auth-context';
-import { Toaster } from 'sonner';
+import { AuthProvider } from '@/lib/auth/context';
 
 export default function ClientLayout({
   children,
@@ -44,10 +43,10 @@ export default function ClientLayout({
     };
   }, [supabase.auth, initializeAuth]);
 
+  // The AuthProvider is already provided in src/app/providers.tsx
   return (
-    <AuthProvider initialUser={authState.user} loading={authState.loading}>
+    <>
       {children}
-      <Toaster position="top-right" />
-    </AuthProvider>
+    </>
   );
 }

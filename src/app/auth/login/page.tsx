@@ -1,7 +1,7 @@
 'use client';
-
+'use client';
 import { useState } from 'react';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth/context';
 import Link from 'next/link';
 
 export default function LoginPage() {
@@ -10,15 +10,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
 
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
+      // Set a timeout to prevent indefinite loading state
+      const loginTimeout = setTimeout(() => {
+        setLoading(false);
+        setError('Login timed out. Please try again.');
+      }, 10000); // 10 second timeout
+
       await signIn(email, password);
-    } catch (error) {
-      // Error is handled by auth context
-    } finally {
+      
+      // Clear timeout if login succeeded
+      clearTimeout(loginTimeout);
+    } catch (error: any) {
+      setError(error?.message || 'Login failed. Please check your credentials and try again.');
       setLoading(false);
     }
   };
@@ -67,6 +78,12 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
+          {error && (
+            <div className="p-3 mb-3 text-sm text-red-500 bg-red-50 rounded-md border border-red-200">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"

@@ -14,10 +14,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Compliance Guardian",
   description: "AI-powered compliance monitoring and management",
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
   icons: {
-    icon: "/icon.png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon-192x192.png"
   },
+};
+
+// Separate viewport export as recommended by Next.js 14+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -33,11 +41,9 @@ export default function RootLayout({
       )} suppressHydrationWarning>
         <Providers>
           <ClientLayout>
-            <div className="min-h-screen">
+            <div className="flex">
               <Sidebar />
-              <main className="ml-0 md:ml-64 min-h-screen transition-all duration-200 ease-in-out p-8 md:p-12">
-                {children}
-              </main>
+              <main className="flex-1">{children}</main>
             </div>
           </ClientLayout>
         </Providers>

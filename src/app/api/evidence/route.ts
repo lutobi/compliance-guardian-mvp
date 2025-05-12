@@ -8,31 +8,52 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const frameworkId = searchParams.get('frameworkId');
   const subcontrolId = searchParams.get('subcontrolId');
+  const assessmentId = searchParams.get('assessmentId');
 
-  console.log('Evidence API params:', { frameworkId, subcontrolId });
+  console.log('Evidence API params:', { frameworkId, subcontrolId, assessmentId });
 
-  if (!frameworkId && !subcontrolId) {
+  if (!frameworkId && !subcontrolId && !assessmentId) {
     return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
   }
 
   const supabase = createRouteHandlerClient({ cookies });
 
   try {
-    // Build query based on parameters
-    let query = supabase
-      .from('evidence')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (frameworkId) {
-      query = query.eq('framework_id', frameworkId);
+    let data, error;
+    if (assessmentId) {
+      // Fetch only evidence belonging to this assessment
+      const { data: acRows, error: acError } = await supabase
+        .from('assessment_controls')
+        .select('id')
+        .eq('assessment_id', assessmentId);
+      if (acError) throw acError;
+      const acIds = acRows.map(r => r.id);
+      if (acIds.length === 0) {
+        return NextResponse.json({ data: [] });
+      }
+      const result = await supabase
+        .from('evidence')
+        .select('*')
+        .in('assessment_control_id', acIds)
+        .order('created_at', { ascending: false });
+      data = result.data;
+      error = result.error;
+    } else {
+      // Build query based on framework or subcontrol
+      let query = supabase
+        .from('evidence')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (frameworkId) {
+        query = query.eq('framework_id', frameworkId);
+      }
+      if (subcontrolId) {
+        query = query.eq('subcontrol_id', subcontrolId);
+      }
+      const result = await query;
+      data = result.data;
+      error = result.error;
     }
-
-    if (subcontrolId) {
-      query = query.eq('subcontrol_id', subcontrolId);
-    }
-
-    const { data, error } = await query;
     console.log('Evidence query result:', { data, error });
 
     if (error) throw error;
@@ -70,7 +91,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Evidence POST body:', body);
     
-    if (!body.subcontrolId || !body.frameworkId) {
+    if (!body.subcontrolId || !body.frameworkId || !body.assessmentId || !body.controlId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
     
@@ -78,8 +99,21 @@ export async function POST(request: Request) {
     let controlName = body.controlName || 'control';
     let title = `Evidence for ${controlName}`;
     
+    // Find assessment_control mapping
+    const { data: acRows, error: acError } = await supabase
+      .from('assessment_controls')
+      .select('id')
+      .eq('assessment_id', body.assessmentId)
+      .eq('control_id', body.controlId);
+    if (acError) throw acError;
+    if (!acRows || acRows.length === 0) {
+      return NextResponse.json({ error: 'Assessment control mapping not found' }, { status: 400 });
+    }
+    const assessmentControlId = acRows[0].id;
+    
     // Create evidence record with all required fields
     const evidenceRecord = {
+      assessment_control_id: assessmentControlId,
       subcontrol_id: body.subcontrolId,
       framework_id: body.frameworkId,
       user_id: user.id,

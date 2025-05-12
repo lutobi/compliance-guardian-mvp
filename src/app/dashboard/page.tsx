@@ -2,107 +2,147 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth-context';
-import { monitoringService } from '@/services/MonitoringService';
-import { DashboardData, FrameworkStatusItem, RecentActivityItem, PendingTaskItem, RiskSummaryItem, VerificationSummary } from '@/types/dashboard';
+import { useAuth } from '@/lib/auth/context';
+import { MonitoringService } from '@/services/MonitoringService';
+import { DashboardData, RecentActivityItem, PendingTaskItem, RiskSummaryItem, VerificationSummary } from '@/types/dashboard';
+import { MonitoringItem, MonitoringStatus } from '@/types/monitoring';
 import { ComplianceChart } from '@/components/dashboard/ComplianceChart';
 import { RiskSummary } from '@/components/dashboard/RiskSummary';
 import { VerificationSummary as VerificationSummaryComponent } from '@/components/dashboard/VerificationSummary';
+import { MonitoringList } from '@/components/monitoring/MonitoringList';
 import { ActivityList } from '@/components/dashboard/ActivityList';
 import { TaskList } from '@/components/dashboard/TaskList';
+
+type MonitoringData = {
+  id: string;
+  status: MonitoringStatus;
+  framework: {
+    id: string;
+    name: string;
+    description: string;
+    slug: string;
+  };
+  monitoredControls: Array<{
+    id: string;
+    control: {
+      id: string;
+      name: string;
+      category: string;
+    };
+  }>;
+};
+
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
+import React, { Suspense } from 'react';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-[400px]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, isSystemUser, isCustomerUser } = useAuth();
   const router = useRouter();
-  const [dashboardData, setDashboardData] = useState<DashboardData>({
-    frameworkStatus: [],
-    recentActivity: [],
-    pendingTasks: [],
-    riskSummary: [],
-    verificationSummary: {
-      total: 0,
-      passed: 0,
-      pending: 0,
-      failed: 0,
-      completionRate: 0
-    },
-    lastUpdated: new Date().toISOString()
-  });
+  const [error, setError] = useState<Error | null>(null);
   const [loadingData, setLoadingData] = useState(true);
+  const [dashboardData, setDashboardData] = useState<{
+    frameworkStatus: MonitoringItem[];
+    recentActivities: RecentActivityItem[];
+    pendingTasks: PendingTaskItem[];
+    riskSummary: RiskSummaryItem | null;
+    verificationSummary: VerificationSummary | null;
+  }>({
+    frameworkStatus: [],
+    recentActivities: [],
+    pendingTasks: [],
+    riskSummary: null,
+    verificationSummary: null
+  });
 
   const loadDashboardData = async () => {
+    setError(null);
     setLoadingData(true);
     try {
       // Get active monitoring data
-      const monitoringData = await monitoringService.getActiveMonitoring();
+      const monitoringData = await MonitoringService.getActiveMonitoring();
       
-      // Calculate framework status
-      const frameworkStats: FrameworkStatusItem[] = [];
-      monitoringData.forEach(monitoring => {
-        const compliantCount = monitoring.controls.filter(
-          c => c.status === 'compliant'
-        ).length;
-        const totalControls = monitoring.controls.length;
-        const complianceRate = totalControls > 0 
-          ? Math.round((compliantCount / totalControls) * 100) 
-          : 0;
-        
-        frameworkStats.push({
-          id: monitoring.framework.id,
-          name: monitoring.framework.name,
-          complianceRate,
-          totalControls,
-          compliantCount,
-          trend: Math.floor(Math.random() * 10) - 5 // Random trend for demo purposes
-        });
-      });
+      // Map monitoring data to framework status
+      const frameworkStats: MonitoringItem[] = (monitoringData as MonitoringData[]).map((item) => ({
+        id: item.id,
+        status: item.status,
+        framework: {
+          id: item.framework.id,
+          name: item.framework.name,
+          description: item.framework.description || '',
+          slug: item.framework.slug
+        },
+        monitoredControls: item.monitoredControls.map(control => ({
+          id: control.id,
+          control: {
+            id: control.control.id,
+            name: control.control.name,
+            category: control.control.category
+          }
+        }))
+      }));
 
       // Get recent activities
-      const recentActivityData = await monitoringService.getRecentActivities(10);
+      const recentActivitiesData = await MonitoringService.getRecentActivities(10);
 
       // Get pending tasks
-      const pendingTasksData = await monitoringService.getPendingTasks(10);
+      const pendingTasksData = await MonitoringService.getPendingTasks(10);
 
       // Get risk assessment data
-      const riskData = await monitoringService.getRiskAssessment();
+      const riskData = await MonitoringService.getRiskAssessment();
 
       // Get verification summary
-      const verificationData = await monitoringService.getVerificationSummary();
+      const verificationData = await MonitoringService.getVerificationSummary();
 
       setDashboardData({
         frameworkStatus: frameworkStats,
-        recentActivity: recentActivityData,
+        recentActivities: recentActivitiesData,
         pendingTasks: pendingTasksData,
         riskSummary: riskData,
-        verificationSummary: verificationData,
-        lastUpdated: new Date().toISOString()
+        verificationSummary: verificationData
       });
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      setError(error instanceof Error ? error : new Error('Failed to load dashboard data'));
     } finally {
       setLoadingData(false);
     }
   };
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (!loading && user) {
+      loadDashboardData();
+    }
+  }, [loading, user]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (isCustomerUser) {
+        router.push('/customer/dashboard');
+      } else if (isSystemUser) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [loading, isCustomerUser, isSystemUser, router]);
 
   // Handle task completion
   const handleTaskComplete = async (taskId: string) => {
     try {
-      await monitoringService.updateControlStatus(
-        dashboardData.pendingTasks.find(task => task.id === taskId)?.frameworkId || '',
-        taskId,
-        'compliant'
-      );
-      // Refresh dashboard data after a short delay
-      setTimeout(() => {
-        loadDashboardData();
-      }, 500);
+      const task = dashboardData.pendingTasks.find(t => t.id === taskId);
+      if (task) {
+        await MonitoringService.updatePointStatus(task.id, MonitoringStatus.Compliant);
+        await loadDashboardData();
+      }
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Failed to complete task:', error);
+      setError(error instanceof Error ? error : new Error('Failed to complete task'));
     }
   };
 
@@ -118,70 +158,85 @@ export default function DashboardPage() {
     linkElement.click();
   };
 
-  // Return early if loading
   if (loading || loadingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4">Loading...</p>
-        </div>
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900" />
       </div>
     );
   }
 
-  // Return early if no user
-  if (!user) {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/auth/login';
-    }
-    return null;
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="text-red-600 text-xl mb-4">Error: {error.message}</div>
+        <button
+          onClick={() => loadDashboardData()}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        {/* Dashboard Header */}
-        <DashboardHeader
-          lastUpdated={dashboardData.lastUpdated}
-          isLoading={loadingData}
-          onRefresh={loadDashboardData}
-          onExport={handleExport}
-        />
+    <div className="min-h-screen bg-gray-100">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Active Monitoring</h2>
+            <MonitoringList
+              monitoringData={dashboardData.frameworkStatus}
+              onStatusUpdate={async (id: string, status: MonitoringStatus) => {
+                try {
+                  await MonitoringService.updatePointStatus(id, status);
+                  await loadDashboardData();
+                } catch (error) {
+                  setError(error instanceof Error ? error : new Error('Failed to update status'));
+                }
+              }}
+              onDelete={async (id) => {
+                try {
+                  await MonitoringService.deleteMonitoringPoint(id);
+                  await loadDashboardData();
+                } catch (error) {
+                  setError(error instanceof Error ? error : new Error('Failed to delete monitoring point'));
+                }
+              }}
+            />
+          </div>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome back, {user.email}</h1>
-          <p className="mt-2 text-gray-600">
-            Here's an overview of your compliance status
-          </p>
-        </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+            <ActivityList 
+              data={dashboardData.recentActivities} 
+              onViewMore={() => router.push('/activity')}
+            />
+          </div>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          {/* Compliance Chart - Takes 2 columns */}
-          <ComplianceChart data={dashboardData.frameworkStatus} />
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Pending Tasks</h2>
+            <TaskList
+              data={dashboardData.pendingTasks}
+              onTaskComplete={handleTaskComplete}
+              onViewMore={() => router.push('/tasks')}
+            />
+          </div>
 
-          {/* Risk Summary */}
-          <RiskSummary data={dashboardData.riskSummary} />
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Risk Assessment</h2>
+            {dashboardData.riskSummary && (
+              <RiskSummary data={[dashboardData.riskSummary]} />
+            )}
+          </div>
 
-          {/* Verification Summary */}
-          <VerificationSummaryComponent data={dashboardData.verificationSummary} />
-        </div>
-
-        {/* Secondary Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Activity List */}
-          <ActivityList 
-            data={dashboardData.recentActivity} 
-            onViewMore={() => router.push('/activity')}
-          />
-
-          {/* Task List */}
-          <TaskList 
-            data={dashboardData.pendingTasks} 
-            onViewMore={() => router.push('/tasks')}
-            onTaskComplete={handleTaskComplete}
-          />
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Verification Status</h2>
+            {dashboardData.verificationSummary && (
+              <VerificationSummaryComponent data={dashboardData.verificationSummary} />
+            )}
+          </div>
         </div>
       </div>
     </div>

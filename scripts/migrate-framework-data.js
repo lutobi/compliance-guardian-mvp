@@ -29,6 +29,14 @@ const frameworkData = {
 
 async function migrateFrameworkData() {
   console.log('Migrating framework data...');
+  // Rename old slug iso27001-2022 to new slug iso-27001 if present
+  console.log('Renaming old slug iso27001-2022 to iso-27001 if exists');
+  const { error: renameError } = await supabase
+    .from('frameworks')
+    .update({ slug: 'iso-27001' })
+    .eq('slug', 'iso27001-2022');
+  if (renameError) console.error('Error renaming old slug:', renameError);
+  else console.log('Old slug renamed successfully');
 
   for (const [slug, framework] of Object.entries(frameworkData)) {
     console.log(`Migrating framework: ${slug}`);

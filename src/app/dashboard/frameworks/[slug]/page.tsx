@@ -7,6 +7,10 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { frameworkData } from '@/data/frameworks';
 import { Control as ControlType } from '@/types/framework';
+import { ChevronDown, ChevronRight, Paperclip } from 'lucide-react';
+import { EvidenceDialog } from './evidence-dialog';
+import { DevOnlyWrapper } from '@/components/development/DevOnlyWrapper';
+import { CoverageAnalysis } from '@/components/analysis/CoverageAnalysis';
 
 interface Control {
   id: string;

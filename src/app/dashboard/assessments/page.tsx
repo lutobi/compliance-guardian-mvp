@@ -2,32 +2,45 @@
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { Database } from "@/lib/database.types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { useCustomerWorkspace } from "@/lib/workspace/customer-context";
+import { frameworkData } from "@/data/frameworks";
 
-type AssessmentWithFramework = Database['public']['Tables']['assessments']['Row'] & {
-  frameworks: {
-    name: string;
-  };
-};
+// Local type for assessments with nested framework data
+type AssessmentWithFramework = { id: string; name: string; status: string; framework: { id: string; name: string; controls: any[] } };
 
 export default function AssessmentsPage() {
+  const { workspace, loading: workspaceLoading } = useCustomerWorkspace();
   const [assessments, setAssessments] = useState<AssessmentWithFramework[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const deleteAssessment = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this assessment?")) return;
+    try {
+      await api.assessments.delete(id);
+      toast.success("Assessment deleted");
+      loadAssessments();
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to delete assessment");
+    }
+  };
+
   useEffect(() => {
-    loadAssessments();
-  }, []);
+    if (!workspaceLoading && workspace) loadAssessments();
+  }, [workspace, workspaceLoading]);
 
   const loadAssessments = async () => {
+    if (!workspace) return;
+    setLoading(true);
     try {
-      const data = await api.assessments.list();
+      const data = (await api.assessments.list(workspace.id)) as AssessmentWithFramework[];
+      console.log('Fetched assessments controls:', data.map(a => ({id: a.id, controls: a.framework.controls})));
       setAssessments(data);
     } catch (error) {
-      const e = error as Error;
-      toast.error(e.message || 'Failed to load assessments');
+      toast.error((error as Error).message || 'Failed to load assessments');
     } finally {
       setLoading(false);
     }
@@ -65,31 +78,50 @@ export default function AssessmentsPage() {
           <Button>New Assessment</Button>
         </Link>
       </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {assessments.map((assessment) => (
-          <Link
-            key={assessment.id}
-            href={`/dashboard/assessments/${assessment.id}`}
-            className="block rounded-lg border p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            <div className="mb-2 flex items-start justify-between">
-              <h2 className="font-semibold">{assessment.name}</h2>
-              <span
-                className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                  assessment.status
-                )}`}
+        {assessments.map((assessment) => {
+          const apiControls = assessment.framework.controls ?? [];
+          // Static fallback: map by slug (framework name) to frameworkData keys
+          const slug = assessment.framework.name
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '');
+          const staticControls = frameworkData[slug]?.controls || [];
+          const controls = apiControls.length > 0 ? apiControls : staticControls;
+          return (
+            <div key={assessment.id} className="group rounded-lg border p-4">
+              <Link
+                href={`/dashboard/assessments/${assessment.id}`}
+                className="block transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
               >
-                {assessment.status.replace('_', ' ')}
-              </span>
-            </div>
+                <div className="mb-2 flex items-start justify-between">
+                  <h2 className="font-semibold">{assessment.name}</h2>
+                  <span
+                    className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
+                      assessment.status
+                    )}`}
+                  >
+                    {assessment.status.replace('_', ' ')}
+                  </span>
+                </div>
 
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <span>{assessment.frameworks.name}</span>
-
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{assessment.framework.name}</span>
+                </div>
+              </Link>
+              <div className="mt-2 flex space-x-2">
+                <Link href={`/dashboard/assessments/${assessment.id}/edit`}>
+                  <Button variant="outline" size="sm">
+                    <PencilIcon className="h-4 w-4 mr-1" /> Edit
+                  </Button>
+                </Link>
+                <Button variant="destructive" size="sm" onClick={() => deleteAssessment(assessment.id)}>
+                  <TrashIcon className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              </div>
             </div>
-          </Link>
-        ))}
+          );
+        })}
 
         {assessments.length === 0 && (
           <div className="col-span-full rounded-lg border border-dashed p-8 text-center">

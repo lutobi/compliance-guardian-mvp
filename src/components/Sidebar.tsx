@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth/context';
 import {
   ChartBarIcon,
   BookOpenIcon,
@@ -16,6 +16,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ClipboardDocumentCheckIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -28,7 +29,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, isCustomerUser, isSystemUser } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -37,9 +38,14 @@ export default function Sidebar() {
   const navItems: NavItem[] = [
     {
       title: 'Dashboard',
-      href: '/dashboard',
+      href: isSystemUser ? '/system/dashboard' : isCustomerUser ? '/customer/dashboard' : '/dashboard',
       icon: ChartBarIcon,
     },
+    ...(isSystemUser
+      ? [
+          { title: 'Workspaces', href: '/customer/dashboard', icon: Squares2X2Icon },
+        ]
+      : []),
     {
       title: 'Monitoring',
       href: '/monitoring',
@@ -90,11 +96,12 @@ export default function Sidebar() {
 
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out md:translate-x-0',
+          'fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out',
           {
             'translate-x-0': isMobileMenuOpen,
             '-translate-x-full': !isMobileMenuOpen,
-          }
+          },
+          'md:translate-x-0 md:static md:inset-auto'
         )}
       >
         <div className="flex flex-col h-full">
@@ -116,6 +123,7 @@ export default function Sidebar() {
                     )}
                     onClick={(e) => {
                       e.preventDefault();
+                      setIsMobileMenuOpen(false);
                       window.location.href = item.href;
                     }}
                   >
