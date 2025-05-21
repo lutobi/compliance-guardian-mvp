@@ -91,42 +91,58 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Evidence POST body:', body);
     
-    if (!body.subcontrolId || !body.frameworkId || !body.assessmentId || !body.controlId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
-    
-    // Get the control name if available
+    // No strict requirement for subcontrolId/frameworkId here; proceed with available data
+    if (!body.frameworkId) console.warn('POST /api/evidence missing frameworkId');
+    if (!body.subcontrolId) console.warn('POST /api/evidence missing subcontrolId');
+
+    // Determine title
     let controlName = body.controlName || 'control';
     let title = `Evidence for ${controlName}`;
     
-    // Find assessment_control mapping
-    const { data: acRows, error: acError } = await supabase
-      .from('assessment_controls')
-      .select('id')
-      .eq('assessment_id', body.assessmentId)
-      .eq('control_id', body.controlId);
-    if (acError) throw acError;
-    if (!acRows || acRows.length === 0) {
-      return NextResponse.json({ error: 'Assessment control mapping not found' }, { status: 400 });
-    }
-    const assessmentControlId = acRows[0].id;
-    
-    // Create evidence record with all required fields
-    const evidenceRecord = {
-      assessment_control_id: assessmentControlId,
+    // Build base record
+    const record: any = {
       subcontrol_id: body.subcontrolId,
       framework_id: body.frameworkId,
       user_id: user.id,
-      title: title,
+      title,
       notes: body.notes || '',
       tags: body.tags || [],
       files: body.files || []
     };
     
-    console.log('Inserting evidence record:', evidenceRecord);
+    // If assessmentId and controlId provided, fetch or create assessment control mapping
+    if (body.assessmentId && body.controlId) {
+      // First try to find existing assessment control
+      const { data: acRows, error: acError } = await supabase
+        .from('assessment_controls')
+        .select('id')
+        .eq('assessment_id', body.assessmentId)
+        .eq('control_ref', body.controlId);
+      if (acError) throw acError;
+
+      if (acRows && acRows.length > 0) {
+        // Use existing assessment control
+        record.assessment_control_id = acRows[0].id;
+      } else {
+        // Create new assessment control
+        const { data: newAc, error: newAcError } = await supabase
+          .from('assessment_controls')
+          .insert({
+            assessment_id: body.assessmentId,
+            control_ref: body.controlId,
+            status: 'in_progress'
+          })
+          .select('id')
+          .single();
+        if (newAcError) throw newAcError;
+        record.assessment_control_id = newAc.id;
+      }
+    }
+    
+    console.log('Inserting evidence record:', record);
     const { data, error } = await supabase
       .from('evidence')
-      .insert(evidenceRecord)
+      .insert(record)
       .select('*')
       .single();
       

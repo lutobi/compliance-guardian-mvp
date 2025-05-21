@@ -12,8 +12,7 @@ import EvidenceDialog from '@/app/frameworks/[slug]/evidence-dialog';
 import { ImplementationPlanManager } from '@/utils/implementation-plan';
 import { ChevronDown, ChevronRight, Paperclip, Bell, BellOff, Calendar, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEvidence } from '@/hooks/useEvidence';
-import { EvidenceService } from '@/services/evidence';
+import { useFrameworkEvidence } from '@/hooks/useFrameworkEvidence';
 import { getFrameworkUuid } from '@/lib/framework-sync';
 import { monitoringService } from '@/services/MonitoringService';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +26,7 @@ interface FrameworkClientProps {
 interface ControlProps {
   control: any;
   evidenceMap: Record<string, Evidence[]>;
-  onAddEvidence: (controlId: string, subControlName?: string) => void;
+  onAddEvidence: (controlId: string, subControlId: string, subControlName?: string) => void;
   frameworkId: string;
 }
 
@@ -43,7 +42,7 @@ const Control: React.FC<ControlProps> = ({ control, evidenceMap, onAddEvidence, 
   const handleAddEvidenceClick = (e: React.MouseEvent, subControlId: string, subControlName?: string) => {
     e.stopPropagation();
     e.preventDefault();
-    onAddEvidence(subControlId, subControlName);
+    onAddEvidence(control.id, subControlId, subControlName);
   };
 
   return (
@@ -99,32 +98,25 @@ const Control: React.FC<ControlProps> = ({ control, evidenceMap, onAddEvidence, 
 };
 
 export function FrameworkClient({ id }: FrameworkClientProps) {
-  const { data: framework, error, loading } = useFrameworkData(id);
-  const { evidence: frameworkEvidence, loading: evidenceLoading } = useEvidence(id);
-  const [evidenceMap, setEvidenceMap] = useState<Record<string, Evidence[]>>({});
+  const { data: framework, loading, error } = useFrameworkData(id);
   const [selectedControl, setSelectedControl] = useState<string | null>(null);
+  const [selectedParentControlId, setSelectedParentControlId] = useState<string | null>(null);
   const [selectedControlName, setSelectedControlName] = useState<string>('');
   const [isEvidenceDialogOpen, setIsEvidenceDialogOpen] = useState(false);
-  const evidenceService = new EvidenceService();
+  
+  // Use our new hook for better evidence handling
+  const { 
+    evidenceMap, 
+    loading: evidenceLoading, 
+    addEvidence, 
+    deleteEvidence, 
+    updateEvidence,
+    refreshEvidence
+  } = useFrameworkEvidence(id);
+
   const [isMonitored, setIsMonitored] = useState(false);
   const [monitoringDetails, setMonitoringDetails] = useState<any>(null);
   const [isLoadingMonitoring, setIsLoadingMonitoring] = useState(true);
-
-  // Update evidenceMap when framework evidence changes
-  useEffect(() => {
-    if (frameworkEvidence && frameworkEvidence.length > 0) {
-      const newEvidenceMap: Record<string, Evidence[]> = {};
-      
-      frameworkEvidence.forEach(evidence => {
-        if (!newEvidenceMap[evidence.subcontrolId]) {
-          newEvidenceMap[evidence.subcontrolId] = [];
-        }
-        newEvidenceMap[evidence.subcontrolId].push(evidence);
-      });
-      
-      setEvidenceMap(newEvidenceMap);
-    }
-  }, [frameworkEvidence]);
 
   // Check if this framework is being monitored
   useEffect(() => {
@@ -139,6 +131,13 @@ export function FrameworkClient({ id }: FrameworkClientProps) {
         
         if (isMonitored && monitoringConfig) {
           setIsMonitored(true);
+          const handleMonitoringFrequencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+            const frequency = e.target.value;
+            if (["annually", "quarterly", "monthly"].includes(frequency)) {
+              // Handle frequency change
+              console.log('Monitoring frequency changed to:', frequency);
+            }
+          };
           setMonitoringDetails(monitoringConfig);
           
           // Calculate next check date based on frequency
@@ -202,47 +201,26 @@ export function FrameworkClient({ id }: FrameworkClientProps) {
     );
   }
 
-  const handleAddEvidence = async (evidence: Omit<Evidence, 'id' | 'createdAt' | 'updatedAt' | 'frameworkId'>) => {
-    try {
-      // Save evidence to database
-      const frameworkId = await getFrameworkUuid(id);
-      if (!frameworkId) {
-        throw new Error(`Framework ID not found for slug: ${id}`);
-      }
-
-      // Find control name for better evidence title
-      let controlName = selectedControlName || 'control';
-      
-      console.log('Adding evidence with control name:', controlName);
-      
-      const result = await evidenceService.addEvidence({
-        subcontrolId: evidence.subcontrolId,
-        frameworkId,
-        files: evidence.files,
-        notes: evidence.notes,
-        tags: evidence.tags,
-        controlName: controlName // Add control name for better title
-      });
-
-      if (result.success && result.data) {
-        // Update local state immediately for fast UI feedback
-        setEvidenceMap(prev => {
-          const newMap = { ...prev };
-          if (!newMap[evidence.subcontrolId]) {
-            newMap[evidence.subcontrolId] = [];
-          }
-          newMap[evidence.subcontrolId] = [...newMap[evidence.subcontrolId], result.data as Evidence];
-          return newMap;
-        });
-      }
-    } catch (error) {
-      console.error('Failed to add evidence:', error);
-    }
+  // Handle evidence submitted from dialog
+  const handleAddEvidence = (evidence: Evidence) => {
+    console.log('Adding evidence in FrameworkClient:', evidence);
+    
+    // Use the hook's addEvidence method
+    addEvidence({
+      frameworkId: id,
+      subcontrolId: evidence.subcontrolId,
+      notes: evidence.notes,
+      files: evidence.files || [],
+      tags: evidence.tags || []
+    });
+    
+    // Close dialog
     setIsEvidenceDialogOpen(false);
   };
 
-  const handleControlClick = (controlId: string, controlName?: string) => {
-    setSelectedControl(controlId);
+  const handleControlClick = (subcontrolId: string, controlId: string, controlName?: string) => {
+    setSelectedControl(subcontrolId);
+    setSelectedParentControlId(controlId);
     setSelectedControlName(controlName || '');
     setIsEvidenceDialogOpen(true);
   };
@@ -250,45 +228,23 @@ export function FrameworkClient({ id }: FrameworkClientProps) {
   const handleDeleteEvidence = async (evidenceId: string) => {
     if (!selectedControl) return;
     
-    try {
-      const result = await evidenceService.deleteEvidence(evidenceId);
-      
-      if (result.success) {
-        // Update local state for immediate UI feedback
-        setEvidenceMap(prev => {
-          const newMap = { ...prev };
-          if (newMap[selectedControl]) {
-            newMap[selectedControl] = newMap[selectedControl].filter(e => e.id !== evidenceId);
-          }
-          return newMap;
-        });
-      }
-    } catch (error) {
-      console.error('Failed to delete evidence:', error);
-    }
+    console.log('Deleting evidence in FrameworkClient:', evidenceId);
+    
+    // Use the hook's deleteEvidence method
+    await deleteEvidence(evidenceId);
   };
 
   const handleUpdateEvidence = async (evidenceId: string, updatedEvidence: Evidence) => {
     if (!selectedControl) return;
     
-    try {
-      const result = await evidenceService.updateEvidence(evidenceId, updatedEvidence);
-      
-      if (result.success && result.data) {
-        // Update local state for immediate UI feedback
-        setEvidenceMap(prev => {
-          const newMap = { ...prev };
-          if (newMap[selectedControl]) {
-            newMap[selectedControl] = newMap[selectedControl].map(e => 
-              e.id === evidenceId ? result.data as Evidence : e
-            );
-          }
-          return newMap;
-        });
-      }
-    } catch (error) {
-      console.error('Failed to update evidence:', error);
-    }
+    console.log('Updating evidence in FrameworkClient:', evidenceId, updatedEvidence);
+    
+    // Use the hook's updateEvidence method
+    await updateEvidence(evidenceId, {
+      notes: updatedEvidence.notes,
+      files: updatedEvidence.files,
+      tags: updatedEvidence.tags
+    });
   };
 
   return (
@@ -391,14 +347,19 @@ export function FrameworkClient({ id }: FrameworkClientProps) {
 
       {selectedControl && (
         <EvidenceDialog
-          subcontrolId={selectedControl}
-          subcontrolName={selectedControlName}
+          key={`evidence-dialog-${selectedControl}-${Date.now()}`}
+          subcontrolId={selectedControl!}
+          frameworkId={id}
           isOpen={isEvidenceDialogOpen}
-          onClose={() => setIsEvidenceDialogOpen(false)}
+          onClose={() => {
+            setIsEvidenceDialogOpen(false);
+            // Refresh evidence when dialog closes
+            refreshEvidence();
+          }}
           onSubmit={handleAddEvidence}
           onDelete={handleDeleteEvidence}
           onUpdate={handleUpdateEvidence}
-          existingEvidence={evidenceMap[selectedControl] || []}
+          existingEvidence={evidenceMap[selectedControl!] || []}
         />
       )}
     </div>

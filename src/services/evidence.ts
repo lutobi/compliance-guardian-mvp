@@ -41,7 +41,7 @@ export class EvidenceService {
   async addEvidence(
     payload: {
       controlId: string;
-      assessmentId: string;
+      assessmentId?: string;
       subcontrolId: string;
       frameworkId: string;
       notes?: string;
@@ -53,19 +53,21 @@ export class EvidenceService {
     try {
       console.log('Adding evidence via API:', payload);
       
+      // Build request body, omitting undefined fields
+      const bodyPayload: any = {
+        subcontrolId: payload.subcontrolId,
+        frameworkId: payload.frameworkId,
+        notes: payload.notes || '',
+        tags: payload.tags || [],
+        files: payload.files || [],
+        controlName: payload.controlName || 'control'
+      };
+      if (payload.controlId) bodyPayload.controlId = payload.controlId;
+      if (payload.assessmentId) bodyPayload.assessmentId = payload.assessmentId;
       const response = await fetch(`${getBaseUrl()}/api/evidence`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          controlId: payload.controlId,
-          assessmentId: payload.assessmentId,
-          subcontrolId: payload.subcontrolId,
-          frameworkId: payload.frameworkId,
-          notes: payload.notes || '',
-          tags: payload.tags || [],
-          files: payload.files || [],
-          controlName: payload.controlName || 'control'
-        }),
+        body: JSON.stringify(bodyPayload),
       });
       
       const result = await response.json();
@@ -175,31 +177,83 @@ export class EvidenceService {
 
   async uploadFile(file: File, path: string): Promise<OperationResult<EvidenceFile>> {
     try {
-      const { data, error } = await this.supabase.storage
-        .from('evidence')
-        .upload(path, file);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = this.supabase.storage
-        .from('evidence')
-        .getPublicUrl(path);
-
-      return {
-        success: true,
-        data: {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: publicUrl
-        }
-      };
+      console.log('Processing file for upload:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      });
+      
+      // Check if file is too large (10MB limit for base64 encoding)
+      if (file.size > 10 * 1024 * 1024) {
+        console.error('File too large (max 10MB):', file.size);
+        return {
+          success: false,
+          error: {
+            code: 'FILE_TOO_LARGE',
+            message: 'File exceeds the maximum size limit of 10MB'
+          }
+        };
+      }
+      
+      // Read the file as base64
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+          if (!event.target || !event.target.result) {
+            resolve({
+              success: false,
+              error: {
+                code: 'FILE_READ_ERROR',
+                message: 'Failed to read file content'
+              }
+            });
+            return;
+          }
+          
+          const base64Content = event.target.result.toString();
+          console.log('File read successfully, content length:', base64Content.length);
+          
+          // Create a unique ID for the file
+          const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+          
+          // Create a data URL that can be used directly in img tags or as download links
+          const dataUrl = file.type.startsWith('image/') 
+            ? base64Content  // For images, use the base64 content directly
+            : `data:${file.type};base64,${base64Content.split(',')[1]}`;
+          
+          resolve({
+            success: true,
+            data: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              url: dataUrl,
+              id: fileId
+            }
+          });
+        };
+        
+        reader.onerror = () => {
+          console.error('Error reading file:', reader.error);
+          resolve({
+            success: false,
+            error: {
+              code: 'FILE_READ_ERROR',
+              message: 'Failed to read file: ' + (reader.error?.message || 'Unknown error')
+            }
+          });
+        };
+        
+        reader.readAsDataURL(file);
+      });
     } catch (error: any) {
+      console.error('File processing error:', error);
       return {
         success: false,
         error: {
           code: error.code || 'UNKNOWN',
-          message: error.message || 'Failed to upload file'
+          message: error.message || 'Failed to process file'
         }
       };
     }

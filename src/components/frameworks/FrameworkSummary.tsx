@@ -23,22 +23,38 @@ interface ControlStats {
 }
 
 export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProps) {
-  const [lastEvidenceMapKeys, setLastEvidenceMapKeys] = useState<string[]>([]);
+  // Use a more robust way to detect changes in the evidenceMap
   const [forceUpdate, setForceUpdate] = useState<number>(0);
+  const [evidenceCount, setEvidenceCount] = useState<number>(0);
   
-  // Force re-calculation when evidenceMap keys change
+  // Force re-calculation when evidenceMap changes
   useEffect(() => {
-    const currentKeys = Object.keys(evidenceMap).sort().join(',');
-    const lastKeys = lastEvidenceMapKeys.sort().join(',');
+    // Calculate the total number of evidence items
+    const totalEvidence = Object.values(evidenceMap).reduce(
+      (sum, items) => sum + items.length, 0
+    );
     
-    if (currentKeys !== lastKeys) {
-      setLastEvidenceMapKeys(Object.keys(evidenceMap));
+    // Only update if the count has changed
+    if (totalEvidence !== evidenceCount) {
+      setEvidenceCount(totalEvidence);
       setForceUpdate(prev => prev + 1);
+      console.log('Evidence map changed in FrameworkSummary', { 
+        evidenceMapKeys: Object.keys(evidenceMap),
+        totalEvidence,
+        previousCount: evidenceCount
+      });
     }
-  }, [evidenceMap, lastEvidenceMapKeys]);
+  }, [evidenceMap, evidenceCount]);
   
   const stats = useMemo(() => {
-    console.log('Recalculating framework summary stats', { controls, evidenceMap, forceUpdate });
+    // Force recalculation by including evidenceCount in dependencies
+    console.log('Recalculating framework summary stats', { 
+      controls: controls.length, 
+      evidenceMapKeys: Object.keys(evidenceMap),
+      evidenceMapSize: Object.values(evidenceMap).flat().length,
+      evidenceCount,
+      forceUpdate 
+    });
     
     const initialStats: ControlStats = {
       total: 0,
@@ -90,7 +106,7 @@ export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProp
 
       return acc;
     }, initialStats);
-  }, [controls, evidenceMap, forceUpdate]);
+  }, [controls, evidenceMap, evidenceCount, forceUpdate]);
 
   const overallProgress = Math.round(
     ((stats.implemented + stats.inProgress * 0.5) / stats.total) * 100
@@ -169,10 +185,10 @@ export function FrameworkSummary({ controls, evidenceMap }: FrameworkSummaryProp
             </div>
             <div className="flex items-center space-x-4">
               <div className="h-[60px] w-[60px] rounded-full bg-blue-50 flex items-center justify-center text-xl font-bold text-blue-600">
-                {controls.filter(c => (c.evidence || []).length > 0).length}
+                {Object.keys(evidenceMap).length}
               </div>
               <div>
-                <p className="font-medium">{controls.reduce((sum, c) => sum + ((c.evidence || []).length), 0)} Items</p>
+                <p className="font-medium">{evidenceCount} Items</p>
                 <p className="text-sm text-muted-foreground">Total Evidence</p>
               </div>
             </div>

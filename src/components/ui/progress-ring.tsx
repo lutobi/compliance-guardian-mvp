@@ -18,7 +18,7 @@ export function ProgressRing({
   className,
   ...props
 }: ProgressRingProps) {
-  const normalizedValue = Math.min(100, Math.max(0, value));
+  const normalizedValue = Math.min(100, Math.max(0, isNaN(value) ? 0 : value));
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (normalizedValue / 100) * circumference;

@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,11 +70,16 @@ export function AddUserDialog({
 
       if (authError) throw authError;
 
+      // Make sure we have a valid user ID
+      if (!authUser || !authUser.user || !authUser.user.id) {
+        throw new Error('Failed to create user: No user ID returned');
+      }
+
       // Create user profile
       const { error: profileError } = await supabase
         .from('users')
         .insert({
-          id: authUser.id,
+          id: authUser.user.id,
           email: formData.email,
           name: formData.name,
           role_id: formData.role,
@@ -99,6 +105,9 @@ export function AddUserDialog({
           <DialogTitle>
             Add {isSystemUser ? 'System User' : 'Team Member'}
           </DialogTitle>
+          <DialogDescription>
+            Fill out the form below to add a new {isSystemUser ? 'system user' : 'team member'} to your organization.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

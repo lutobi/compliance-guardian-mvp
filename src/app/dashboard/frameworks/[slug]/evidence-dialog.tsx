@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { EvidenceService } from '@/services/evidence';
 import { Evidence, EvidenceFile } from '@/types/evidence';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +38,8 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   assessmentId,
   subcontrolName
 }) => {
+  // Keep a local copy of evidence to ensure UI updates
+  const [localEvidence, setLocalEvidence] = useState<Evidence[]>([]);
   const [files, setFiles] = useState<FileList | null>(null);
   const [notes, setNotes] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -46,6 +48,25 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const evidenceService = new EvidenceService();
+
+  // Update local evidence when existingEvidence changes
+  useEffect(() => {
+    setLocalEvidence(existingEvidence);
+    console.log('Evidence dialog updated with evidence:', existingEvidence.length);
+  }, [existingEvidence]);
+  
+  // Reset form state when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setFiles(null);
+      setNotes('');
+      setEditingId(null);
+      setEditingNotes('');
+      setTags([]);
+      setSearchTerm('');
+      console.log('Evidence dialog opened');
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -68,7 +89,15 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting evidence with framework ID:', frameworkId);
+    console.log('Submitting evidence:', {
+      frameworkId,
+      assessmentId,
+      controlId,
+      subcontrolId,
+      subcontrolName
+    });
+    
+    // Basic validation
     if (!files && !notes.trim()) {
       toast.error('Please add files or notes');
       return;
@@ -77,65 +106,126 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
       toast.error('Framework ID is required');
       return;
     }
-    if (!validateUUID(frameworkId)) {
-      console.error('Invalid framework ID format:', frameworkId);
-      toast.error('Invalid framework ID format');
+    // Assessment ID is not required for framework-only evidence
+    if (assessmentId === undefined) {
+      console.log('No assessment ID provided, this is framework-only evidence');
+    }
+    if (!controlId) {
+      toast.error('Control ID is required');
+      return;
+    }
+    if (!subcontrolId) {
+      toast.error('Subcontrol ID is required');
       return;
     }
 
     setLoading(true);
+    console.log('Starting evidence submission process...');
 
     try {
       // First upload any files
       const uploadedFiles: EvidenceFile[] = [];
       if (files) {
         for (const file of Array.from(files)) {
-          // Check file size (max 10MB)
-          if (file.size > 10 * 1024 * 1024) {
-            throw new Error(`File ${file.name} is too large. Maximum size is 10MB`);
-          }
+          try {
+            console.log('Processing file:', file.name, file.type, file.size);
+            
+            // Check file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+              toast.error(`File ${file.name} is too large. Maximum size is 10MB`);
+              continue;
+            }
 
-          // Check file type
-          const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-          if (!allowedTypes.includes(file.type)) {
-            throw new Error(`File type ${file.type} is not supported`);
-          }
+            // Check file type
+            const allowedTypes = [
+              'image/jpeg',
+              'image/png',
+              'application/pdf',
+              'text/plain',
+              'application/msword',
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ];
+            if (!allowedTypes.includes(file.type)) {
+              toast.error(`File type ${file.type} is not supported`);
+              continue;
+            }
 
-          const path = `${frameworkId}/${subcontrolId}/${Date.now()}-${file.name}`;
-          const result = await evidenceService.uploadFile(file, path);
-          if (result.success && result.data) {
-            uploadedFiles.push(result.data);
-          } else {
-            throw new Error(`Failed to upload file ${file.name}: ${result.error?.message}`);
+            // Create a unique path for the file
+            const timestamp = Date.now();
+            const randomId = Math.random().toString(36).substring(2, 10);
+            // Sanitize filename more strictly to avoid special characters
+            const sanitizedFileName = file.name
+              .replace(/[^a-zA-Z0-9.-]/g, '_')
+              .replace(/\s+/g, '_')
+              .replace(/__+/g, '_');
+            
+            // Ensure path is not too long (Supabase has limits)
+            const maxFileNameLength = 50;
+            const truncatedFileName = sanitizedFileName.length > maxFileNameLength 
+              ? sanitizedFileName.substring(0, maxFileNameLength) + '.' + file.name.split('.').pop() 
+              : sanitizedFileName;
+              
+            const path = `${frameworkId}/${subcontrolId}/${timestamp}-${randomId}-${truncatedFileName}`;
+            console.log('Uploading file to path:', path);
+            const result = await evidenceService.uploadFile(file, path);
+            if (result.success && result.data) {
+              uploadedFiles.push(result.data);
+              toast.success(`Uploaded ${file.name}`);
+            } else {
+              toast.error(`Failed to upload ${file.name}: ${result.error?.message || 'Unknown error'}`);
+            }
+          } catch (error) {
+            console.error('File upload error:', error);
+            toast.error(`Error uploading ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
           }
         }
       }
 
-      // Create the evidence record
-      const result = await evidenceService.addEvidence({
-        controlId,
-        assessmentId,
+      // Add evidence with control reference
+      const evidenceData: {
+        controlId: string;
+        subcontrolId: string;
+        frameworkId: string;
+        notes: string;
+        files: EvidenceFile[];
+        controlName: string;
+        assessmentId?: string;
+      } = {
+        controlId: controlId, // This is the control reference (e.g., 'A.5')
         subcontrolId,
-        frameworkId: frameworkId || '',
+        frameworkId,
+        notes,
         files: uploadedFiles,
-        notes: notes.trim(),
-        tags: tags.filter(tag => tag.trim() !== ''),
-        controlName: subcontrolName || ''
-      });
+        controlName: subcontrolName || `Control ${controlId}`
+      };
+      
+      // Only include assessmentId if it's provided and not empty
+      if (assessmentId) {
+        evidenceData.assessmentId = assessmentId;
+      }
+      
+      console.log('Submitting evidence data:', evidenceData);
+      const result = await evidenceService.addEvidence(evidenceData);
+      
+      console.log('Evidence submission result:', result);
+
+      // Debug file uploads
+      if (uploadedFiles.length > 0) {
+        console.log('Uploaded files:', uploadedFiles);
+      }
 
       if (result.success && result.data) {
+        toast.success('Evidence added successfully');
         onSubmit(result.data);
         setFiles(null);
         setNotes('');
         setTags([]);
-        onClose();
-        toast.success('Evidence added successfully');
       } else {
-        throw new Error(result.error?.message || 'Failed to add evidence');
+        toast.error(result.error?.message || 'Failed to add evidence');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error submitting evidence:', error);
-      toast.error(error.message || 'Failed to add evidence');
+      toast.error(error instanceof Error ? error.message : 'Failed to submit evidence');
     } finally {
       setLoading(false);
     }
@@ -167,21 +257,24 @@ export const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             {subcontrolName ? `Evidence for ${subcontrolName}` : 'Add Evidence'}
           </DialogTitle>
+          <DialogDescription>
+            Add or manage evidence for this control. You can upload files and add notes.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           {/* Existing Evidence Section */}
-          {existingEvidence.length > 0 && (
+          {localEvidence.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-medium text-sm">Existing Evidence</h3>
-              <div className="space-y-2">
-                {existingEvidence.map(evidence => (
+              <h3 className="font-medium text-sm">Existing Evidence ({localEvidence.length} items)</h3>
+              <div className="space-y-4">
+                {localEvidence.map(evidence => (
                   <div key={evidence.id} className="border rounded-lg p-4">
                     {editingId === evidence.id ? (
                       <div className="space-y-2">

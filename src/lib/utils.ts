@@ -19,8 +19,8 @@ export const safeOperation = async <T>(
 
 export const getBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    // Browser should use relative path
-    return '';
+    // Browser should use current origin
+    return window.location.origin;
   }
   
   // Reference for vercel.com
@@ -28,6 +28,12 @@ export const getBaseUrl = () => {
     return `https://${process.env.VERCEL_URL}`;
   }
   
-  // Assume localhost
+  // For server-side rendering in development, we'll use a relative URL
+  // This ensures we don't hardcode any port numbers
+  if (process.env.NODE_ENV === 'development') {
+    return '';
+  }
+  
+  // Fallback to localhost with default port
   return `http://localhost:${process.env.PORT || 3000}`;
 }

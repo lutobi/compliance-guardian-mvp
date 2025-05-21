@@ -5,17 +5,26 @@ import { ControlVerification } from '@/utils/control-verification';
 import { EnhancedControl } from '@/types/enhanced-framework';
 
 interface CoverageAnalysisProps {
-  framework: {
+  framework?: {
     controls: any[];
   };
-  evidenceMap: Record<string, any[]>;
+  controls?: any[];
+  data?: {
+    controls: any[];
+  };
+  evidenceMap?: Record<string, any[]>;
 }
 
 export const CoverageAnalysis: React.FC<CoverageAnalysisProps> = ({
   framework,
-  evidenceMap
+  controls,
+  data,
+  evidenceMap = {}
 }) => {
-  if (!framework?.controls) {
+  // Support multiple input formats
+  const controlsData = framework?.controls || controls || data?.controls;
+  
+  if (!controlsData || controlsData.length === 0) {
     return (
       <Card className="p-6">
         <p className="text-gray-600">No framework data available for analysis.</p>
@@ -25,9 +34,9 @@ export const CoverageAnalysis: React.FC<CoverageAnalysisProps> = ({
 
   let coverage;
   try {
-    const implementedControls = framework.controls.map(control => ({
+    const implementedControls = controlsData.map(control => ({
       ...control,
-      evidence: evidenceMap[control.id] || []
+      evidence: evidenceMap[control.id || control.control_id] || []
     }));
     coverage = ControlVerification.verifyFrameworkCoverage(
       implementedControls,
@@ -94,50 +103,61 @@ export const CoverageAnalysis: React.FC<CoverageAnalysisProps> = ({
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Control Details</h2>
         <div className="space-y-4">
-          {Object.entries(coverage.details ?? {}).map(([controlId, detail]) => (
-            <div key={controlId} className="border-b pb-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-medium">{controlId}</h3>
-                  <p className="text-sm text-gray-600">
-                    Sub-Controls Coverage: {detail.subControlsCoverage.toFixed(2)}%
-                  </p>
-                </div>
-                <div className={`px-3 py-1 rounded-full ${
-                  detail.implemented ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {detail.implemented ? 'Implemented' : 'Missing'}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <p className="text-sm text-gray-600">Monitoring Points</p>
-                  <p className="font-medium">{detail.monitoringPoints}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Evidence Requirements</p>
-                  <p className="font-medium">{detail.evidenceRequirements}</p>
-                </div>
-              </div>
-
-              {detail.missingSubControls.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-red-600">Missing Sub-Controls:</p>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {detail.missingSubControls.map(subId => (
-                      <span 
-                        key={subId}
-                        className="px-2 py-1 bg-red-50 text-red-700 rounded-full text-sm"
-                      >
-                        {subId}
-                      </span>
-                    ))}
+          {Object.entries(coverage.details ?? {}).map(([controlId, detailObj]) => {
+            // Type assertion for the detail object
+            const detail = detailObj as {
+              subControlsCoverage: number;
+              implemented: boolean;
+              monitoringPoints: number;
+              evidenceRequirements: number;
+              missingSubControls: string[];
+            };
+            
+            return (
+              <div key={controlId} className="border-b pb-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-medium">{controlId}</h3>
+                    <p className="text-sm text-gray-600">
+                      Sub-Controls Coverage: {detail.subControlsCoverage.toFixed(2)}%
+                    </p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full ${
+                    detail.implemented ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {detail.implemented ? 'Implemented' : 'Missing'}
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+                
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className="text-sm text-gray-600">Monitoring Points</p>
+                    <p className="font-medium">{detail.monitoringPoints}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Evidence Requirements</p>
+                    <p className="font-medium">{detail.evidenceRequirements}</p>
+                  </div>
+                </div>
+
+                {detail.missingSubControls.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm text-red-600">Missing Sub-Controls:</p>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {detail.missingSubControls.map(subId => (
+                        <span 
+                          key={subId}
+                          className="px-2 py-1 bg-red-50 text-red-700 rounded-full text-sm"
+                        >
+                          {subId}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </Card>
 

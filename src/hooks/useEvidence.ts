@@ -5,8 +5,12 @@ import { toast } from 'sonner';
 
 import { getFrameworkUuid } from '@/lib/framework-sync';
 
-export function useEvidence(frameworkSlug: string | null | undefined, subcontrolId?: string) {
-  console.log('useEvidence hook called with:', { frameworkSlug, subcontrolId });
+export function useEvidence(frameworkSlug: string | null | undefined, subcontrolId?: string, forceRefresh: boolean = false) {
+  // Only log in development and only when parameters are valid
+  if (process.env.NODE_ENV === 'development' && (frameworkSlug || subcontrolId)) {
+    console.log('useEvidence hook called with:', { frameworkSlug, subcontrolId });
+  }
+  
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Evidence } from '@/types/evidence';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -128,6 +128,9 @@ const EvidenceDialog: React.FC<EvidenceDialogProps> = ({
           <DialogTitle className="text-lg font-semibold">
             {subcontrolName ? `Evidence for ${subcontrolName}` : 'Add Evidence'}
           </DialogTitle>
+          <DialogDescription>
+            Add or manage evidence for this control. You can upload files and add notes.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">

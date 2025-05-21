@@ -12,14 +12,27 @@ if (typeof window === 'undefined') {
 
 export type { Database };
 
+// Supabase URL and key
+const supabaseUrl = 'https://nrfpsbbkynykubcaarpg.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yZnBzYmJreW55a3ViY2FhcnBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcwOTE3OTgsImV4cCI6MjA2MjY2Nzc5OH0.vRMYpGwZ7URyRkEUBERNeCkdcEX-BoTNAX5NDUkeU1E';
+
+// Singleton instance
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
+
 // Unified Supabase client instance
-export const supabase =
-  typeof window === 'undefined'
-    ? createClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-    : createClientComponentClient<Database>();
+export const supabase = (() => {
+  if (supabaseInstance) return supabaseInstance;
+  
+  if (typeof window === 'undefined') {
+    // Server-side
+    supabaseInstance = createClient<Database>(supabaseUrl, supabaseKey);
+  } else {
+    // Client-side
+    supabaseInstance = createClient<Database>(supabaseUrl, supabaseKey);
+  }
+  
+  return supabaseInstance;
+})();
 
 // Legacy type definition - to be removed
 export type LegacyDatabase = {

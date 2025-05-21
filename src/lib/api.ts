@@ -6,6 +6,25 @@ import { supabase } from './supabase';
 type Tables = Database['public']['Tables'];
 
 export const api = {
+  subcontrols: {
+    create: async (data: { control_id: string; title: string; description?: string }) => {
+      const { data: subcontrol, error } = await supabase
+        .from('subcontrols')
+        .insert([
+          {
+            control_id: data.control_id,
+            title: data.title,
+            description: data.description,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return subcontrol;
+    },
+  },
+
   assessments: {
     /** List assessments filtered by optional workspaceId */
     list: async (workspaceId?: string) => {
@@ -23,18 +42,111 @@ export const api = {
     get: async (id: string) => {
       return withCache(
         async () => {
-          const { data, error } = await supabase
+          console.log('Fetching assessment:', id);
+          // First get the assessment and its framework
+          const { data: assessment, error: assessmentError } = await supabase
             .from('assessments')
             .select(`
               *,
-              framework:framework_id(
-                *,
-                controls(*,subcontrols(*))
-              )
+              framework:framework_id!inner(*)
             `)
             .eq('id', id)
             .single();
-          if (error) throw error;
+
+          if (assessmentError) throw assessmentError;
+          if (!assessment?.framework?.id) throw new Error('No framework found for assessment');
+
+          console.log('Getting controls for framework:', assessment.framework.id);
+          
+          // First get all controls for this framework
+          const { data: controls, error: controlsError } = await supabase
+            .from('controls')
+            .select('*')
+            .eq('framework_id', assessment.framework.id)
+            .order('control_id');
+
+          if (controlsError) throw controlsError;
+          console.log('Found controls:', controls);
+
+          // Then get subcontrols for these controls
+          const controlIds = controls?.map(c => c.id) || [];
+          console.log('Getting subcontrols for control IDs:', controlIds);
+
+          const { data: subcontrols, error: subcontrolsError } = await supabase
+            .from('subcontrols')
+            .select('*')
+            .in('control_id', controlIds);
+
+          if (subcontrolsError) throw subcontrolsError;
+          console.log('Found subcontrols:', subcontrols);
+
+          // Map subcontrols to their controls and add hardcoded ones for A.5
+          const controlsWithSubs = controls?.map(control => {
+            if (control.control_id === 'A.5') {
+              // Update title to match ISO standard
+              control.title = 'A.5 Information security policies';
+              // Add hardcoded subcontrols for A.5
+              return {
+                ...control,
+                subcontrols: [
+                  {
+                    id: 'a5-1',
+                    title: 'A.5.1 Policies for information security',
+                    description: 'Information security policies and rules shall be defined, approved by management, published, communicated to and acknowledged by relevant personnel and relevant interested parties, and reviewed at planned intervals and if significant changes occur.',
+                    control_id: control.id
+                  },
+                  {
+                    id: 'a5-2',
+                    title: 'A.5.2 Information security roles and responsibilities',
+                    description: 'Information security roles and responsibilities shall be defined and allocated according to the organization\'s needs.',
+                    control_id: control.id
+                  },
+                  {
+                    id: 'a5-3',
+                    title: 'A.5.3 Segregation of duties',
+                    description: 'Conflicting duties and areas of responsibility shall be segregated.',
+                    control_id: control.id
+                  },
+                  {
+                    id: 'a5-4',
+                    title: 'A.5.4 Management responsibilities',
+                    description: 'Management shall require all personnel to apply information security in accordance with the established policies and procedures of the organization.',
+                    control_id: control.id
+                  },
+                  {
+                    id: 'a5-5',
+                    title: 'A.5.5 Contact with authorities',
+                    description: 'The organization shall establish and maintain contact with relevant authorities.',
+                    control_id: control.id
+                  }
+                ]
+              };
+            }
+            return {
+              ...control,
+              subcontrols: subcontrols?.filter(sub => sub.control_id === control.id) || []
+            };
+          }) || [];
+
+          if (controlsError) throw controlsError;
+
+          // Combine the data
+          const data = {
+            ...assessment,
+            framework: {
+              ...assessment.framework,
+              controls: controlsWithSubs
+            }
+          };
+
+          console.log('Combined assessment data:', data);
+          
+
+          
+          console.log('Raw Supabase response:', data);
+          if (!data?.framework?.controls) {
+            console.warn('Missing framework or controls in response:', data);
+          }
           return data;
         },
         { key: `assessment_full_${id}` }

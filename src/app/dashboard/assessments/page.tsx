@@ -1,5 +1,4 @@
 'use client';
-
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import Link from "next/link";
@@ -37,8 +36,12 @@ export default function AssessmentsPage() {
     setLoading(true);
     try {
       const data = (await api.assessments.list(workspace.id)) as AssessmentWithFramework[];
-      console.log('Fetched assessments controls:', data.map(a => ({id: a.id, controls: a.framework.controls})));
-      setAssessments(data);
+      // Ensure all assessments have a valid framework object
+      const validData = data.map(assessment => ({
+        ...assessment,
+        framework: assessment.framework || { id: '', name: 'Unknown', controls: [] }
+      }));
+      setAssessments(validData);
     } catch (error) {
       toast.error((error as Error).message || 'Failed to load assessments');
     } finally {
@@ -79,49 +82,40 @@ export default function AssessmentsPage() {
         </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {assessments.map((assessment) => {
-          const apiControls = assessment.framework.controls ?? [];
-          // Static fallback: map by slug (framework name) to frameworkData keys
-          const slug = assessment.framework.name
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^a-z0-9-]/g, '');
-          const staticControls = frameworkData[slug]?.controls || [];
-          const controls = apiControls.length > 0 ? apiControls : staticControls;
-          return (
-            <div key={assessment.id} className="group rounded-lg border p-4">
-              <Link
-                href={`/dashboard/assessments/${assessment.id}`}
-                className="block transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <div className="mb-2 flex items-start justify-between">
-                  <h2 className="font-semibold">{assessment.name}</h2>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                      assessment.status
-                    )}`}
-                  >
-                    {assessment.status.replace('_', ' ')}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{assessment.framework.name}</span>
-                </div>
-              </Link>
-              <div className="mt-2 flex space-x-2">
-                <Link href={`/dashboard/assessments/${assessment.id}/edit`}>
-                  <Button variant="outline" size="sm">
-                    <PencilIcon className="h-4 w-4 mr-1" /> Edit
-                  </Button>
-                </Link>
-                <Button variant="destructive" size="sm" onClick={() => deleteAssessment(assessment.id)}>
-                  <TrashIcon className="h-4 w-4 mr-1" /> Delete
-                </Button>
+        {assessments.map((assessment) => (
+          <div key={assessment.id} className="group rounded-lg border p-4">
+            <Link
+              href={`/dashboard/assessments/${assessment.id}`}
+              className="block transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              <div className="mb-2 flex items-start justify-between">
+                <h2 className="font-semibold">{assessment.name}</h2>
+                <span
+                  className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
+                    assessment.status
+                  )}`}
+                >
+                  {assessment.status.replace('_', ' ')}
+                </span>
               </div>
+
+              <div className="flex items-center justify-between text-sm text-gray-500">
+                <span>{assessment.framework.name}</span>
+              </div>
+            </Link>
+            <div className="mt-2 flex space-x-2">
+              <Link href={`/dashboard/assessments/${assessment.id}/edit`}>
+                <Button variant="outline" size="sm">
+                  <PencilIcon className="h-4 w-4 mr-1" /> Edit
+                </Button>
+              </Link>
+              <Button variant="destructive" size="sm" onClick={() => deleteAssessment(assessment.id)}>
+                <TrashIcon className="h-4 w-4 mr-1" /> Delete
+              </Button>
             </div>
-          );
-        })}
+          </div>
+        ))}
+
 
         {assessments.length === 0 && (
           <div className="col-span-full rounded-lg border border-dashed p-8 text-center">

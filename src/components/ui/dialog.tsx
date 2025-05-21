@@ -32,25 +32,55 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-3 border bg-white p-4 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg max-h-[80vh]",
-        className
-      )}
-      {...props}
-    >
+>(({ className, children, ...props }, ref) => {
+  // Check if there's a DialogDescription component among the children
+  const hasDescription = React.Children.toArray(children).some(child => {
+    if (!React.isValidElement(child) || !child.type) return false;
+    
+    // Direct comparison with the component
+    if (child.type === DialogDescription) return true;
+    
+    // Check for displayName property
+    if (typeof child.type === 'object') {
+      const type = child.type as any; // Use any to bypass TypeScript restrictions
+      return type.displayName === 'DialogDescription';
+    }
+    
+    return false;
+  });
+  
+  // Generate a unique ID for the dialog description if needed
+  const [descriptionId] = React.useState(`dialog-description-${Math.random().toString(36).substring(2, 9)}`);
+  
+  // Only use aria-describedby if we don't have a DialogDescription component
+  const ariaDescribedBy = hasDescription ? undefined : (props["aria-describedby"] || descriptionId);
+  
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-md translate-x-[-50%] translate-y-[-50%] gap-3 border bg-white p-4 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg max-h-[80vh]",
+          className
+        )}
+        aria-describedby={ariaDescribedBy}
+        {...props}
+      >
       {children}
+      {!hasDescription && !props["aria-describedby"] && (
+        <div id={descriptionId} className="sr-only">
+          Dialog content
+        </div>
+      )}
       <DialogPrimitive.Close className="absolute right-3 top-3 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
-))
+);
+})
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({
