@@ -1,7 +1,7 @@
 import { Database } from './database.types';
 import { withCache, clearCache } from './api-wrapper';
 import { cacheData } from './cache';
-import { supabase } from './supabase';
+import { supabase } from './supabase/client';
 
 type Tables = Database['public']['Tables'];
 

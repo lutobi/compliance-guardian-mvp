@@ -28,6 +28,7 @@ export interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   hasCapability: (capability: string) => boolean;
   hasAccess: (level: string) => boolean;
@@ -162,6 +163,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [authService]);
 
+  const resetPassword = useCallback(async (email: string): Promise<void> => {
+    try {
+      setLoading(true);
+      await authService.resetPassword(email);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [authService]);
+
   const isSystemUser = authService.isSystemUser(user ? {
     id: user.id,
     email: user.email,
@@ -236,6 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signIn,
         signOut,
+        resetPassword,
         updateProfile,
         hasCapability,
         hasAccess,

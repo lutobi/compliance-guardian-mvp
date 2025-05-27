@@ -3,15 +3,18 @@
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/lib/auth/context';
 import Link from 'next/link';
+import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-  const { signIn, loading: authLoading } = useAuth();
+  const { signIn, loading: authLoading, resetPassword } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const isLoading = loading || authLoading;
 
@@ -53,6 +56,24 @@ export default function LoginPage() {
     }
   };
 
+  const handleResetPassword = async () => {
+    setError('');
+    if (!formData.email) {
+      setError('Enter your email to reset password');
+      return;
+    }
+    try {
+      setLoading(true);
+      await resetPassword(formData.email);
+      toast.success('Password reset email sent');
+    } catch (err) {
+      const e = err as Error;
+      toast.error(e.message || 'Failed to reset password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -86,14 +107,14 @@ export default function LoginPage() {
                 onChange={handleChange}
               />
             </div>
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="sr-only">
                 Password
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
@@ -101,6 +122,14 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleChange}
               />
+              <button type="button" onClick={() => setShowPassword(prev => !prev)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                {showPassword ? <EyeOff className="h-5 w-5 text-gray-500" /> : <Eye className="h-5 w-5 text-gray-500" />}
+              </button>
+            </div>
+            <div className="flex justify-end text-sm">
+              <button type="button" onClick={handleResetPassword} disabled={isLoading} className="font-medium text-indigo-600 hover:text-indigo-500">
+                Forgot password?
+              </button>
             </div>
           </div>
 

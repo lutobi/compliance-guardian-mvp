@@ -1,5 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { Evidence } from '@/types/evidence';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
@@ -32,20 +32,11 @@ export async function GET(request: Request) {
   try {
     let data, error;
     if (assessmentId) {
-      // Fetch only evidence belonging to this assessment
-      const { data: acRows, error: acError } = await supabase
-        .from('assessment_controls')
-        .select('id')
-        .eq('assessment_id', assessmentId);
-      if (acError) throw acError;
-      const acIds = acRows.map(r => r.id);
-      if (acIds.length === 0) {
-        return NextResponse.json({ data: [] });
-      }
+      // Fetch evidence by assessment_id directly
       const result = await supabase
         .from('evidence')
         .select('*')
-        .in('assessment_control_id', acIds)
+        .eq('assessment_id', assessmentId)
         .order('created_at', { ascending: false });
       data = result.data;
       error = result.error;
@@ -132,33 +123,9 @@ export async function POST(request: Request) {
       files: body.files || []
     };
     
-    // If assessmentId and controlId provided, fetch or create assessment control mapping
-    if (body.assessmentId && body.controlId) {
-      // First try to find existing assessment control
-      const { data: acRows, error: acError } = await supabase
-        .from('assessment_controls')
-        .select('id')
-        .eq('assessment_id', body.assessmentId)
-        .eq('control_ref', body.controlId);
-      if (acError) throw acError;
-
-      if (acRows && acRows.length > 0) {
-        // Use existing assessment control
-        record.assessment_control_id = acRows[0].id;
-      } else {
-        // Create new assessment control
-        const { data: newAc, error: newAcError } = await supabase
-          .from('assessment_controls')
-          .insert({
-            assessment_id: body.assessmentId,
-            control_ref: body.controlId,
-            status: 'in_progress'
-          })
-          .select('id')
-          .single();
-        if (newAcError) throw newAcError;
-        record.assessment_control_id = newAc.id;
-      }
+    // Link evidence to assessment directly
+    if (body.assessmentId) {
+      record.assessment_id = body.assessmentId;
     }
     
     console.log('Inserting evidence record:', record);

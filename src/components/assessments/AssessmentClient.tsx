@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
-import { useAssessmentEvidence } from '@/hooks/useAssessmentEvidence';
+import { useAssessmentEvidenceQuery } from '@/hooks/useAssessmentEvidenceQuery';
 import { FrameworkSummary } from '@/components/frameworks/FrameworkSummary';
 import type { Evidence } from '@/types/evidence';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { calculateControlProgress } from '@/utils/progress';
 import { Paperclip } from 'lucide-react';
-import LegacyEvidenceDialog from '@/app/dashboard/frameworks/[slug]/evidence-dialog';
+import EvidenceDialog from '@/app/dashboard/frameworks/[slug]/evidence-dialog-new';
 import { frameworkData } from '@/data/frameworks';
 
 interface AssessmentClientProps {
@@ -19,19 +19,8 @@ interface AssessmentClientProps {
 export default function AssessmentClient({ id }: AssessmentClientProps) {
   const [assessment, setAssessment] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  // Fetch assessment-scoped evidence
-  const { evidence: assessmentEvidence, loading: assessmentEvidenceLoading } = useAssessmentEvidence(id);
-  // Local state to track evidence and update UI after mutations
-  const [localEvidence, setLocalEvidence] = useState<Evidence[]>([]);
-  useEffect(() => {
-    setLocalEvidence(assessmentEvidence);
-  }, [assessmentEvidence]);
-  // Group evidence by subcontrol using localEvidence
-  const evidenceMap: Record<string, Evidence[]> = {};
-  localEvidence.forEach(e => {
-    if (!evidenceMap[e.subcontrolId]) evidenceMap[e.subcontrolId] = [];
-    evidenceMap[e.subcontrolId].push(e);
-  });
+  // Fetch assessment-scoped evidence via React Query
+  const { evidence, isLoading: assessmentEvidenceLoading, isError, error: evidenceError, addEvidence, updateEvidence, deleteEvidence } = useAssessmentEvidenceQuery(id);
   // State for evidence dialog
   const [selectedSubcontrolId, setSelectedSubcontrolId] = useState<string | null>(null);
   const [selectedSubcontrolName, setSelectedSubcontrolName] = useState<string>('');
@@ -76,14 +65,17 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
         // For ISO 27001, always use the enhanced static data
         const staticFramework = frameworkData['iso-27001'];
         if (staticFramework?.controls) {
-          console.log('Loading complete ISO 27001 controls from static data');
-          setAssessment(prev => ({
-            ...prev,
-            framework: {
-              ...prev.framework,
-              controls: staticFramework.controls
-            }
-          }));
+          // Only apply static controls once to avoid infinite loop
+          if (assessment.framework.controls?.length !== staticFramework.controls.length) {
+            console.log('Loading complete ISO 27001 controls from static data');
+            setAssessment(prev => ({
+              ...prev,
+              framework: {
+                ...prev.framework,
+                controls: staticFramework.controls
+              }
+            }));
+          }
           return;
         }
       }
@@ -363,6 +355,13 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
     };
   });
 
+  // Group evidence by subcontrol using React Query data
+  const evidenceMap: Record<string, Evidence[]> = {};
+  evidence.forEach(e => {
+    if (!evidenceMap[e.subcontrolId]) evidenceMap[e.subcontrolId] = [];
+    evidenceMap[e.subcontrolId].push(e);
+  });
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <h1 className="text-2xl font-bold mb-4">{assessment.name}</h1>
@@ -437,7 +436,7 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
       </div>
       {/* Evidence dialog for assessment */}
       {isEvidenceDialogOpen && selectedSubcontrolId && selectedControlId && (
-        <LegacyEvidenceDialog
+        <EvidenceDialog
           controlId={selectedControlId}
           subcontrolId={selectedSubcontrolId}
           assessmentId={id}
@@ -445,9 +444,15 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
           subcontrolName={selectedSubcontrolName}
           isOpen={isEvidenceDialogOpen}
           onClose={() => setIsEvidenceDialogOpen(false)}
-          onSubmit={(e) => setLocalEvidence(prev => [e, ...prev])}
-          onDelete={(id) => setLocalEvidence(prev => prev.filter(item => item.id !== id))}
-          onUpdate={(id, e) => setLocalEvidence(prev => prev.map(item => item.id === id ? e : item))}
+          onSubmit={async (evidenceData) => {
+            await addEvidence.mutateAsync({ ...evidenceData, assessmentId: id });
+          }}
+          onDelete={async (evidenceId) => {
+            await deleteEvidence.mutateAsync(evidenceId);
+          }}
+          onUpdate={async (evidenceId, updates) => {
+            await updateEvidence.mutateAsync({ id: evidenceId, updates });
+          }}
           existingEvidence={evidenceMap[selectedSubcontrolId] || []}
         />
       )}
