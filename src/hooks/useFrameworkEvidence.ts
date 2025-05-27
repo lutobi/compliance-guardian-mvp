@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
 import { Evidence } from '@/types/evidence';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
 
 /**
  * Custom hook for managing framework evidence with reliable UI updates
@@ -12,13 +13,31 @@ export function useFrameworkEvidence(frameworkId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshCounter, setRefreshCounter] = useState(0);
+  // Store resolved UUID for framework slug
+  const [frameworkUuid, setFrameworkUuid] = useState<string | null>(null);
 
   // Force a refresh of evidence data
-  const refreshEvidence = () => {
+  const refreshEvidence = useCallback(() => {
     setRefreshCounter(prev => prev + 1);
-  };
+  }, []);
 
-  // Using the shared Supabase client from lib/supabase
+  // Add effect to resolve slug to UUID
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        // Determine true framework UUID
+        const uuid = await resolveFrameworkUuid(supabase, frameworkId);
+        if (isMounted) setFrameworkUuid(uuid);
+      } catch (err) {
+        console.error('Error resolving frameworkId:', err);
+        if (isMounted) setError(err as Error);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [frameworkId]);
+
+  // Using Next.js API routes to avoid direct REST filter issues
 
   // Fetch evidence and build the evidence map
   useEffect(() => {
@@ -30,33 +49,23 @@ export function useFrameworkEvidence(frameworkId: string) {
     const fetchEvidence = async () => {
       setLoading(true);
       try {
-        console.log('Fetching evidence for framework:', frameworkId);
-        
-        const { data, error } = await supabase
-          .from('evidence')
-          .select('*')
-          .eq('framework_id', frameworkId);
-          
-        if (error) throw error;
-        
-        // Format the evidence data
-        const formattedEvidence = (data || []).map(item => ({
-          id: item.id,
-          frameworkId: item.framework_id,
-          subcontrolId: item.subcontrol_id,
-          notes: item.notes,
-          files: item.files || [],
-          tags: item.tags || [],
-          createdAt: item.created_at,
-          updatedAt: item.updated_at
-        }));
-        
-        console.log(`Fetched ${formattedEvidence.length} evidence items`);
-        setEvidence(formattedEvidence);
+        const idParam = frameworkUuid || frameworkId;
+        const res = await fetch(
+          `/api/evidence?frameworkId=${encodeURIComponent(idParam)}`,
+          { credentials: 'include' }
+        );
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error);
+        const data = json.data;
+
+        // Use API-returned Evidence objects directly
+        const fetchedEvidence: Evidence[] = data;
+        console.log(`Fetched ${fetchedEvidence.length} evidence items`);
+        setEvidence(fetchedEvidence);
         
         // Build the evidence map
         const map: Record<string, Evidence[]> = {};
-        formattedEvidence.forEach(item => {
+        fetchedEvidence.forEach(item => {
           if (!map[item.subcontrolId]) {
             map[item.subcontrolId] = [];
           }
@@ -77,55 +86,45 @@ export function useFrameworkEvidence(frameworkId: string) {
     fetchEvidence();
     
     // Set up real-time subscription
-    const channel = supabase
-      .channel('evidence_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'evidence',
-          filter: `framework_id=eq.${frameworkId}`
-        },
-        (payload) => {
-          console.log('Received real-time update:', payload);
-          refreshEvidence(); // Refresh data on any change
-        }
-      )
-      .subscribe();
+    // const channel = supabase
+    //   .channel('evidence_changes')
+    //   .on(
+    //     'postgres_changes',
+    //     {
+    //       event: '*',
+    //       schema: 'public',
+    //       table: 'evidence',
+    //       filter: `framework_id=eq.${frameworkId}`
+    //     },
+    //     (payload) => {
+    //       console.log('Received real-time update:', payload);
+    //       refreshEvidence(); // Refresh data on any change
+    //     }
+    //   )
+    //   .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [frameworkId, refreshCounter, supabase]);
+    // return () => {
+    //   supabase.removeChannel(channel);
+    // };
+  }, [frameworkId, refreshCounter, frameworkUuid]);
 
   // Add new evidence
   const addEvidence = async (newEvidence: Omit<Evidence, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const { data, error } = await supabase
-        .from('evidence')
-        .insert({
-          framework_id: frameworkId,
-          subcontrol_id: newEvidence.subcontrolId,
-          notes: newEvidence.notes,
-          files: newEvidence.files || [],
-          tags: newEvidence.tags || []
-        })
-        .select()
-        .single();
+      console.log('Sending new evidence to API:', newEvidence);
+      const payload = { ...newEvidence, frameworkId: frameworkUuid || newEvidence.frameworkId };
+      const res = await fetch('/api/evidence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+      const data = json.data;
 
-      if (error) throw error;
-
-      const formattedEvidence: Evidence = {
-        id: data.id,
-        frameworkId: data.framework_id,
-        subcontrolId: data.subcontrol_id,
-        notes: data.notes,
-        files: data.files || [],
-        tags: data.tags || [],
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      // Use API-returned Evidence object directly
+      const formattedEvidence: Evidence = data;
 
       // Update local state immediately for UI responsiveness
       setEvidence(prev => [...prev, formattedEvidence]);
@@ -155,12 +154,12 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Delete evidence
   const deleteEvidence = async (evidenceId: string) => {
     try {
-      const { error } = await supabase
-        .from('evidence')
-        .delete()
-        .eq('id', evidenceId);
+      // const { error } = await supabase
+      //   .from('evidence')
+      //   .delete()
+      //   .eq('id', evidenceId);
 
-      if (error) throw error;
+      // if (error) throw error;
 
       // Update local state immediately for UI responsiveness
       setEvidence(prev => prev.filter(e => e.id !== evidenceId));
@@ -189,48 +188,48 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Update evidence
   const updateEvidence = async (evidenceId: string, updates: Partial<Evidence>) => {
     try {
-      const { data, error } = await supabase
-        .from('evidence')
-        .update({
-          notes: updates.notes,
-          files: updates.files,
-          tags: updates.tags,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', evidenceId)
-        .select()
-        .single();
+      // const { data, error } = await supabase
+      //   .from('evidence')
+      //   .update({
+      //     notes: updates.notes,
+      //     files: updates.files,
+      //     tags: updates.tags,
+      //     updated_at: new Date().toISOString()
+      //   })
+      //   .eq('id', evidenceId)
+      //   .select()
+      //   .single();
 
-      if (error) throw error;
+      // if (error) throw error;
 
-      const formattedEvidence: Evidence = {
-        id: data.id,
-        frameworkId: data.framework_id,
-        subcontrolId: data.subcontrol_id,
-        notes: data.notes,
-        files: data.files || [],
-        tags: data.tags || [],
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      // const formattedEvidence: Evidence = {
+      //   id: data.id,
+      //   frameworkId: data.framework_id,
+      //   subcontrolId: data.subcontrol_id,
+      //   notes: data.notes,
+      //   files: data.files || [],
+      //   tags: data.tags || [],
+      //   createdAt: data.created_at,
+      //   updatedAt: data.updated_at
+      // };
 
       // Update local state immediately for UI responsiveness
-      setEvidence(prev => prev.map(e => e.id === evidenceId ? formattedEvidence : e));
+      // setEvidence(prev => prev.map(e => e.id === evidenceId ? formattedEvidence : e));
       
       // Update the evidence map
-      setEvidenceMap(prev => {
-        const newMap = { ...prev };
-        Object.keys(newMap).forEach(key => {
-          newMap[key] = newMap[key].map(e => e.id === evidenceId ? formattedEvidence : e);
-        });
-        return newMap;
-      });
+      // setEvidenceMap(prev => {
+      //   const newMap = { ...prev };
+      //   Object.keys(newMap).forEach(key => {
+      //     newMap[key] = newMap[key].map(e => e.id === evidenceId ? formattedEvidence : e);
+      //   });
+      //   return newMap;
+      // });
       
       // Force a refresh to ensure consistency
-      setTimeout(refreshEvidence, 500);
+      // setTimeout(refreshEvidence, 500);
       
-      toast.success('Evidence updated successfully');
-      return { success: true, data: formattedEvidence };
+      // toast.success('Evidence updated successfully');
+      // return { success: true, data: formattedEvidence };
     } catch (error) {
       console.error('Error updating evidence:', error);
       toast.error('Failed to update evidence');

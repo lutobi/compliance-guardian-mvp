@@ -2,15 +2,17 @@ export interface Evidence {
   id: string;
   subcontrolId: string;
   frameworkId: string;
-  files: Array<{
-    name: string;
-    size: number;
-  }>;
+  controlId?: string; // Optional reference to the parent control
+  assessmentId?: string; // Optional reference to an assessment
+  files: EvidenceFile[];
   notes: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;
   controlName?: string; // Optional control name for better titles
+  createdBy?: string; // User ID who created the evidence
+  updatedBy?: string; // User ID who last updated the evidence
+  status?: 'draft' | 'submitted' | 'approved' | 'rejected'; // Evidence status
 }
 
 export interface EvidenceFile {

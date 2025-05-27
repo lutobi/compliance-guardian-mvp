@@ -7,7 +7,7 @@ import type {
 } from '@supabase/supabase-js';
 import { Database } from '@/lib/database.types';
 import { UserRole } from '@/types/roles';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 
 export interface UserProfile {
   id: string;
@@ -69,25 +69,31 @@ export class AuthService {
     return true;
   }
 
-  async signInWithEmail(email: string, password: string): Promise<AuthResponse> {
+  async signInWithEmail(email: string, password: string): Promise<AuthTokenResponse> {
     try {
       this.checkRateLimit(email.toLowerCase());
 
-      const response = await this.supabase.auth.signInWithPassword({
+      const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (response.error) {
-        throw response.error;
+      if (error) {
+        throw error;
       }
 
       // Pre-fetch and cache user profile for faster access
-      if (response.data.user) {
-        await this.getUserProfile(response.data.user.id);
+      if (data.user) {
+        await this.getUserProfile(data.user.id);
       }
 
-      return response;
+      return {
+        data: {
+          user: data.user,
+          session: data.session
+        },
+        error: null
+      };
     } catch (error) {
       if (error instanceof Error && error.message.includes('too many requests')) {
         throw new Error('Login rate limit reached. Please try again in a minute.');
@@ -100,7 +106,7 @@ export class AuthService {
     try {
       this.checkRateLimit(email.toLowerCase());
 
-      const response = await this.supabase.auth.signUp({
+      const { data, error } = await this.supabase.auth.signUp({
         email,
         password,
         options: {
@@ -109,27 +115,29 @@ export class AuthService {
         },
       });
 
-      if (response.error) {
-        throw response.error;
+      if (error) {
+        throw error;
       }
 
       // Auto-populate custom users table with default Customer role
-      if (response.data.user) {
+      if (data.user) {
         const roles = await this.getAllRoles();
         const customerRole = roles.find(r => r.name === 'Customer');
         if (customerRole) {
           const { error: insertErr } = await this.supabase
             .from('users')
-            .upsert({
-              id: response.data.user.id,
-              email: response.data.user.email,
-              role_id: customerRole.id
-            }, { onConflict: ['email'] });
+            .insert([
+              {
+                id: data.user.id,
+                email: data.user.email,
+                role_id: customerRole.id
+              }
+            ]);
           if (insertErr) console.error('[signUp] error inserting user role:', insertErr);
         }
       }
 
-      return response;
+      return { data, error: null };
     } catch (error) {
       if (error instanceof Error && error.message.includes('too many requests')) {
         throw new Error('Sign up rate limit reached. Please try again in a minute.');

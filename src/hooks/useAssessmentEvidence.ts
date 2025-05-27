@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Evidence } from '@/types/evidence';
 
 export function useAssessmentEvidence(assessmentId: string) {

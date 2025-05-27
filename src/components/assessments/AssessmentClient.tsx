@@ -9,7 +9,7 @@ import type { Evidence } from '@/types/evidence';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { calculateControlProgress } from '@/utils/progress';
 import { Paperclip } from 'lucide-react';
-import { EvidenceDialog } from '@/app/dashboard/frameworks/[slug]/evidence-dialog';
+import LegacyEvidenceDialog from '@/app/dashboard/frameworks/[slug]/evidence-dialog';
 import { frameworkData } from '@/data/frameworks';
 
 interface AssessmentClientProps {
@@ -437,7 +437,7 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
       </div>
       {/* Evidence dialog for assessment */}
       {isEvidenceDialogOpen && selectedSubcontrolId && selectedControlId && (
-        <EvidenceDialog
+        <LegacyEvidenceDialog
           controlId={selectedControlId}
           subcontrolId={selectedSubcontrolId}
           assessmentId={id}

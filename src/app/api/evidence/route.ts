@@ -1,7 +1,8 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { Evidence } from '@/types/evidence';
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
 
 export async function GET(request: Request) {
   console.log('Evidence API GET called');
@@ -17,6 +18,16 @@ export async function GET(request: Request) {
   }
 
   const supabase = createRouteHandlerClient({ cookies });
+
+  // Resolve frameworkId (slug or UUID)
+  let frameworkUuid: string | null = null;
+  if (frameworkId) {
+    try {
+      frameworkUuid = await resolveFrameworkUuid(supabase, frameworkId);
+    } catch {
+      return NextResponse.json({ data: [] });
+    }
+  }
 
   try {
     let data, error;
@@ -45,7 +56,7 @@ export async function GET(request: Request) {
         .select('*')
         .order('created_at', { ascending: false });
       if (frameworkId) {
-        query = query.eq('framework_id', frameworkId);
+        query = query.eq('framework_id', frameworkUuid);
       }
       if (subcontrolId) {
         query = query.eq('subcontrol_id', subcontrolId);
@@ -72,9 +83,12 @@ export async function GET(request: Request) {
     })) || [];
 
     return NextResponse.json({ data: formattedData });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching evidence:', error);
-    return NextResponse.json({ error: 'Failed to fetch evidence' }, { status: 500 });
+    if (error.message.includes('invalid input syntax for type uuid')) {
+      return NextResponse.json({ data: [] });
+    }
+    return NextResponse.json({ error: error.message || 'Failed to fetch evidence' }, { status: 500 });
   }
 }
 
@@ -91,6 +105,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('Evidence POST body:', body);
     
+    // Resolve frameworkId (slug or UUID)
+    let frameworkUuid: string;
+    try {
+      frameworkUuid = await resolveFrameworkUuid(supabase, body.frameworkId);
+    } catch {
+      return NextResponse.json({ error: 'Invalid frameworkId' }, { status: 400 });
+    }
+
     // No strict requirement for subcontrolId/frameworkId here; proceed with available data
     if (!body.frameworkId) console.warn('POST /api/evidence missing frameworkId');
     if (!body.subcontrolId) console.warn('POST /api/evidence missing subcontrolId');
@@ -102,7 +124,7 @@ export async function POST(request: Request) {
     // Build base record
     const record: any = {
       subcontrol_id: body.subcontrolId,
-      framework_id: body.frameworkId,
+      framework_id: frameworkUuid,
       user_id: user.id,
       title,
       notes: body.notes || '',

@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useAuth } from '@/lib/auth/context';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 
 export interface CustomerSettings {
   theme: {
@@ -91,20 +91,20 @@ export function useCustomerWorkspace() {
   return context;
 }
 
-export function CustomerProvider({ children }: { children: ReactNode }): JSX.Element {
+export function CustomerProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [workspace, setWorkspace] = useState<CustomerWorkspace | null>(null);
   const [workspaces, setWorkspaces] = useState<CustomerWorkspace[]>([]);
   const [customerData, setCustomerData] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+
   const router = useRouter();
 
   // Memoize the current user's ID to prevent unnecessary reloads
   const userId = useMemo(() => user?.id, [user?.id]);
   const customerId = useMemo(() => user?.customerId, [user?.customerId]);
-
+  
   const loadWorkspaces = useCallback(async () => {
     if (!userId) {
       setWorkspace(null);
@@ -224,12 +224,14 @@ export function CustomerProvider({ children }: { children: ReactNode }): JSX.Ele
     } finally {
       setLoading(false);
     }
-  }, [userId, customerId, supabase]);
+  }, [userId, customerId]);
 
   // Load workspaces on mount/user change
   useEffect(() => {
-    loadWorkspaces();
-  }, [loadWorkspaces]);
+    if (userId) {
+      loadWorkspaces();
+    }
+  }, [userId, loadWorkspaces]);
 
   const updateSettings = async (newSettings: Partial<CustomerSettings>) => {
     if (!workspace) {

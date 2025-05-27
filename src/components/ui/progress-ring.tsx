@@ -8,6 +8,7 @@ interface ProgressRingProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: number;
   strokeWidth?: number;
   showPercentage?: boolean;
+  textClassName?: string;
 }
 
 export function ProgressRing({
@@ -15,6 +16,7 @@ export function ProgressRing({
   size = 48,
   strokeWidth = 5,
   showPercentage = true,
+  textClassName,
   className,
   ...props
 }: ProgressRingProps) {
@@ -64,7 +66,7 @@ export function ProgressRing({
       </svg>
       {showPercentage && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-sm font-semibold">
+          <span className={cn(textClassName ?? 'text-sm', 'font-semibold')}>
             {Math.round(normalizedValue)}%
           </span>
         </div>

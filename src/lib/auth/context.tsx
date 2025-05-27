@@ -1,9 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { supabase } from '@/lib/supabase/client';
 import { AuthService, UserProfile } from '@/services/AuthService';
 
 export interface User {
@@ -108,31 +108,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refreshUser]);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string): Promise<void> => {
     try {
       setLoading(true);
       const { data, error } = await authService.signInWithEmail(email, password);
-      if (error) throw error;
+      if (error) {
+        console.error('Sign in error:', error);
+        throw new Error(error.message);
+      }
 
-      if (data.user) {
-        // Client-side role-based routing
-        const profile = await authService.getUserProfile(data.user.id);
-        if (profile?.userType === 'system') {
-          router.push('/system/dashboard');
-        } else if (profile?.userType === 'customer') {
-          if (profile.workspaceId) {
-            router.push('/customer/dashboard');
-          } else {
-            router.push('/customer/select-workspace');
-          }
-        } else {
-          router.push('/dashboard');
-        }
+      if (!data.user) {
+        throw new Error('No user data received');
+      }
+
+      // Get user profile
+      const profile = await authService.getUserProfile(data.user.id);
+      if (!profile) {
+        throw new Error('Could not fetch user profile');
+      }
+
+      // Update user state
+      setUser(mapProfileToUser(profile));
+
+      // Client-side role-based routing
+      if (profile.userType === 'system') {
+        await router.push('/system/dashboard');
+      } else if (profile.userType === 'customer') {
+        await router.push(profile.workspaceId ? '/customer/dashboard' : '/customer/select-workspace');
+      } else {
+        await router.push('/dashboard');
       }
     } catch (error) {
-      console.error('Error signing in:', error);  
+      console.error('Error signing in:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
-  }, [authService, router]);
+  }, [authService, router, mapProfileToUser]);
 
   const signOut = useCallback(async () => {
     try {
