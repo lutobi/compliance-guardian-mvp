@@ -12,6 +12,9 @@ import { VerificationSummary as VerificationSummaryComponent } from '@/component
 import { MonitoringList } from '@/components/monitoring/MonitoringList';
 import { ActivityList } from '@/components/dashboard/ActivityList';
 import { TaskList } from '@/components/dashboard/TaskList';
+import { Button } from '@/components/ui/button';
+import { ProgressRing } from '@/components/ui/progress-ring';
+import { api } from '@/lib/api';
 
 type MonitoringData = {
   id: string;
@@ -51,15 +54,17 @@ export default function DashboardPage() {
     frameworkStatus: MonitoringItem[];
     recentActivities: RecentActivityItem[];
     pendingTasks: PendingTaskItem[];
-    riskSummary: RiskSummaryItem | null;
+    riskSummary: RiskSummaryItem[];
     verificationSummary: VerificationSummary | null;
   }>({
     frameworkStatus: [],
     recentActivities: [],
     pendingTasks: [],
-    riskSummary: null,
+    riskSummary: [],
     verificationSummary: null
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [assessmentStats, setAssessmentStats] = useState<{count:number;completionRate:number}>({count:0,completionRate:0});
 
   const loadDashboardData = async () => {
     setError(null);
@@ -107,6 +112,12 @@ export default function DashboardPage() {
         riskSummary: riskData,
         verificationSummary: verificationData
       });
+
+      // fetch assessment overview
+      const assessments = await api.assessments.list();
+      const total = assessments.length;
+      const done = assessments.filter((a: any) => a.status === 'completed').length;
+      setAssessmentStats({ count: total, completionRate: total>0?Math.round((done/total)*100):0 });
     } catch (error) {
       setError(error instanceof Error ? error : new Error('Failed to load dashboard data'));
     } finally {
@@ -117,6 +128,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!loading && user) {
       loadDashboardData();
+      const intervalId = setInterval(loadDashboardData, 30000);
+      return () => clearInterval(intervalId);
     }
   }, [loading, user]);
 
@@ -183,11 +196,62 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
+        {/* Actions & Search */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <input
+            type="text"
+            className="border rounded p-2 w-full sm:w-64"
+            placeholder="Search frameworks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <div className="flex space-x-2 mt-4 sm:mt-0">
+            <Button onClick={() => router.push('/dashboard/assessments/new')}>New Assessment</Button>
+            <Button variant="secondary" onClick={() => router.push('/dashboard/assessments/new')}>Upload Evidence</Button>
+          </div>
+        </div>
+        {/* Assessments Overview */}
+        {!loadingData && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-sm font-medium text-gray-500">Total Assessments</h3>
+              <p className="text-2xl font-bold">{assessmentStats.count}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 flex items-center justify-center">
+              <ProgressRing value={assessmentStats.completionRate} size={64} strokeWidth={6} textClassName="text-lg" />
+            </div>
+          </div>
+        )}
+        {/* KPI Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-sm font-medium text-gray-500">Monitored Frameworks</h3>
+            <p className="text-2xl font-bold">{dashboardData.frameworkStatus.length}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-sm font-medium text-gray-500">Pending Tasks</h3>
+            <p className="text-2xl font-bold">{dashboardData.pendingTasks.length}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-sm font-medium text-gray-500">Recent Activities</h3>
+            <p className="text-2xl font-bold">{dashboardData.recentActivities.length}</p>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-sm font-medium text-gray-500">Completion Rate</h3>
+            <p className="text-2xl font-bold">{dashboardData.verificationSummary?.completionRate}%</p>
+          </div>
+        </div>
+        {/* Compliance Chart */}
+        <div className="mb-8">
+          <ComplianceChart data={dashboardData.frameworkStatus} />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Active Monitoring</h2>
             <MonitoringList
-              monitoringData={dashboardData.frameworkStatus}
+              monitoringData={dashboardData.frameworkStatus.filter(item =>
+                item.framework.name.toLowerCase().includes(searchTerm.toLowerCase())
+              )}
               onStatusUpdate={async (id: string, status: MonitoringStatus) => {
                 try {
                   await MonitoringService.updatePointStatus(id, status);
@@ -226,8 +290,8 @@ export default function DashboardPage() {
 
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-4">Risk Assessment</h2>
-            {dashboardData.riskSummary && (
-              <RiskSummary data={[dashboardData.riskSummary]} />
+            {dashboardData.riskSummary.length > 0 && (
+              <RiskSummary data={dashboardData.riskSummary} />
             )}
           </div>
 

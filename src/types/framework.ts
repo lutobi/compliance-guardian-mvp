@@ -21,14 +21,17 @@ export interface Framework {
   name: string;
   description: string;
   version: string;
-  categories: string[];
-  lastUpdated?: string;
-  implementationProgress?: number;
-  totalControls?: number;
-  implementedControls?: number;
   controls: Control[];
+  last_synced_at: string;
 }
 
 export interface FrameworkData extends Framework {
   controls: Control[];
+}
+
+export interface FrameworkUpdateLog {
+  id: string;
+  framework_id: string;
+  updated_at: string;
+  changes: any[];
 }

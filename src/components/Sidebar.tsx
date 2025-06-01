@@ -17,6 +17,8 @@ import {
   XMarkIcon,
   ClipboardDocumentCheckIcon,
   Squares2X2Icon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -29,10 +31,16 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const { user, signOut, isCustomerUser, isSystemUser } = useAuth();
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('sidebarCollapsed');
+    if (stored !== null) setCollapsed(JSON.parse(stored));
   }, []);
 
   const navItems: NavItem[] = [
@@ -73,7 +81,7 @@ export default function Sidebar() {
     },
     {
       title: 'Settings',
-      href: '/settings',
+      href: '/dashboard/settings',
       icon: Cog6ToothIcon,
     },
   ];
@@ -96,7 +104,8 @@ export default function Sidebar() {
 
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out',
+          'fixed inset-y-0 left-0 z-30 transform bg-white border-r border-gray-200 transition-all duration-200 ease-in-out',
+          collapsed ? 'w-16' : 'w-64',
           {
             'translate-x-0': isMobileMenuOpen,
             '-translate-x-full': !isMobileMenuOpen,
@@ -127,8 +136,8 @@ export default function Sidebar() {
                       window.location.href = item.href;
                     }}
                   >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    {item.title}
+                    <item.icon className="h-5 w-5" />
+                    <span className={collapsed ? 'hidden' : ''}>{item.title}</span>
                   </a>
                 );
               })}
@@ -156,6 +165,24 @@ export default function Sidebar() {
               </div>
             </div>
           )}
+
+          {/* Collapse Toggle */}
+          <div className="flex justify-center p-2 border-t">
+            <button
+              onClick={() => {
+                const next = !collapsed;
+                setCollapsed(next);
+                localStorage.setItem('sidebarCollapsed', JSON.stringify(next));
+              }}
+              className="p-1"
+            >
+              {collapsed ? (
+                <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+              ) : (
+                <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </>

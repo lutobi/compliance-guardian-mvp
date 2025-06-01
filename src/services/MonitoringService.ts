@@ -69,23 +69,77 @@ export class MonitoringService {
   }
 
   public async getRecentActivities(limit: number = 10): Promise<any[]> {
-    // TODO: implement actual query using supabase
-    return [];
+    const { data, error } = await this.supabase
+      .from('activities')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) this.logger.error('getRecentActivities failed', { error });
+    return data || [];
   }
 
   public async getPendingTasks(limit: number = 10): Promise<any[]> {
-    // TODO: implement actual query using supabase
-    return [];
+    const { data, error } = await this.supabase
+      .from('monitoring_controls')
+      .select('id,control:controls(name,description,category),monitoring(framework:frameworks(id,name)),next_check,status,monitoring(settings)')
+      .neq('status', 'compliant')
+      .order('next_check', { ascending: true })
+      .limit(limit);
+    if (error) this.logger.error('getPendingTasks failed', { error });
+    return (
+      data?.map((item: any) => ({
+        id: item.id,
+        name: item.control.name,
+        description: item.control.description,
+        category: item.control.category,
+        framework: item.monitoring.framework.name,
+        frameworkId: item.monitoring.framework.id,
+        dueDate: item.next_check,
+        priority: (item.monitoring.settings?.priority as any) || 'medium',
+        status: item.status,
+      })) || []
+    );
   }
 
   public async getRiskAssessment(): Promise<any[]> {
-    // TODO: implement actual query using supabase
-    return [];
+    const { data, error } = await this.supabase
+      .from('risk_assessments')
+      .select('*');
+    if (error) this.logger.error('getRiskAssessment failed', { error });
+    const rows = data || [];
+    const total = rows.length;
+    const summary = rows.reduce((acc: any, r: any) => {
+      const key = `${r.category}-${r.risk_level}`;
+      if (!acc[key]) acc[key] = { category: r.category, level: r.risk_level, count: 0 };
+      acc[key].count++;
+      return acc;
+    }, {});
+    return Object.values(summary).map((item: any) => ({
+      ...item,
+      percentage: total ? Math.round((item.count / total) * 100) : 0,
+    }));
   }
 
   public async getVerificationSummary(): Promise<any | null> {
-    // TODO: implement actual query using supabase
-    return null;
+    const { data, error } = await this.supabase
+      .from('verifications')
+      .select('total_checks,passed_checks,pending_checks,failed_checks');
+    if (error) this.logger.error('getVerificationSummary failed', { error });
+    const rows = data || [];
+    const summary = rows.reduce(
+      (acc: any, r: any) => {
+        acc.total += r.total_checks || 0;
+        acc.passed += r.passed_checks || 0;
+        acc.pending += r.pending_checks || 0;
+        acc.failed += r.failed_checks || 0;
+        return acc;
+      },
+      { total: 0, passed: 0, pending: 0, failed: 0 }
+    );
+    const completionRate = summary.total
+      ? Math.round((summary.passed / summary.total) * 100)
+      : 0;
+    return { ...summary, completionRate };
   }
 
   public async updatePointStatus(pointId: string, status: string): Promise<boolean> {

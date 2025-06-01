@@ -258,4 +258,35 @@ export class EvidenceService {
       };
     }
   }
+
+  /**
+   * Fetch evidence items by framework ID
+   */
+  async getEvidenceByFramework(frameworkId: string): Promise<Evidence[]> {
+    try {
+      console.log('Fetching evidence for framework:', frameworkId);
+      const { data, error } = await this.supabase
+        .from('evidence')
+        .select('*')
+        .eq('framework_id', frameworkId)
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching evidence by framework:', error);
+        throw error;
+      }
+      return data?.map(item => ({
+        id: item.id,
+        subcontrolId: item.subcontrol_id,
+        frameworkId: item.framework_id,
+        files: Array.isArray(item.files) ? item.files as unknown as EvidenceFile[] : [],
+        notes: item.notes || '',
+        tags: item.tags || [],
+        createdAt: item.created_at || '',
+        updatedAt: item.updated_at || '',
+      })) || [];
+    } catch (error) {
+      console.error('Failed to get evidence by framework:', error);
+      return [];
+    }
+  }
 }

@@ -1,0 +1,17 @@
+{
+  "frameworks": [
+    {
+      "name": "EUDR Compliance",
+      "description": "European Union Deforestation Regulation",
+      "version": "1.0",
+      "controls": [
+        {
+          "control_id": "ECDR-001",
+          "name": "Commodity Origin Tracking",
+          "description": "Ensure traceability of commodity origins.",
+          "subcontrols": ["Record supplier location", "Verify certification"]
+        }
+      ]
+    }
+  ]
+}

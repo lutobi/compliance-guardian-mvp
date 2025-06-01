@@ -1,0 +1,31 @@
+'use client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { SettingsService } from '@/services/SettingsService';
+import type { Settings } from '@/types/settings';
+
+export function useSettings() {
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading, isError, error } = useQuery<Settings | null, Error>({
+    queryKey: ['settings'],
+    queryFn: SettingsService.getSettings,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const mutation = useMutation<Settings, Error, Partial<Settings>>({
+    mutationFn: (newSettings) => SettingsService.upsertSettings(newSettings),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['settings'], data);
+    },
+  });
+
+  return {
+    settings,
+    isLoading,
+    isError,
+    error,
+    updateSettings: mutation.mutateAsync,
+    isUpdating: mutation.status === 'pending',
+    updateError: mutation.error,
+  };
+}
