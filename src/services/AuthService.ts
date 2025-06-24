@@ -137,7 +137,38 @@ export class AuthService {
         }
       }
 
+            // Create a default workspace for this new customer
+      if (data.user) {
+        try {
+          const workspaceName = `${email}'s Workspace`;
+          const { data: workspaceData, error: wsError } = await this.supabase
+            .from('workspaces')
+            .insert({ name: workspaceName, type: 'customer', settings: {} })
+            .select('id')
+            .single();
+          if (wsError || !workspaceData) {
+            console.error('[signUp] error creating workspace:', wsError);
+          } else {
+            const workspaceId = workspaceData.id;
+            // Create associated customer record
+            const customerName = email;
+            const { error: custError } = await this.supabase
+              .from('customers')
+              .insert({ name: customerName, workspace_id: workspaceId, settings: {} });
+            if (custError) console.error('[signUp] error creating customer record:', custError);
+            // Link user to new workspace
+            const { error: updError } = await this.supabase
+              .from('users')
+              .update({ workspace_id: workspaceId })
+              .eq('id', data.user.id);
+            if (updError) console.error('[signUp] error updating user workspace_id:', updError);
+          }
+        } catch (err) {
+          console.error('[signUp] workspace creation error:', err);
+        }
+      }
       return { data, error: null };
+
     } catch (error) {
       if (error instanceof Error && error.message.includes('too many requests')) {
         throw new Error('Sign up rate limit reached. Please try again in a minute.');
@@ -239,8 +270,8 @@ export class AuthService {
           .eq('id', roleIdValue)
           .maybeSingle();
         if (roleErr || !rawRole) {
-          console.warn('[getUserProfile] roles query error or no data, defaulting to customer:', roleErr);
-          roleRow = { id: '', name: 'Customer', capabilities: { type: 'customer', features: [], access: [] } };
+          console.warn('[getUserProfile] roles query error or no data, defaulting to Customer Admin:', roleErr);
+          roleRow = { id: '', name: UserRole.CUSTOMER_ADMIN, capabilities: { type: 'customer', features: [], access: [] } }; 
         } else {
           const caps = rawRole.capabilities as any;
           roleRow = {
@@ -254,8 +285,8 @@ export class AuthService {
           };
         }
       } else {
-        console.warn('[getUserProfile] no valid role_id, defaulting to Customer role');
-        roleRow = { id: '', name: 'Customer', capabilities: { type: 'customer', features: [], access: [] } };
+        console.warn('[getUserProfile] no valid role_id, defaulting to Customer Admin role');
+        roleRow = { id: '', name: UserRole.CUSTOMER_ADMIN, capabilities: { type: 'customer', features: [], access: [] } };
       }
       // Build profile
       const profile: UserProfile = {
@@ -271,6 +302,45 @@ export class AuthService {
         access: roleRow.capabilities?.access || []
       };
       console.log('[getUserProfile] built profile', profile);
+      // Auto-provision workspace for new customer without one
+      if (profile.userType === 'customer' && !profile.workspaceId) {
+        console.log('[getUserProfile] provisioning workspace for user', userId);
+        try {
+          const workspaceName = `${profile.email}'s Workspace`;
+          const { data: wsData, error: wsError } = await this.supabase
+            .from('workspaces')
+            .insert({ name: workspaceName, type: 'customer', settings: {} })
+            .select('id')
+            .single();
+          if (wsError || !wsData) {
+            console.error('[getUserProfile] error creating workspace:', wsError);
+          } else {
+            const newWorkspaceId = wsData.id;
+            const { data: custData, error: custError } = await this.supabase
+              .from('customers')
+              .insert({ name: profile.email || '', workspace_id: newWorkspaceId, settings: {} })
+              .select('id')
+              .single();
+            if (custError || !custData) {
+              console.error('[getUserProfile] error creating customer:', custError);
+            } else {
+              const newCustomerId = custData.id;
+              const { error: updError } = await this.supabase
+                .from('users')
+                .update({ workspace_id: newWorkspaceId })
+                .eq('id', profile.id);
+              if (updError) {
+                console.error('[getUserProfile] error updating user workspace:', updError);
+              } else {
+                profile.workspaceId = newWorkspaceId;
+                profile.customerId = newCustomerId;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('[getUserProfile] provisioning error:', e);
+        }
+      }
       // If customer, fetch customer ID
       if (profile.userType === 'customer' && profile.workspaceId) {
         console.log('[getUserProfile] querying customers table for workspace', profile.workspaceId);

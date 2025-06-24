@@ -1,4 +1,5 @@
 export type Role = 'owner' | 'admin' | 'editor' | 'viewer';
+
 export type Status = 'pending' | 'active';
 
 export interface TeamMember {

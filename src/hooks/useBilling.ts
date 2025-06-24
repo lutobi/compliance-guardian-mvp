@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BillingService } from '@/services/BillingService';
-import type { Subscription, Invoice } from '@/types/billing';
+import type { Subscription, Invoice, SubscriptionPlan } from '@/types/billing';
 
 export function useBilling() {
   const queryClient = useQueryClient();
@@ -17,8 +17,9 @@ export function useBilling() {
     queryFn: BillingService.getInvoices,
   });
 
-  const updateSubMutation = useMutation(BillingService.updateSubscription, {
-    onSuccess: () => queryClient.invalidateQueries(['subscription']),
+  const updateSubMutation = useMutation<Subscription, Error, SubscriptionPlan>({
+    mutationFn: BillingService.updateSubscription,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['subscription'] }),
   });
 
   return {
@@ -31,6 +32,6 @@ export function useBilling() {
     isInvError,
     invError,
     updateSubscription: updateSubMutation.mutateAsync,
-    isUpdating: updateSubMutation.isLoading,
+    isUpdating: updateSubMutation.status === 'pending',
   };
 }

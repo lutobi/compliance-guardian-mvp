@@ -20,6 +20,11 @@ export default function ClientLayout({
 
   const supabase = createClientComponentClient();
 
+  // Seed initial admin on first load
+  useEffect(() => {
+    fetch('/api/team/init', { method: 'POST' }).catch(console.error);
+  }, []);
+
   const initializeAuth = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();

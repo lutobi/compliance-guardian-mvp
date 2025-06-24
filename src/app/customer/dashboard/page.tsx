@@ -138,9 +138,9 @@ export default function CustomerDashboard() {
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <ul className="space-y-2">
-            <li><a href="/dashboard/assessments/new" className="text-blue-600 hover:underline">Start New Assessment</a></li>
-            <li><a href="/customer/documents" className="text-blue-600 hover:underline">Upload Documents</a></li>
-            <li><a href="/dashboard/assessments" className="text-blue-600 hover:underline">View Ongoing Assessments</a></li>
+            <li><a href="/customer/assessments/new" className="text-blue-600 hover:underline">Start New Assessment</a></li>
+            <li><a href="/settings" className="text-blue-600 hover:underline">Settings</a></li>
+            <li><a href="/customer/assessments" className="text-blue-600 hover:underline">View Ongoing Assessments</a></li>
             <li><a href="/monitoring" className="text-blue-600 hover:underline">View Monitoring Status</a></li>
           </ul>
         </div>

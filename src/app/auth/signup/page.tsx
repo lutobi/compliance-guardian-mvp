@@ -14,7 +14,7 @@ export default function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,9 +25,9 @@ export default function SignUpPage() {
         throw new Error('Passwords do not match');
       }
 
-      await signIn(email, password);
-      toast.success('Successfully signed up!');
-      router.push('/auth/login');
+      await signUp(email, password);
+      toast.success('Confirmation email sent! Please check your inbox to verify your account before logging in.');
+      
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to sign up');
     } finally {

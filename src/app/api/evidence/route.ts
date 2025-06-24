@@ -161,3 +161,75 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Failed to add evidence' }, { status: 500 });
   }
 }
+
+// Handle evidence update
+export async function PUT(request: Request) {
+  console.log('Evidence API PUT called');
+  const supabase = createRouteHandlerClient({ cookies });
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = await request.json();
+    const id = body.id;
+    if (!id) {
+      return NextResponse.json({ error: 'Missing evidence ID' }, { status: 400 });
+    }
+    const record: any = {};
+    if (body.notes !== undefined) record.notes = body.notes;
+    if (body.tags !== undefined) record.tags = body.tags;
+    if (body.files !== undefined) record.files = body.files;
+    record.updated_at = new Date().toISOString();
+    const { data, error } = await supabase
+      .from('evidence')
+      .update(record)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) {
+      console.error('Error updating evidence:', error);
+      return NextResponse.json({ error: error.message || 'Failed to update evidence' }, { status: 500 });
+    }
+    const mappedData: Evidence = {
+      id: data.id,
+      subcontrolId: data.subcontrol_id,
+      frameworkId: data.framework_id,
+      files: data.files || [],
+      notes: data.notes || '',
+      tags: data.tags || [],
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      controlName: data.title?.replace('Evidence for ', '') || ''
+    };
+    return NextResponse.json({ data: mappedData, success: true });
+  } catch (error: any) {
+    console.error('Error in evidence PUT:', error);
+    return NextResponse.json({ error: error.message || 'Failed to update evidence' }, { status: 500 });
+  }
+}
+
+// Handle evidence deletion
+export async function DELETE(request: Request) {
+  console.log('Evidence API DELETE called');
+  const supabase = createRouteHandlerClient({ cookies });
+  try {
+    const body = await request.json();
+    const id = body.id;
+    if (!id) {
+      return NextResponse.json({ error: 'Missing evidence ID' }, { status: 400 });
+    }
+    const { error } = await supabase
+      .from('evidence')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting evidence:', error);
+      return NextResponse.json({ error: error.message || 'Failed to delete evidence' }, { status: 500 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error in evidence DELETE:', error);
+    return NextResponse.json({ error: error.message || 'Failed to delete evidence' }, { status: 500 });
+  }
+}

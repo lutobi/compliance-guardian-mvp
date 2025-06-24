@@ -57,6 +57,8 @@ export interface CustomerContextType {
   selectWorkspace: (workspaceId: string) => Promise<void>;
   createWorkspace: (name: string, industry?: string) => Promise<CustomerWorkspace | null>;
   refreshWorkspaces: () => Promise<void>;
+  deleteWorkspace: (workspaceId: string) => Promise<void>;
+  updateWorkspaceName: (name: string) => Promise<void>;
 }
 
 const defaultSettings: CustomerSettings = {
@@ -130,7 +132,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       }
 
       // Get all customer workspaces accessible to this user
-      const { data: workspacesData, error: workspacesError } = await supabase
+      let workspaceQuery = supabase
         .from('workspaces')
         .select(`
           id, 
@@ -146,6 +148,12 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
           )
         `)
         .eq('type', 'customer');
+      if (customerId) {
+        workspaceQuery = workspaceQuery.eq('customers.id', customerId);
+      } else if (userData?.workspace_id) {
+        workspaceQuery = workspaceQuery.eq('id', userData.workspace_id);
+      }
+      const { data: workspacesData, error: workspacesError } = await workspaceQuery;
 
       if (workspacesError) {
         setError('Failed to load workspaces');
@@ -156,7 +164,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       // Transform data to match our expected structure
       const transformedWorkspaces = workspacesData.map(w => ({
         id: w.id,
-        name: w.customers?.[0]?.name || w.name,
+        name: w.name || w.customers?.[0]?.name,
         customerId: w.customers?.[0]?.id,
         industry: w.customers?.[0]?.industry,
         settings: {
@@ -168,6 +176,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       }));
 
       setWorkspaces(transformedWorkspaces);
+      console.log('[CustomerProvider] loadWorkspaces →', transformedWorkspaces);
 
       // Set current workspace based on user data or customerId
       const currentWorkspaceId = userData?.workspace_id || customerId;
@@ -179,6 +188,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
         
         if (currentWorkspace) {
           setWorkspace(currentWorkspace);
+          console.log('[CustomerProvider] current workspace selected →', currentWorkspace);
           
           // Also set customer data if available
           const customerInfo = workspacesData.find(w => 
@@ -285,6 +295,44 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateWorkspaceName = async (name: string) => {
+      console.log('[CustomerProvider.rename] invoked →', name);
+    if (!workspace) {
+      setError('No workspace selected');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Update workspaces table
+      const { error: wsError } = await supabase
+        .from('workspaces')
+        .update({ name })
+        .eq('id', workspace.id);
+      if (wsError) throw wsError;
+      // Update customers table
+      if (workspace.customerId) {
+        const { error: custError } = await supabase
+          .from('customers')
+          .update({ name })
+          .eq('id', workspace.customerId);
+        if (custError) throw custError;
+      }
+      // Sync local state
+      setWorkspace({ ...workspace, name });
+        console.log('[CustomerProvider.rename] set local workspace →', { ...workspace, name });
+      setCustomerData(prev => prev ? { ...prev, name } : prev);
+      setWorkspaces(prev => prev.map(w => w.id === workspace.id ? { ...w, name } : w));
+          // Reload workspaces to sync full context
+          await loadWorkspaces();
+    } catch (error) {
+      console.error('Error updating workspace name:', error);
+      setError('Failed to update workspace name');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const selectWorkspace = async (workspaceId: string) => {
     if (!userId) {
       setError('No user is logged in');
@@ -382,6 +430,53 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
     await loadWorkspaces();
   };
 
+  const deleteWorkspace = async (workspaceId: string) => {
+    if (!userId) {
+      setError('No user is logged in');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Delete associated customer record
+      const { error: custErr } = await supabase
+        .from('customers')
+        .delete()
+        .eq('workspace_id', workspaceId);
+      if (custErr) throw custErr;
+      // Delete workspace record
+      const { error: wsErr } = await supabase
+        .from('workspaces')
+        .delete()
+        .eq('id', workspaceId);
+      if (wsErr) throw wsErr;
+      // If deleted current workspace, select another or clear
+      if (workspace?.id === workspaceId) {
+        const remaining = workspaces.filter(w => w.id !== workspaceId);
+        if (remaining.length > 0) {
+          await selectWorkspace(remaining[0].id);
+        } else {
+          // Clear when no workspaces left
+          const { error: userErr } = await supabase
+            .from('users')
+            .update({ workspace_id: null })
+            .eq('id', userId);
+          if (userErr) throw userErr;
+          setWorkspace(null);
+          setWorkspaces([]);
+          setCustomerData(null);
+        }
+      } else {
+        // Just refresh list
+        await loadWorkspaces();
+      }
+    } catch (err: any) {
+      console.error('Error deleting workspace:', err.message, err.details);
+      setError('Failed to delete workspace: ' + (err.message ?? 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <CustomerContext.Provider
       value={{
@@ -392,9 +487,11 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
         loading,
         error,
         updateSettings,
+        updateWorkspaceName,
         selectWorkspace,
         createWorkspace,
-        refreshWorkspaces
+        refreshWorkspaces,
+        deleteWorkspace
       }}
     >
       {children}

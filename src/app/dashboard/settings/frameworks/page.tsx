@@ -1,18 +1,20 @@
-'use client';
-
+"use client";
 import React, { useState } from 'react';
 import { useFrameworks, useFrameworkUpdateLogs } from '@/hooks/useFrameworks';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/context';
 import { useTeam } from '@/hooks/useTeam';
+import { useRouter } from 'next/navigation';
 
 export default function FrameworksSettingsPage() {
+  const router = useRouter();
   const { data: frameworks = [], isLoading, isError, error, refetch } = useFrameworks();
-  const { user } = useAuth();
+  const { user, isSystemUser } = useAuth();
   const { members: teamMembers = [] } = useTeam();
-  const currentMember = teamMembers.find(m => m.user_id === user?.id);
-  const isAdmin = currentMember?.role === 'owner' || currentMember?.role === 'admin';
+  const currentMember = teamMembers.find(m => m.email === user?.email);
+  const isTeamAdmin = currentMember?.role === 'owner' || currentMember?.role === 'admin';
+  const isAdmin = isSystemUser || isTeamAdmin;
   const [syncing, setSyncing] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { data: logs = [], isLoading: logsLoading, isError: logsError } =
@@ -23,10 +25,16 @@ export default function FrameworksSettingsPage() {
     setSyncing(true);
     try {
       const res = await fetch('/api/sync-frameworks', { method: 'POST' });
-      const body = await res.json();
+      let body: any = {};
+      try {
+        body = await res.json();
+      } catch {
+        /* ignore JSON parse errors */
+      }
       if (!res.ok) throw new Error(body.error || 'Sync failed');
       toast.success('Frameworks synced');
       await refetch();
+      router.refresh();
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -40,6 +48,7 @@ export default function FrameworksSettingsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Frameworks</h1>
+      {/* DEBUG panel removed */}
       {isAdmin && (
         <Button onClick={handleSync} disabled={syncing}>
           {syncing ? 'Syncing...' : 'Check for updates'}

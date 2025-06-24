@@ -24,7 +24,12 @@ export function useSettings() {
     isLoading,
     isError,
     error,
-    updateSettings: mutation.mutateAsync,
+    updateSettings: async (newSettings: Partial<Settings>) => {
+      if (!settings?.workspace_id) {
+        throw new Error('Workspace ID is required');
+      }
+      return mutation.mutateAsync({ workspace_id: settings.workspace_id, ...newSettings });
+    },
     isUpdating: mutation.status === 'pending',
     updateError: mutation.error,
   };

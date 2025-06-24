@@ -27,6 +27,7 @@ async function seed() {
     console.log(`Upserting framework ${id}`);
     await supabase.from('frameworks').upsert({
       id,
+      slug: id,
       name: fw.name,
       version: fw.version,
       description: fw.description,

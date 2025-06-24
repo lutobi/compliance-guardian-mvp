@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/context';
+import { useCustomerWorkspace } from '@/lib/workspace/customer-context';
 import {
   ChartBarIcon,
   BookOpenIcon,
@@ -28,6 +29,8 @@ interface NavItem {
 }
 
 export default function Sidebar() {
+  console.log('[Sidebar] rendered workspace →', useCustomerWorkspace().workspace);
+  const { workspace, workspaces, selectWorkspace, deleteWorkspace } = useCustomerWorkspace();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -59,11 +62,13 @@ export default function Sidebar() {
       href: '/monitoring',
       icon: ClipboardDocumentCheckIcon,
     },
-    {
-      title: 'Frameworks',
-      href: '/frameworks',
-      icon: BookOpenIcon,
-    },
+    ...(isSystemUser
+      ? [{
+          title: 'Frameworks',
+          href: '/dashboard/frameworks',
+          icon: BookOpenIcon,
+        }]
+      : []),
     {
       title: 'Compare',
       href: '/compare',
@@ -81,7 +86,7 @@ export default function Sidebar() {
     },
     {
       title: 'Settings',
-      href: '/dashboard/settings',
+      href: '/settings',
       icon: Cog6ToothIcon,
     },
   ];
@@ -149,10 +154,36 @@ export default function Sidebar() {
               <div className="flex items-center space-x-3 mb-4">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {user.email}
+                    {isCustomerUser ? workspace?.name : user.email}
                   </p>
                 </div>
               </div>
+              {isSystemUser && (
+                <div className="mt-4 border-t pt-2">
+                  <span className="text-xs font-medium text-gray-500 block mb-1">Workspaces</span>
+                  {workspaces.map((ws) => (
+                    <div key={ws.id} className="flex items-center justify-between mb-1">
+                      <button
+                        onClick={() => selectWorkspace(ws.id)}
+                        className={cn(
+                          'text-sm',
+                          workspace?.id === ws.id
+                            ? 'font-semibold text-gray-900'
+                            : 'text-gray-600 hover:text-gray-900'
+                        )}
+                      >
+                        {ws.name}
+                      </button>
+                      <button
+                        onClick={() => deleteWorkspace(ws.id)}
+                        className="text-red-500 hover:text-red-700 text-xs"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div>
                 <Button
                   variant="ghost"

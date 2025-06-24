@@ -28,7 +28,7 @@ export const supabase = (() => {
     supabaseInstance = createClient<Database>(supabaseUrl, supabaseKey);
   } else {
     // Client-side
-    supabaseInstance = createClient<Database>(supabaseUrl, supabaseKey);
+    supabaseInstance = createClientComponentClient<Database>();
   }
   
   return supabaseInstance;

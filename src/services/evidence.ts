@@ -95,83 +95,35 @@ export class EvidenceService {
 
   async updateEvidence(id: string, evidence: Partial<Evidence>): Promise<OperationResult<Evidence>> {
     try {
-      console.log('Updating evidence:', id, evidence);
-      
-      // Prepare the update record with proper field names
-      const updateRecord: any = {
-        updated_at: new Date().toISOString()
-      };
-      
-      // Only include fields that are provided
-      if (evidence.notes !== undefined) updateRecord.notes = evidence.notes;
-      if (evidence.tags !== undefined) updateRecord.tags = evidence.tags;
-      if (evidence.files !== undefined) updateRecord.files = evidence.files;
-      
-      console.log('Update record:', updateRecord);
-      const { data, error } = await this.supabase
-        .from('evidence')
-        .update(updateRecord)
-        .eq('id', id)
-        .select('*')
-        .single();
-
-      if (error) {
-        console.error('Error updating evidence:', error);
-        throw error;
-      }
-
-      console.log('Evidence updated successfully:', data);
-      return {
-        success: true,
-        data: {
-          id: data.id,
-          subcontrolId: data.subcontrol_id,
-          frameworkId: data.framework_id,
-          files: Array.isArray(data.files) ? data.files as unknown as EvidenceFile[] : [],
-          notes: data.notes || '',
-          tags: data.tags || [],
-          createdAt: data.created_at || '',
-          updatedAt: data.updated_at || ''
-        }
-      };
+      const response = await fetch(`${getBaseUrl()}/api/evidence`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id, ...evidence }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to update evidence');
+      return { success: true, data: result.data };
     } catch (error: any) {
-      console.error('Failed to update evidence:', error);
-      return {
-        success: false,
-        error: {
-          code: error.code || 'UNKNOWN',
-          message: error.message || 'Failed to update evidence'
-        }
-      };
+      console.error('Failed to update evidence via API:', error);
+      return { success: false, error: { code: 'API_ERROR', message: error.message } };
     }
   }
 
   async deleteEvidence(id: string): Promise<OperationResult<void>> {
     try {
-      console.log('Deleting evidence:', id);
-      const { error } = await this.supabase
-        .from('evidence')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting evidence:', error);
-        throw error;
-      }
-
-      console.log('Evidence deleted successfully');
-      return {
-        success: true
-      };
+      const response = await fetch(`${getBaseUrl()}/api/evidence`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Failed to delete evidence');
+      return { success: true };
     } catch (error: any) {
-      console.error('Failed to delete evidence:', error);
-      return {
-        success: false,
-        error: {
-          code: error.code || 'UNKNOWN',
-          message: error.message || 'Failed to delete evidence'
-        }
-      };
+      console.error('Failed to delete evidence via API:', error);
+      return { success: false, error: { code: 'API_ERROR', message: error.message } };
     }
   }
 

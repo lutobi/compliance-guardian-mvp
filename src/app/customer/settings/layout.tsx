@@ -7,12 +7,13 @@ import { useRouter, usePathname } from 'next/navigation';
 const tabItems = [
   { value: 'general', label: 'General' },
   { value: 'frameworks', label: 'Frameworks' },
+  { value: 'billing', label: 'Billing' },
 ];
 
 export default function CustomerSettingsLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const segments = pathname.split('/');
+  const segments = pathname?.split('/') || [];
   const current = segments[3] || 'general';
   const [value, setValue] = useState<string>(current);
 

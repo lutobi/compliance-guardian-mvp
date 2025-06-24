@@ -5,6 +5,8 @@ import { api } from '@/lib/api';
 import Link from 'next/link';
 import { useAssessmentEvidenceQuery } from '@/hooks/useAssessmentEvidenceQuery';
 import { FrameworkSummary } from '@/components/frameworks/FrameworkSummary';
+import { AssessmentSummaryCard } from '@/app/dashboard/assessments/AssessmentSummaryCard';
+import { AssessmentNarrativeCard } from '@/app/dashboard/assessments/AssessmentNarrativeCard';
 import type { Evidence } from '@/types/evidence';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { calculateControlProgress } from '@/utils/progress';
@@ -363,27 +365,36 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
   });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-4">{assessment.name}</h1>
-      <p><strong>Status:</strong> {assessment.status.replace('_', ' ')}</p>
-      <p><strong>Framework:</strong> {framework.name}</p>
-      {assessment.description && (
-        <p className="mt-2"><strong>Description:</strong> {assessment.description}</p>
+    <div className="w-full mx-auto px-4 pt-4 pb-2 overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
+        <div className="min-w-0 space-y-2 overflow-hidden">
+          <h1 className="text-2xl font-bold truncate whitespace-nowrap">{assessment.name}</h1>
+          <div className="inline-flex items-baseline space-x-4 text-sm">
+            <p><strong>Status:</strong> {assessment.status.replace('_', ' ')}</p>
+            <p><strong>Version:</strong> {framework.version}</p>
+          </div>
+          <Link href="/dashboard/assessments" className="inline-block px-2 py-1 bg-blue-600 text-white rounded text-sm">
+            Back to Assessments
+          </Link>
+          <div className="mt-2 space-y-1">
+            <h2 className="text-xl font-semibold">Framework Details</h2>
+            <p><strong>Name:</strong> {framework.name}</p>
+            <p className="mt-1">{framework.description}</p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <AssessmentSummaryCard assessmentId={id} />
+          <AssessmentNarrativeCard assessmentId={id} />
+        </div>
+      </div>
+      {/* Full-width categories grid below summary */}
+      {framework.categories && framework.categories.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {framework.categories.map(cat => (
+            <span key={cat} className="bg-gray-100 text-sm px-2 py-1 rounded">{cat}</span>
+          ))}
+        </div>
       )}
-      <div className="mt-4">
-        <Link href="/dashboard/assessments" className="inline-block px-4 py-2 bg-blue-600 text-white rounded">
-          Back to Assessments
-        </Link>
-      </div>
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-2">Framework Details</h2>
-        <p><strong>Name:</strong> {framework.name}</p>
-        <p><strong>Version:</strong> {framework.version}</p>
-        {framework.categories && framework.categories.length > 0 && (
-          <p><strong>Categories:</strong> {framework.categories.join(', ')}</p>
-        )}
-        <p className="mt-2">{framework.description}</p>
-      </div>
       <div className="mt-8">
         <FrameworkSummary controls={processedControls} evidenceMap={evidenceMap} />
       </div>

@@ -27,6 +27,7 @@ export interface AuthContextType {
   isCustomerUser: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -133,11 +134,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Client-side role-based routing
       if (profile.userType === 'system') {
-        await router.push('/system/dashboard');
+        await router.push('/dashboard');
       } else if (profile.userType === 'customer') {
         await router.push(profile.workspaceId ? '/customer/dashboard' : '/customer/select-workspace');
       } else {
-        await router.push('/dashboard');
+        await router.push('/auth/login');
       }
     } catch (error) {
       console.error('Error signing in:', error);
@@ -146,6 +147,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, [authService, router, mapProfileToUser]);
+
+  const signUp = useCallback(async (email: string, password: string): Promise<void> => {
+      try {
+        setLoading(true);
+        const { data, error } = await authService.signUp(email, password);
+        if (error) {
+          console.error('Sign up error:', error);
+          throw new Error(error.message);
+        }
+      } catch (error) {
+        console.error('Error signing up:', error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    }, [authService]);
 
   const signOut = useCallback(async () => {
     try {
@@ -248,6 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isCustomerUser,
         loading,
         signIn,
+        signUp,
         signOut,
         resetPassword,
         updateProfile,

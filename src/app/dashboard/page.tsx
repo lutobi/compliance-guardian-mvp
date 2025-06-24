@@ -138,9 +138,9 @@ export default function DashboardPage() {
       if (isCustomerUser) {
         router.push('/customer/dashboard');
       } else if (isSystemUser) {
-        router.push('/admin/dashboard');
+        router.push('/dashboard/frameworks');
       } else {
-        router.push('/login');
+        router.push('/auth/login');
       }
     }
   }, [loading, isCustomerUser, isSystemUser, router]);

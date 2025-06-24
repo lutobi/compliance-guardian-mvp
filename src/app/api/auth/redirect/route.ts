@@ -57,7 +57,7 @@ export async function GET(request: Request) {
     console.log('[Auth Redirect] redirect target based on userType');
     // Redirect based on user type
     if (userType === 'system') {
-      return NextResponse.redirect(`${origin}/system/dashboard`);
+      return NextResponse.redirect(`${origin}/dashboard`);
     } else if (userType === 'customer') {
       // Check if user has a workspace
       if (userRow.workspace_id) {

@@ -1,11 +1,10 @@
 import { supabase } from '@/lib/supabase/client';
 import type { TeamMember } from '@/types/team';
+import { createClient } from '@supabase/supabase-js';
 
 export class TeamService {
-  private static supabase = supabase;
-
   static async getMembers(): Promise<TeamMember[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('team_members')
       .select('*');
     if (error) throw error;
@@ -13,7 +12,7 @@ export class TeamService {
   }
 
   static async inviteMember(member: Omit<TeamMember, 'id' | 'invited_at' | 'accepted_at' | 'status'>): Promise<TeamMember> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('team_members')
       .insert(member)
       .select('*')
@@ -23,7 +22,7 @@ export class TeamService {
   }
 
   static async updateMember(id: string, updates: Partial<TeamMember>): Promise<TeamMember> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('team_members')
       .update(updates)
       .eq('id', id)
@@ -34,7 +33,7 @@ export class TeamService {
   }
 
   static async removeMember(id: string): Promise<void> {
-    const { error } = await this.supabase
+    const { error } = await supabase
       .from('team_members')
       .delete()
       .eq('id', id);

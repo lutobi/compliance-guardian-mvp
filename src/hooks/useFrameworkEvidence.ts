@@ -154,17 +154,16 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Delete evidence
   const deleteEvidence = async (evidenceId: string) => {
     try {
-      // const { error } = await supabase
-      //   .from('evidence')
-      //   .delete()
-      //   .eq('id', evidenceId);
-
-      // if (error) throw error;
-
+      const res = await fetch('/api/evidence', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: evidenceId }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete evidence');
       // Update local state immediately for UI responsiveness
       setEvidence(prev => prev.filter(e => e.id !== evidenceId));
-      
-      // Update the evidence map
       setEvidenceMap(prev => {
         const newMap = { ...prev };
         Object.keys(newMap).forEach(key => {
@@ -172,13 +171,11 @@ export function useFrameworkEvidence(frameworkId: string) {
         });
         return newMap;
       });
-      
       // Force a refresh to ensure consistency
       setTimeout(refreshEvidence, 500);
-      
       toast.success('Evidence deleted successfully');
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting evidence:', error);
       toast.error('Failed to delete evidence');
       return { success: false, error };
@@ -188,49 +185,29 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Update evidence
   const updateEvidence = async (evidenceId: string, updates: Partial<Evidence>) => {
     try {
-      // const { data, error } = await supabase
-      //   .from('evidence')
-      //   .update({
-      //     notes: updates.notes,
-      //     files: updates.files,
-      //     tags: updates.tags,
-      //     updated_at: new Date().toISOString()
-      //   })
-      //   .eq('id', evidenceId)
-      //   .select()
-      //   .single();
-
-      // if (error) throw error;
-
-      // const formattedEvidence: Evidence = {
-      //   id: data.id,
-      //   frameworkId: data.framework_id,
-      //   subcontrolId: data.subcontrol_id,
-      //   notes: data.notes,
-      //   files: data.files || [],
-      //   tags: data.tags || [],
-      //   createdAt: data.created_at,
-      //   updatedAt: data.updated_at
-      // };
-
-      // Update local state immediately for UI responsiveness
-      // setEvidence(prev => prev.map(e => e.id === evidenceId ? formattedEvidence : e));
-      
-      // Update the evidence map
-      // setEvidenceMap(prev => {
-      //   const newMap = { ...prev };
-      //   Object.keys(newMap).forEach(key => {
-      //     newMap[key] = newMap[key].map(e => e.id === evidenceId ? formattedEvidence : e);
-      //   });
-      //   return newMap;
-      // });
-      
-      // Force a refresh to ensure consistency
-      // setTimeout(refreshEvidence, 500);
-      
-      // toast.success('Evidence updated successfully');
-      // return { success: true, data: formattedEvidence };
-    } catch (error) {
+      const res = await fetch('/api/evidence', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ id: evidenceId, ...updates }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update evidence');
+      const updated: Evidence = json.data;
+      // Update local state immediately
+      setEvidence(prev => prev.map(e => e.id === evidenceId ? updated : e));
+      setEvidenceMap(prev => {
+        const newMap = { ...prev };
+        Object.keys(newMap).forEach(key => {
+          newMap[key] = newMap[key].map(e => e.id === evidenceId ? updated : e);
+        });
+        return newMap;
+      });
+      // Refresh to ensure consistency
+      setTimeout(refreshEvidence, 500);
+      toast.success('Evidence updated successfully');
+      return { success: true, data: updated };
+    } catch (error: any) {
       console.error('Error updating evidence:', error);
       toast.error('Failed to update evidence');
       return { success: false, error };

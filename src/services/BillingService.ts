@@ -1,20 +1,18 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase/client';
 import type { Subscription, Invoice } from '@/types/billing';
 
 export class BillingService {
-  private static supabase = createClientComponentClient();
-
   static async getSubscription(): Promise<Subscription | null> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('subscriptions')
       .select('*')
-      .single();
+      .maybeSingle();
     if (error) throw error;
     return data;
   }
 
   static async updateSubscription(plan: Subscription['subscription_plan']): Promise<Subscription> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('subscriptions')
       .upsert({ subscription_plan: plan }, { onConflict: 'workspace_id' })
       .select('*')
@@ -24,7 +22,7 @@ export class BillingService {
   }
 
   static async getInvoices(): Promise<Invoice[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('invoices')
       .select('*')
       .order('date', { ascending: false });

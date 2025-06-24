@@ -3,6 +3,8 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { EnhancedControl, MonitoringPoint } from '@/types/enhanced-framework';
 import { MonitoringService } from '@/services/monitoring';
+import { EvidenceService } from '@/services/evidence';
+import type { EvidenceFile } from '@/types/evidence';
 
 interface ControlMonitoringProps {
   control: EnhancedControl;
@@ -10,6 +12,7 @@ interface ControlMonitoringProps {
 
 export const ControlMonitoring: React.FC<ControlMonitoringProps> = ({ control }) => {
   const [monitoringStatus, setMonitoringStatus] = useState<any[]>([]);
+  const [subEvidence, setSubEvidence] = useState<Record<string, EvidenceFile[]>>({});
   const monitoringService = MonitoringService.getInstance();
 
   useEffect(() => {
@@ -28,6 +31,23 @@ export const ControlMonitoring: React.FC<ControlMonitoringProps> = ({ control })
       clearInterval(interval);
     };
   }, [control]);
+
+  useEffect(() => {
+    const service = new EvidenceService();
+    const fetchEvidence = async () => {
+      const map: Record<string, EvidenceFile[]> = {};
+      for (const sc of control.subControls) {
+        try {
+          const evs = await service.getEvidenceForSubcontrol(sc.id);
+          map[sc.id] = evs.flatMap(e => e.files);
+        } catch (err) {
+          console.error('Failed to fetch evidence for sub-control', sc.id, err);
+        }
+      }
+      setSubEvidence(map);
+    };
+    fetchEvidence();
+  }, [control.subControls]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -137,6 +157,21 @@ export const ControlMonitoring: React.FC<ControlMonitoringProps> = ({ control })
                   </span>
                 ))}
               </div>
+              {subEvidence[subControl.id]?.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {subEvidence[subControl.id].map((file, idx) => (
+                    <div key={idx} className="w-16 h-16 border rounded overflow-hidden">
+                      {file.type?.startsWith('image') ? (
+                        <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                          {file.name}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

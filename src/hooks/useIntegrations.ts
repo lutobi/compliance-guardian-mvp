@@ -12,18 +12,19 @@ export function useIntegrations() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const createMutation = useMutation(IntegrationService.createIntegration, {
-    onSuccess: () => queryClient.invalidateQueries(['integrations']),
+  const createMutation = useMutation<Integration, Error, Omit<Integration, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>>({
+    mutationFn: IntegrationService.createIntegration,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integrations'] }),
   });
 
-  const updateMutation = useMutation(
-    ({ id, updates }: { id: string; updates: Partial<Omit<Integration, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>> }) =>
-      IntegrationService.updateIntegration(id, updates),
-    { onSuccess: () => queryClient.invalidateQueries(['integrations']) }
-  );
+  const updateMutation = useMutation<Integration, Error, { id: string; updates: Partial<Omit<Integration, 'id' | 'workspace_id' | 'created_at' | 'updated_at'>> }>({
+    mutationFn: ({ id, updates }) => IntegrationService.updateIntegration(id, updates),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integrations'] }),
+  });
 
-  const deleteMutation = useMutation(IntegrationService.deleteIntegration, {
-    onSuccess: () => queryClient.invalidateQueries(['integrations']),
+  const deleteMutation = useMutation<void, Error, string>({
+    mutationFn: IntegrationService.deleteIntegration,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integrations'] }),
   });
 
   return {
@@ -32,10 +33,10 @@ export function useIntegrations() {
     isError,
     error,
     createIntegration: createMutation.mutateAsync,
-    isCreating: createMutation.isLoading,
+    isCreating: createMutation.status === 'pending',
     updateIntegration: updateMutation.mutateAsync,
-    isUpdating: updateMutation.isLoading,
+    isUpdating: updateMutation.status === 'pending',
     deleteIntegration: deleteMutation.mutateAsync,
-    isDeleting: deleteMutation.isLoading,
+    isDeleting: deleteMutation.status === 'pending',
   };
 }

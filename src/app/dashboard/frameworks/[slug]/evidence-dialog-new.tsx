@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Evidence, EvidenceFile } from '@/types/evidence';
+import { EvidenceService } from '@/services/evidence';
 
 interface EvidenceDialogProps {
   subcontrolId: string;
@@ -20,6 +21,8 @@ interface EvidenceDialogProps {
   existingEvidence?: Evidence[];
   subcontrolName?: string;
 }
+
+interface FilePreview { url: string; name: string; type?: string; }
 
 // Simple array-based FileList implementation
 class FileListWrapper extends Array<File> implements FileList {
@@ -52,6 +55,9 @@ export default function EvidenceDialog({
   // Simple state management hooks moved above the mounted guard to maintain hook order
   const [notes, setNotes] = useState('');
   const [files, setFiles] = useState<FileListWrapper | null>(null);
+  const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
+  const previewUrlsRef = useRef<string[]>([]);
+  const [previewFile, setPreviewFile] = useState<FilePreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState('');
@@ -61,10 +67,18 @@ export default function EvidenceDialog({
     if (isOpen) {
       setNotes('');
       setFiles(null);
+      setFilePreviews([]);
       setEditingId(null);
       setEditingNotes('');
     }
   }, [isOpen]);
+
+  // Clean up previews on unmount
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,25 +92,19 @@ export default function EvidenceDialog({
     setLoading(true);
     
     try {
-      // Process files
+      const service = new EvidenceService();
+      // Process and upload files
       const uploadedFiles: EvidenceFile[] = [];
-      
       if (files && files.length > 0) {
         for (let i = 0; i < files.length; i++) {
           const file = files[i];
           if (!file) continue;
-          
-          // Simulate file upload
-          const timestamp = Date.now();
-          const randomId = Math.random().toString(36).substring(2, 10);
-          
-          uploadedFiles.push({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            url: `https://storage.example.com/${timestamp}_${randomId}`,
-            id: `${timestamp}_${randomId}`
-          });
+          const res = await service.uploadFile(file, `${frameworkId}/${subcontrolId}`);
+          if (res.success && res.data) {
+            uploadedFiles.push(res.data);
+          } else {
+            toast.error(`Failed to upload file: ${file.name}`);
+          }
         }
       }
       
@@ -121,6 +129,7 @@ export default function EvidenceDialog({
       // Reset form
       setNotes('');
       setFiles(null);
+      setFilePreviews([]);
       
       // Close dialog
       onClose();
@@ -180,11 +189,24 @@ export default function EvidenceDialog({
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFiles(new FileListWrapper(Array.from(e.target.files)));
+      const list = Array.from(e.target.files);
+      setFiles(new FileListWrapper(list));
+      // generate previews
+      const previews = list.map(file => {
+        const url = URL.createObjectURL(file);
+        previewUrlsRef.current.push(url);
+        return { url, name: file.name, type: file.type };
+      });
+      
+
+
+
+      setFilePreviews(prev => [...prev, ...previews]);
     }
   };
 
   return (
+    <>
     <Dialog open={isOpen} modal>
       <DialogContent 
         className="max-w-4xl" 
@@ -237,16 +259,18 @@ export default function EvidenceDialog({
                       <p>{evidence.notes}</p>
                       
                       {evidence.files && evidence.files.length > 0 && (
-                        <div className="mt-2">
-                          <h4 className="text-sm font-medium mb-1">Files:</h4>
-                          <div className="space-y-1">
-                            {evidence.files.map((file, index) => (
-                              <div key={index} className="flex items-center text-sm">
-                                <Paperclip className="w-4 h-4 mr-1" />
-                                <span>{file.name}</span>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {evidence.files.map((file, index) => (
+                            <div key={index} className="w-24 h-24 border rounded overflow-hidden cursor-pointer" onClick={() => setPreviewFile({ url: file.url!, name: file.name, type: file.type })}>
+                              {file.type?.startsWith('image') ? (
+                                <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="flex items-center justify-center w-full h-full p-1 text-xs text-gray-800">
+                                  {file.name}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
                       
@@ -301,32 +325,40 @@ export default function EvidenceDialog({
                 id="file-upload"
               />
               
-              {files && files.length > 0 ? (
-                <div className="space-y-2">
-                  {Array.from(files).map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div>
-                        <p className="text-sm font-medium">{file.name}</p>
-                        <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
-                      </div>
+              {filePreviews.length > 0 ? (
+                <div className="flex flex-wrap gap-4">
+                  {filePreviews.map((preview, index) => (
+                    <div key={index} className="w-24 h-24 border rounded overflow-hidden relative cursor-pointer" onClick={() => setPreviewFile(preview)}>
+                      {preview.type?.startsWith('image') ? (
+                        <img src={preview.url} alt={preview.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="flex items-center justify-center w-full h-full p-1 truncate text-xs text-gray-800">
+                          {preview.name}
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => {
-                          const newFiles = Array.from(files).filter((_, i) => i !== index);
-                          setFiles(newFiles.length > 0 ? new FileListWrapper(newFiles) : null);
+                          // remove preview and file
+                          setFilePreviews(prev => {
+                            const removed = prev[index];
+                            if (removed) URL.revokeObjectURL(removed.url);
+                            return prev.filter((_, i) => i !== index);
+                          });
+                          setFiles(prev => {
+                            if (!prev) return null;
+                            const arr = Array.from(prev).filter((_, i) => i !== index);
+                            return arr.length > 0 ? new FileListWrapper(arr) : null;
+                          });
                         }}
-                        className="text-red-500"
+                        className="absolute top-1 right-1 text-white bg-black bg-opacity-50 rounded-full p-1"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3" />
                       </button>
                     </div>
                   ))}
-                  
-                  <label
-                    htmlFor="file-upload"
-                    className="block text-center text-sm text-blue-500 cursor-pointer mt-2"
-                  >
-                    Add more files
+                  <label htmlFor="file-upload" className="w-24 h-24 border-2 border-dashed rounded flex items-center justify-center cursor-pointer">
+                    <Paperclip className="w-6 h-6 text-gray-400" />
                   </label>
                 </div>
               ) : (
@@ -357,5 +389,25 @@ export default function EvidenceDialog({
         </form>
       </DialogContent>
     </Dialog>
+    <Dialog open={!!previewFile} onOpenChange={(open) => !open && setPreviewFile(null)}>
+      <DialogContent className="max-w-3xl w-full">
+        <DialogHeader>
+          <DialogTitle>Preview: {previewFile?.name}</DialogTitle>
+        </DialogHeader>
+        <div className="h-[80vh] overflow-auto">
+          {previewFile?.type?.startsWith('image') ? (
+            <img src={previewFile?.url!} alt={previewFile?.name!} className="w-full h-full object-contain" />
+          ) : previewFile?.type === 'application/pdf' ? (
+            <embed src={previewFile?.url!} type="application/pdf" width="100%" height="100%" />
+          ) : (
+            <iframe src={previewFile?.url!} className="w-full h-full" />
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setPreviewFile(null)}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }

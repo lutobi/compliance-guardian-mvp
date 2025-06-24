@@ -1,11 +1,12 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
 export async function middleware(req: NextRequest) {
   // Bypass favicon requests to avoid 500 errors
   if (req.nextUrl.pathname === '/favicon.ico') {
-    return NextResponse.next();
+    // Return no content for favicon to avoid errors when file is missing
+    return new NextResponse(null, { status: 204 });
   }
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
