@@ -364,6 +364,34 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
     evidenceMap[e.subcontrolId].push(e);
   });
 
+  // Determine if assessment is fully complete (every subcontrol has evidence)
+  const totalSubcontrols = processedControls.reduce((sum, c) => sum + (c.subcontrols?.length || 0), 0);
+  const completedSubcontrols = Object.keys(evidenceMap).length;
+  const isComplete = totalSubcontrols > 0 && completedSubcontrols === totalSubcontrols;
+
+  // Handler to generate AI report PDF
+  const generateReport = async () => {
+    try {
+      const endpoint = `/api/report/html-pdf?assessmentId=${id}`;
+        console.log('DEBUG: generateReport calling', endpoint);
+        const res = await fetch(endpoint);
+      if (!res.ok) {
+          const text = await res.text();
+          console.error('Report API error', res.status, text);
+          throw new Error('Failed to generate report: ' + text);
+        }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `assessment-${id}-report.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="w-full mx-auto px-4 pt-4 pb-2 overflow-hidden">
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto] items-start gap-4">
@@ -385,6 +413,12 @@ export default function AssessmentClient({ id }: AssessmentClientProps) {
         <div className="space-y-4">
           <AssessmentSummaryCard assessmentId={id} />
           <AssessmentNarrativeCard assessmentId={id} />
+           <button
+              onClick={generateReport}
+              className="mt-2 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Generate AI Report
+            </button>
         </div>
       </div>
       {/* Full-width categories grid below summary */}

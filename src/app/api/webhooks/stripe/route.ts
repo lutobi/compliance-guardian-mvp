@@ -2,19 +2,24 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-// Disable Next.js body parsing to validate raw Stripe payload
-export const config = { api: { bodyParser: false } };
+export const runtime = 'nodejs';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' });
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
-export async function POST(req: Request) {
+
+
+
+
+
+
+
+
+export async function POST(req) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-05-28.basil' });
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
   const payload = await req.text();
   const sig = req.headers.get('stripe-signature')!;
-  let event: Stripe.Event;
+  let event: any; // using any to avoid type issues
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -31,7 +36,7 @@ export async function POST(req: Request) {
     case 'customer.subscription.created':
     case 'customer.subscription.updated':
     case 'customer.subscription.deleted': {
-      const subscription = event.data.object as Stripe.Subscription;
+      const subscription: any = event.data.object;
       await supabase
         .from('subscriptions')
         .upsert({
@@ -54,7 +59,7 @@ export async function POST(req: Request) {
     }
     case 'invoice.payment_succeeded':
     case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice;
+      const invoice: any = event.data.object;
       await supabase
         .from('invoices')
         .insert({

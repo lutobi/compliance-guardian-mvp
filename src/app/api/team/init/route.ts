@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import type { Database } from '@/types/supabase';
 
 export async function POST() {
+  try {
   const supabase = createRouteHandlerClient<Database>({ cookies });
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -59,6 +60,10 @@ export async function POST() {
   }
 
   return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error('team/init error:', err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
-export const config = { runtime: 'edge' };
+export const runtime = 'nodejs';

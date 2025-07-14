@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -11,6 +12,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  
   async redirects() {
     return [
       { source: '/login', destination: '/auth/login', permanent: false },
@@ -18,6 +20,14 @@ const nextConfig = {
       { source: '/verify-email', destination: '/auth/verify-email', permanent: false }
     ];
   },
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.afm$/,
+      type: 'asset/source',
+    });
+    return config;
+  },
+
   // Port is configured via package.json scripts or environment variables,
   // not through devServer which is not a valid Next.js config option
 };

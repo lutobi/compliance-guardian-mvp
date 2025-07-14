@@ -1,4 +1,4 @@
-import 'ts-node/register';
+
 import * as dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import { frameworkData } from '../src/data/frameworks';
