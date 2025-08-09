@@ -1,24 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { User } from '@supabase/supabase-js';
-import { AuthProvider } from '@/lib/auth/context';
+import { useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { log } from '@/lib/services/errorHandler';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [authState, setAuthState] = useState<{
-    user: User | null;
-    loading: boolean;
-  }>({
-    user: null,
-    loading: true,
-  });
-
-  const supabase = createClientComponentClient();
+  const { isAuthenticated, profile, isLoading } = useAuth();
 
   // Initialize team when user is authenticated (with improved error handling and retry logic)
   useEffect(() => {
@@ -28,9 +21,10 @@ export default function ClientLayout({
     const RETRY_DELAY = 2000; // 2 seconds
     
     const initializeTeam = async () => {
-      if (authState.user && !authState.loading && !initialized) {
+      if (isAuthenticated && profile && !isLoading && !initialized) {
         try {
-          console.log('Attempting team initialization...');
+          log('info', 'Attempting team initialization...', { userId: profile.id });
+          
           const response = await fetch('/api/team/init', { 
             method: 'POST',
             headers: {
@@ -38,22 +32,45 @@ export default function ClientLayout({
             }
           });
           
-          if (response.ok) {
+          const data = await response.json();
+          
+          if (response.ok && data.success) {
             initialized = true;
-            console.log('Team initialization successful');
+            log('info', 'Team initialization successful');
+            toast.success('Team setup complete');
             return true;
           } else {
-            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-            console.error(`Team initialization failed: ${response.status}`, errorData);
+            log('error', 'Team initialization failed', { 
+              status: response.status,
+              error: data.error?.message || 'Unknown error'
+            });
+            
+            // Show error toast for client-facing errors
+            if (response.status === 400) {
+              toast.error(`Setup error: ${data.error?.message || 'Invalid data'}`);
+              return true; // Don't retry validation errors
+            }
             
             // Only retry for specific error codes that might be temporary
             if (response.status >= 500 && retryCount < MAX_RETRIES) {
+              toast.warning('Connection issue. Retrying setup...');
               return false; // Signal for retry
             }
-            return true; // Don't retry for 4xx errors
+            
+            // Show error for non-retryable errors
+            if (retryCount >= MAX_RETRIES) {
+              toast.error('Could not complete setup. Please try again later.');
+            }
+            
+            return true; // Don't retry for other 4xx errors
           }
-        } catch (error) {
-          console.error('Team initialization error:', error);
+        } catch (error: any) {
+          log('error', 'Team initialization error', { error: error.message });
+          
+          if (retryCount >= MAX_RETRIES - 1) {
+            toast.error('Connection error. Please check your network.');
+          }
+          
           return retryCount < MAX_RETRIES; // Retry network errors
         }
       }
@@ -66,47 +83,40 @@ export default function ClientLayout({
       
       if (!success && retryCount < MAX_RETRIES) {
         retryCount++;
-        console.log(`Retrying team initialization (${retryCount}/${MAX_RETRIES}) in ${RETRY_DELAY}ms`);
+        const backoffDelay = RETRY_DELAY * Math.pow(2, retryCount - 1);
+        log('info', `Retrying team initialization`, { 
+          attempt: `${retryCount}/${MAX_RETRIES}`,
+          delay: backoffDelay
+        });
         
-        // Use setTimeout for retry with delay
-        setTimeout(attemptInitWithRetry, RETRY_DELAY * retryCount);
+        // Use setTimeout for retry with exponential backoff
+        setTimeout(attemptInitWithRetry, backoffDelay);
       }
     };
     
-    attemptInitWithRetry();
+    // Only try to initialize if authenticated
+    if (isAuthenticated && profile) {
+      attemptInitWithRetry();
+    }
     
     // Cleanup function to prevent memory leaks
     return () => {
       initialized = true; // Prevent further initialization attempts
     };
-  }, [authState.user, authState.loading]);
+  }, [isAuthenticated, profile, isLoading]);
 
-  const initializeAuth = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      setAuthState(prev => ({ ...prev, user }));
-    } catch (error) {
-      console.error('Error getting session:', error);
-    } finally {
-      setAuthState(prev => ({ ...prev, loading: false }));
-    }
-  }, [supabase.auth]);
-
-  useEffect(() => {
-    initializeAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setAuthState(prev => ({ ...prev, user: session?.user ?? null }));
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [supabase.auth, initializeAuth]);
-
-  // The AuthProvider is already provided in src/app/providers.tsx
   return (
     <>
+      <ToastContainer 
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       {children}
     </>
   );
