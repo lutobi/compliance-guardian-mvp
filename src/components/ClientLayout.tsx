@@ -20,10 +20,66 @@ export default function ClientLayout({
 
   const supabase = createClientComponentClient();
 
-  // Seed initial admin on first load
+  // Initialize team when user is authenticated (with improved error handling and retry logic)
   useEffect(() => {
-    fetch('/api/team/init', { method: 'POST' }).catch(console.error);
-  }, []);
+    let initialized = false;
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 2000; // 2 seconds
+    
+    const initializeTeam = async () => {
+      if (authState.user && !authState.loading && !initialized) {
+        try {
+          console.log('Attempting team initialization...');
+          const response = await fetch('/api/team/init', { 
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            initialized = true;
+            console.log('Team initialization successful');
+            return true;
+          } else {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error(`Team initialization failed: ${response.status}`, errorData);
+            
+            // Only retry for specific error codes that might be temporary
+            if (response.status >= 500 && retryCount < MAX_RETRIES) {
+              return false; // Signal for retry
+            }
+            return true; // Don't retry for 4xx errors
+          }
+        } catch (error) {
+          console.error('Team initialization error:', error);
+          return retryCount < MAX_RETRIES; // Retry network errors
+        }
+      }
+      return true; // No need to retry if not authenticated or already initialized
+    };
+    
+    // Implement retry with exponential backoff
+    const attemptInitWithRetry = async () => {
+      const success = await initializeTeam();
+      
+      if (!success && retryCount < MAX_RETRIES) {
+        retryCount++;
+        console.log(`Retrying team initialization (${retryCount}/${MAX_RETRIES}) in ${RETRY_DELAY}ms`);
+        
+        // Use setTimeout for retry with delay
+        setTimeout(attemptInitWithRetry, RETRY_DELAY * retryCount);
+      }
+    };
+    
+    attemptInitWithRetry();
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      initialized = true; // Prevent further initialization attempts
+    };
+  }, [authState.user, authState.loading]);
 
   const initializeAuth = useCallback(async () => {
     try {
