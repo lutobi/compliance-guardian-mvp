@@ -4,10 +4,11 @@ import { useAuth } from '@/lib/auth/context';
 import { useCustomerWorkspace } from '@/lib/workspace/customer-context';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { MonitoringService } from '@/services/MonitoringService';
+import { updateMonitoringPointStatusAction, deleteMonitoringPointAction } from './actions'; // removed getCustomerDashboardData
+// Removed direct supabase import - using API routes instead to avoid CORS issues
 import type { MonitoringItem } from '@/types/monitoring';
 import { MonitoringStatus } from '@/types/monitoring';
-import { api } from '@/lib/api';
+// import { api } from '@/lib/api'; // using server-mounted API route for assessments
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { FrameworkStatusItem, RecentActivityItem, PendingTaskItem, RiskSummaryItem, VerificationSummary } from '@/types/dashboard';
 import { ComplianceChart } from '@/components/dashboard/ComplianceChart';
@@ -21,6 +22,7 @@ export default function CustomerDashboard() {
   const router = useRouter();
   const { user, loading: authLoading, isCustomerUser, isSystemUser } = useAuth();
   const { workspace, loading: workspaceLoading } = useCustomerWorkspace();
+  console.log('[Dashboard]', { authLoading, workspaceLoading, workspace });
 
   const [dashboardData, setDashboardData] = useState<{ frameworkStatus: FrameworkStatusItem[]; recentActivities: RecentActivityItem[]; pendingTasks: PendingTaskItem[]; riskSummary: RiskSummaryItem[]; verificationSummary: VerificationSummary | null; }>({ frameworkStatus: [], recentActivities: [], pendingTasks: [], riskSummary: [], verificationSummary: null });
   const [loadingData, setLoadingData] = useState(true);
@@ -28,35 +30,92 @@ export default function CustomerDashboard() {
   const [monitoringItems, setMonitoringItems] = useState<MonitoringItem[]>([]);
 
   const loadDashboardData = async () => {
+    const wsId = workspace?.id;
+    console.log('[Dashboard] ==> WORKSPACE DEBUG <==');
+    console.log('[Dashboard] workspace object:', workspace);
+    console.log('[Dashboard] workspace.id:', wsId);
+    console.log('[Dashboard] workspace.customerId:', workspace?.customerId);
+    console.log('[Dashboard] user:', user);
+    console.log('[Dashboard] ==> END WORKSPACE DEBUG <==');
+    
+    if (!wsId) {
+      console.error('[Dashboard] No workspace ID available, cannot load assessments');
+      setLoadingData(false);
+      return;
+    }
+    
+    setLoadingData(true);
     try {
-      setLoadingData(true);
-      const monitoringData = await MonitoringService.getActiveMonitoring();
-      setMonitoringItems(monitoringData);
-      const frameworkStatus: FrameworkStatusItem[] = (monitoringData as any[]).map(item => {
-        const totalControls = item.monitoredControls?.length ?? 0;
-        const compliantCount = item.status === 'compliant' ? totalControls : 0;
-        const complianceRate = totalControls > 0 ? Math.round((compliantCount / totalControls) * 100) : 0;
-        return {
-          id: item.framework.id,
-          name: item.framework.name,
-          complianceRate,
-          totalControls,
-          compliantCount,
-          trend: 0,
-        };
-      });
-      const recentActivities = await MonitoringService.getRecentActivities(10);
-      const pendingTasks = await MonitoringService.getPendingTasks(10);
-      const riskSummary = await MonitoringService.getRiskAssessment();
-      const verificationSummary = await MonitoringService.getVerificationSummary();
-      setDashboardData({ frameworkStatus, recentActivities, pendingTasks, riskSummary, verificationSummary });
+      // Fetch dashboard data via API route (now includes assessments)
+      console.log('[Dashboard] Fetching dashboard data for workspace:', wsId);
+      const dashboardRes = await fetch(`/api/dashboard?workspaceId=${wsId}`, { credentials: 'include' });
+      
+      if (!dashboardRes.ok) {
+        const errorText = await dashboardRes.text();
+        console.error('[Dashboard] API error response:', errorText);
+        throw new Error(`Dashboard fetch error ${dashboardRes.status}`);
+      }
+      
+      const dashboardJson = await dashboardRes.json();
+      console.log('[Dashboard] dashboard API response:', dashboardJson);
 
-      // Compute assessment metrics
-      const assessments = await api.assessments.list(workspace.id);
-      const totalAssessments = assessments.length;
-      const completedAssessments = assessments.filter(a => a.status === 'completed').length;
-      const assessmentCompletionRate = totalAssessments > 0 ? Math.round((completedAssessments / totalAssessments) * 100) : 0;
-      setAssessmentStats({ count: totalAssessments, completionRate: assessmentCompletionRate });
+      // Extract assessment stats from the API response
+      const stats = dashboardJson.stats || { totalAssessments: 0, completedAssessments: 0, completionRate: 0 };
+      console.log('[Dashboard] Assessment stats from API:', stats);
+      
+      setAssessmentStats({ 
+        count: stats.totalAssessments, 
+        completionRate: stats.completionRate 
+      });
+
+      // Transform dashboard data for other components
+      const frameworkStatus = dashboardJson.frameworks?.map((f: any) => ({
+        id: f.id,
+        name: f.name,
+        status: f.status || 'pending',
+        progress: f.progress || 0,
+        lastUpdated: f.lastUpdated || new Date().toISOString(),
+      })) || [];
+
+      const recentActivities = dashboardJson.recentActivities?.map((a: any) => ({
+        id: a.id,
+        type: a.type || 'assessment',
+        title: a.title || 'Activity',
+        description: a.description || '',
+        timestamp: a.timestamp || new Date().toISOString(),
+        status: a.status || 'pending',
+      })) || [];
+
+      const pendingTasks = dashboardJson.pendingTasks?.map((t: any) => ({
+        id: t.id,
+        title: t.title || 'Task',
+        description: t.description || '',
+        priority: t.priority || 'medium',
+        dueDate: t.dueDate || new Date().toISOString(),
+        assignee: t.assignee || 'Unassigned',
+      })) || [];
+
+      const riskSummary = dashboardJson.riskSummary?.map((r: any) => ({
+        id: r.id,
+        category: r.category || 'General',
+        level: r.level || 'medium',
+        count: r.count || 0,
+        trend: 0,
+      })) || [];
+
+      const verificationSummary = dashboardJson.verificationSummary || {
+        total: 0,
+        completed: 0,
+        pending: 0,
+        failed: 0,
+        completionRate: 0,
+        trend: 0,
+      };
+      
+      setDashboardData({ frameworkStatus, recentActivities, pendingTasks, riskSummary, verificationSummary });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      setAssessmentStats({ count: 0, completionRate: 0 });
     } finally {
       setLoadingData(false);
     }
@@ -79,7 +138,7 @@ export default function CustomerDashboard() {
   // Handle task completion
   const handleTaskComplete = async (taskId: string) => {
     try {
-      await MonitoringService.updatePointStatus(taskId, MonitoringStatus.Compliant);
+      await updateMonitoringPointStatusAction(taskId, MonitoringStatus.Compliant);
       await loadDashboardData();
     } catch (error) {
       console.error('Failed to complete task:', error);
@@ -99,11 +158,26 @@ export default function CustomerDashboard() {
 
       {/* Assessments Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
+        <div 
+          className="bg-white rounded-lg shadow p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-l-4 border-blue-500" 
+          onClick={() => router.push('/customer/assessments')}
+          title="View all ongoing assessments"
+        >
           <h3 className="text-sm font-medium text-gray-500">Total Assessments</h3>
-          <p className="text-2xl font-bold">{assessmentStats.count}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-2xl font-bold">{assessmentStats.count}</p>
+            <span className="text-blue-500 text-sm">View all →</span>
+          </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-4 flex items-center justify-center">
+        <div 
+          className="bg-white rounded-lg shadow p-4 flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-l-4 border-green-500" 
+          onClick={() => router.push('/customer/assessments')}
+          title="View ongoing assessments"
+        >
+          <div className="mr-3">
+            <h3 className="text-sm font-medium text-gray-500 mb-1">Completion Rate</h3>
+            <span className="text-blue-500 text-sm">View details →</span>
+          </div>
           <ProgressRing value={assessmentStats.completionRate} size={80} strokeWidth={8} textClassName="text-lg" />
         </div>
       </div>
@@ -148,8 +222,8 @@ export default function CustomerDashboard() {
           <h2 className="text-xl font-semibold mb-4">Active Monitoring</h2>
           <MonitoringList
             monitoringData={monitoringItems}
-            onStatusUpdate={async (id, status) => { try { await MonitoringService.updatePointStatus(id, status); await loadDashboardData(); } catch {} }}
-            onDelete={async (id) => { try { await MonitoringService.deleteMonitoringPoint(id); await loadDashboardData(); } catch {} }}
+            onStatusUpdate={async (id, status) => { try { await updateMonitoringPointStatusAction(id, status); await loadDashboardData(); } catch {} }}
+            onDelete={async (id) => { try { await deleteMonitoringPointAction(id); await loadDashboardData(); } catch {} }}
           />
         </div>
         <div className="bg-white rounded-lg shadow p-6">
