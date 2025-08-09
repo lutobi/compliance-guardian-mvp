@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import type { Database } from '@/lib/database.types';
+import {
+  WorkspaceSettings,
+  WorkspaceSettingsInsert,
+  TeamMemberInsert,
+  normalizeWorkspaceId,
+  validateSettingsPayload,
+  validateTeamMemberPayload
+} from '@/lib/schema/settings';
 
 export async function POST() {
   console.log('========== TEAM INIT API CALLED ==========');
@@ -34,10 +42,13 @@ export async function POST() {
     const workspaceId = user.workspace_id;
     console.log('Workspace ID found:', workspaceId);
     
-    // Convert UUID to string if necessary to match the settings.workspace_id type
-    // Since team_members.workspace_id is defined as text in the schema
-    const workspaceIdString = workspaceId.toString();
-    console.log('Using workspaceId (string format):', workspaceIdString);
+    // Normalize workspace ID to ensure consistent string format using our utility
+    const workspaceIdString = normalizeWorkspaceId(workspaceId);
+    if (!workspaceIdString) {
+      console.error('Invalid workspace ID format');
+      return NextResponse.json({ error: 'Invalid workspace ID format' }, { status: 400 });
+    }
+    console.log('Using normalized workspaceId:', workspaceIdString);
     
     // First ensure settings record exists - this must be done before team_members insertion
     // due to the foreign key constraint
@@ -59,20 +70,31 @@ export async function POST() {
     if (!existingSettings) {
       console.log('Creating default settings for workspace:', workspaceIdString);
       
+      // Create settings payload using our schema type
+      const settingsPayload: WorkspaceSettingsInsert = {
+        workspace_id: workspaceIdString,
+        workspace_name: `Workspace ${workspaceIdString.substring(0, 6)}`,
+        default_compliance_framework: 'EUDR',
+        locale: 'en-US',
+        timezone: 'UTC',
+        date_format: 'yyyy-MM-dd',
+        time_format: '24h',
+        notifications_enabled: true,
+        compliance_frequency: 'monthly',
+        notification_threshold: 7
+      };
+      
+      // Validate the settings payload against our schema
+      const missingFields = validateSettingsPayload(settingsPayload);
+      if (missingFields.length > 0) {
+        const errorMessage = `Invalid settings payload: Missing required fields [${missingFields.join(', ')}]`;
+        console.error(errorMessage);
+        return NextResponse.json({ error: errorMessage }, { status: 400 });
+      }
+      
       const { error: createSettingsError } = await supabase
         .from('settings')
-        .insert({
-          workspace_id: workspaceIdString,
-          workspace_name: `Workspace ${workspaceIdString.substring(0, 6)}`,
-          default_compliance_framework: 'EUDR',
-          locale: 'en-US',
-          timezone: 'UTC',
-          date_format: 'yyyy-MM-dd',
-          time_format: '24h',
-          notifications_enabled: true,
-          compliance_frequency: 'monthly',
-          notification_threshold: 7
-        });
+        .insert(settingsPayload);
       
       if (createSettingsError) {
         console.error('Error creating settings:', createSettingsError);
@@ -120,13 +142,26 @@ export async function POST() {
       console.log('No existing team member found, creating new team member.');
       console.log('Creating team member for:', user.email);
       
+      // Create team member payload using our schema type
+      const teamMemberPayload: TeamMemberInsert = {
+        workspace_id: workspaceIdString,
+        email: user.email,
+        role: 'owner',
+        status: 'active'
+      };
+      
+      // Validate team member payload against our schema
+      const missingFields = validateTeamMemberPayload(teamMemberPayload);
+      if (missingFields.length > 0) {
+        const errorMessage = `Invalid team member payload: Missing required fields [${missingFields.join(', ')}]`;
+        console.error(errorMessage);
+        return NextResponse.json({ error: errorMessage }, { status: 400 });
+      }
+      
       const { error: insertError } = await supabase
         .from('team_members')
         .insert({
-          workspace_id: workspaceIdString,
-          email: user.email,
-          role: 'owner',
-          status: 'active',
+          ...teamMemberPayload,
           invited_at: new Date().toISOString(),
         });
         
