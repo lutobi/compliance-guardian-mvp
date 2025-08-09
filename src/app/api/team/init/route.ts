@@ -10,9 +10,17 @@ import {
   validateSettingsPayload,
   validateTeamMemberPayload
 } from '@/lib/schema/settings';
+import {
+  createSuccessResponse,
+  createErrorResponse,
+  handleDatabaseError,
+  handleValidationError,
+  handleAuthError,
+  log
+} from '@/lib/services/errorHandler';
 
 export async function POST() {
-  console.log('========== TEAM INIT API CALLED ==========');
+  log('info', '========== TEAM INIT API CALLED ==========');
   try {
     // Initialize Supabase client
     const supabase = createRouteHandlerClient<Database>({ cookies });
@@ -20,8 +28,8 @@ export async function POST() {
     // Verify authentication
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      console.log('Not authenticated in team/init');
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      log('warn', 'Authentication failed in team/init');
+      return handleAuthError('Authentication required to initialize team');
     }
 
     // Fetch user details and ensure workspace_id exists
@@ -32,23 +40,26 @@ export async function POST() {
       .single();
     
     if (userError || !user) {
-      console.error('Error fetching user data:', userError?.message || 'User not found');
-      return NextResponse.json(
-        { error: userError?.message || 'User not found' }, 
-        { status: 500 }
+      log('error', 'Error fetching user data', { 
+        error: userError?.message || 'User not found',
+        email: session.user.email 
+      });
+      return handleDatabaseError(
+        userError || new Error('User not found'),
+        'fetching user profile'
       );
     }
     
     const workspaceId = user.workspace_id;
-    console.log('Workspace ID found:', workspaceId);
+    log('info', 'Workspace ID found', { workspaceId });
     
     // Normalize workspace ID to ensure consistent string format using our utility
     const workspaceIdString = normalizeWorkspaceId(workspaceId);
     if (!workspaceIdString) {
-      console.error('Invalid workspace ID format');
-      return NextResponse.json({ error: 'Invalid workspace ID format' }, { status: 400 });
+      log('error', 'Invalid workspace ID format', { workspaceId });
+      return handleValidationError(['workspace_id'], 'workspace ID');
     }
-    console.log('Using normalized workspaceId:', workspaceIdString);
+    log('info', 'Using normalized workspaceId', { workspaceIdString });
     
     // First ensure settings record exists - this must be done before team_members insertion
     // due to the foreign key constraint
@@ -59,16 +70,13 @@ export async function POST() {
       .single();
     
     if (settingsCheckError && settingsCheckError.code !== 'PGRST116') { // Not found error is expected
-      console.error('Error checking settings:', settingsCheckError);
-      return NextResponse.json(
-        { error: `Settings check error: ${settingsCheckError.message}` }, 
-        { status: 500 }
-      );
+      log('error', 'Error checking settings', { error: settingsCheckError });
+      return handleDatabaseError(settingsCheckError, 'checking workspace settings');
     }
     
     // If settings don't exist, create them
     if (!existingSettings) {
-      console.log('Creating default settings for workspace:', workspaceIdString);
+      log('info', 'Creating default settings for workspace', { workspaceId: workspaceIdString });
       
       // Create settings payload using our schema type
       const settingsPayload: WorkspaceSettingsInsert = {
@@ -87,9 +95,8 @@ export async function POST() {
       // Validate the settings payload against our schema
       const missingFields = validateSettingsPayload(settingsPayload);
       if (missingFields.length > 0) {
-        const errorMessage = `Invalid settings payload: Missing required fields [${missingFields.join(', ')}]`;
-        console.error(errorMessage);
-        return NextResponse.json({ error: errorMessage }, { status: 400 });
+        log('error', 'Invalid settings payload', { missingFields });
+        return handleValidationError(missingFields, 'workspace settings');
       }
       
       const { error: createSettingsError } = await supabase
@@ -97,11 +104,8 @@ export async function POST() {
         .insert(settingsPayload);
       
       if (createSettingsError) {
-        console.error('Error creating settings:', createSettingsError);
-        return NextResponse.json(
-          { error: `Failed to create settings: ${createSettingsError.message}` }, 
-          { status: 500 }
-        );
+        log('error', 'Error creating settings', { error: createSettingsError });
+        return handleDatabaseError(createSettingsError, 'creating workspace settings');
       }
       
       // Double-check settings were created
@@ -111,13 +115,16 @@ export async function POST() {
         .eq('workspace_id', workspaceIdString)
         .single();
       
-      console.log('Settings verification result:', verifySettings ? 'found' : 'not found', verifyError ? `(error: ${verifyError.message})` : '(no errors)');
+      log('info', 'Settings verification result', { 
+        found: !!verifySettings,
+        error: verifyError ? verifyError.message : null
+      });
         
       if (verifyError || !verifySettings) {
-        console.error('Failed to verify settings creation:', verifyError);
-        return NextResponse.json(
-          { error: 'Settings creation could not be verified' }, 
-          { status: 500 }
+        log('error', 'Failed to verify settings creation', { error: verifyError });
+        return handleDatabaseError(
+          verifyError || new Error('Settings creation could not be verified'),
+          'verifying settings creation'
         );
       }
     }
@@ -130,17 +137,13 @@ export async function POST() {
       .eq('email', user.email);
       
     if (countError) {
-      console.error('Error checking team member count:', countError);
-      return NextResponse.json(
-        { error: `Team count error: ${countError.message}` }, 
-        { status: 500 }
-      );
+      log('error', 'Error checking team member count', { error: countError });
+      return handleDatabaseError(countError, 'checking existing team members');
     }
     
     // Only insert if no team member exists
     if (!count || count === 0) {
-      console.log('No existing team member found, creating new team member.');
-      console.log('Creating team member for:', user.email);
+      log('info', 'No existing team member found, creating new team member', { email: user.email });
       
       // Create team member payload using our schema type
       const teamMemberPayload: TeamMemberInsert = {
@@ -153,9 +156,8 @@ export async function POST() {
       // Validate team member payload against our schema
       const missingFields = validateTeamMemberPayload(teamMemberPayload);
       if (missingFields.length > 0) {
-        const errorMessage = `Invalid team member payload: Missing required fields [${missingFields.join(', ')}]`;
-        console.error(errorMessage);
-        return NextResponse.json({ error: errorMessage }, { status: 400 });
+        log('error', 'Invalid team member payload', { missingFields });
+        return handleValidationError(missingFields, 'team member');
       }
       
       const { error: insertError } = await supabase
@@ -166,21 +168,20 @@ export async function POST() {
         });
         
       if (insertError) {
-        console.error('Error inserting team member:', insertError);
-        return NextResponse.json(
-          { error: `Failed to create team member: ${insertError.message}` }, 
-          { status: 500 }
-        );
+        log('error', 'Error inserting team member', { error: insertError });
+        return handleDatabaseError(insertError, 'creating team member');
       }
     }
 
-    console.log('========== TEAM INIT SUCCESSFUL ==========');
-    return NextResponse.json({ success: true });
+    log('info', '========== TEAM INIT SUCCESSFUL ==========');
+    return createSuccessResponse({ initialized: true });
   } catch (err: any) {
-    console.error('Unhandled error in team/init:', err);
-    return NextResponse.json(
-      { error: `Unhandled error: ${err.message}` }, 
-      { status: 500 }
+    log('error', 'Unhandled error in team/init', { error: err });
+    return createErrorResponse(
+      `Unhandled error during team initialization: ${err.message}`,
+      500,
+      'api',
+      'UNHANDLED_ERROR'
     );
   }
 }
