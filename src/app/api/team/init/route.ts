@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import type { Database } from '@/lib/database.types';
 import {
@@ -18,31 +17,35 @@ import {
   handleAuthError,
   log
 } from '@/lib/services/errorHandler';
+import {
+  getServerSupabase,
+  requireAuthentication
+} from '@/lib/services/authService';
 
 export async function POST() {
   log('info', '========== TEAM INIT API CALLED ==========');
   try {
-    // Initialize Supabase client
-    const supabase = createRouteHandlerClient<Database>({ cookies });
-    
-    // Verify authentication
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      log('warn', 'Authentication failed in team/init');
+    // Verify authentication using our auth service
+    const { authenticated, error: authError, userId } = await requireAuthentication();
+    if (!authenticated || authError) {
+      log('warn', 'Authentication failed in team/init', { error: authError?.message });
       return handleAuthError('Authentication required to initialize team');
     }
+    
+    // Initialize Supabase client from our service
+    const supabase = getServerSupabase();
 
     // Fetch user details and ensure workspace_id exists
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('workspace_id, email')
-      .eq('email', session.user.email)
+      .eq('id', userId)
       .single();
     
     if (userError || !user) {
       log('error', 'Error fetching user data', { 
         error: userError?.message || 'User not found',
-        email: session.user.email 
+        userId 
       });
       return handleDatabaseError(
         userError || new Error('User not found'),
