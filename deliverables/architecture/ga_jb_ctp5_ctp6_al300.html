@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GA — MV Junction Box (AL300 Option, M90 Glands)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --bg:#fafbfc; --panel:#fff; --stroke:#94a3b8; --text:#0f172a; --muted:#475569; --accent:#ef4444; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:16px 16px 8px} header h1{margin:0 0 4px;font-size:20px} header p{margin:0;color:var(--muted)}
+  .wrap{max-width:1200px;margin:8px auto 24px;padding:0 16px 24px}
+  svg{width:100%;height:auto;background:#fff;border:1px solid #e2e8f0}
+  .jb{fill:#fff;stroke:#0f172a;stroke-width:2}
+  .plate{fill:#f8fafc;stroke:#334155;stroke-width:1.5}
+  .hole{fill:#fff;stroke:#ef4444;stroke-width:2}
+  .dim{font:12px/1.2 ui-sans-serif;fill:#0f172a}
+  .note{font:12px/1.4 ui-sans-serif;fill:#475569}
+  .title{font:600 14px/1.2 ui-sans-serif;fill:#0f172a}
+</style>
+</head>
+<body>
+<header>
+  <h1>General Arrangement — MV Junction Box (STS04/05/06) — AL 3C 300 mm² Option</h1>
+  <p>Enclosure 1000 × 800 × 400 mm (H×W×D). Gland plate sized for estimated cable OD 75–80 mm; double‑compression glands M90 class. Spare breaker tie‑in at switchboard (indoor terminations); JB side may be outdoor.</p>
+</header>
+<div class="wrap">
+  <svg viewBox="0 0 1200 800" role="img" aria-label="GA drawing: enclosure, gland plate with four M90 holes, edge distances, first saddle, bend radius">
+    <!-- Enclosure front -->
+    <rect class="jb" x="100" y="80" width="800" height="600" rx="8"/>
+    <text x="110" y="70" class="title">Front Elevation — 1000 (H) × 800 (W)</text>
+
+    <!-- Gland plate bottom area -->
+    <rect class="plate" x="150" y="600" width="700" height="60"/>
+    <text x="160" y="595" class="dim">Removable gland plate — 700 × 60</text>
+
+    <!-- Four M90 holes (example spacing) -->
+    <circle class="hole" cx="250" cy="630" r="22"/>
+    <circle class="hole" cx="430" cy="630" r="22"/>
+    <circle class="hole" cx="610" cy="630" r="22"/>
+    <circle class="hole" cx="790" cy="630" r="22"/>
+    <text x="240" y="665" class="dim">Hole Ø 90 mm (M90)</text>
+
+    <!-- Dimensions/notes -->
+    <text x="920" y="160" class="note">• Cable OD (Al 3C 300): ~73–80 mm
+• Double‑compression glands: M90 class
+• Edge distance ≥ 1.5 × Ø (≥ 135 mm)
+• Hole center spacing ≥ 2.5 × Ø (≥ 225 mm)</text>
+
+    <text x="920" y="320" class="note">• First support/saddle within 150 mm of entry
+• Maintain armor continuity across gland
+• Outdoor side: weather shroud/drip edge if exposed</text>
+
+    <text x="920" y="420" class="note">• Minimum bend radius:
+  12–15 × OD → 900–1,200 mm
+• Verify per selected OEM datasheet</text>
+
+    <text x="920" y="520" class="note">• Earth bar with labeled test link inside JB
+• Filtered breathers ×2 (in/out airflow)
+• Labels per TIA‑606 and project policy</text>
+  </svg>
+</div>
+<footer style="max-width:1200px;margin:0 auto;padding:8px 16px 24px;color:#475569;font-size:12px">
+  File: deliverables/architecture/ga_jb_ctp5_ctp6_al300.html — For tender reference. Final dimensions to be set to chosen cable datasheet and vendor gland drawing.
+</footer>
+</body>
+</html>

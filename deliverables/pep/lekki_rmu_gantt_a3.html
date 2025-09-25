@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>CNL Lekki RMU Monitoring — A3 Gantt</title>
+  <style>
+    /* Page setup */
+    @page { size: A3 landscape; margin: 8mm; }
+    html, body { margin: 0; padding: 0; background: #fff; }
+    body { font-family: Inter, Arial, Helvetica, sans-serif; color: #222; }
+
+    /* Header */
+    .header { text-align: left; padding: 8px 4px 10px; border-bottom: 3px solid #1f5ca6; }
+    .title { font-size: 20px; font-weight: 800; color: #1f5ca6; margin: 0 0 2px; }
+    .subtitle { font-size: 11px; color: #555; margin: 0; }
+
+    /* Layout */
+    .gantt { margin-top: 10px; }
+    .months, .weeks { display: flex; align-items: stretch; }
+    .col-task { width: 320px; flex: 0 0 320px; }
+    .col-time { flex: 1; position: relative; }
+
+    /* Headers */
+    .months .cell { background: linear-gradient(135deg, #1f5ca6, #3ca55c); color: #fff; font-weight: 700; text-align: center; border: 1px solid #333; font-size: 11px; padding: 8px 0; }
+    .weeks .cell { background: #f3f8ff; border: 1px solid #b7c6dd; text-align: center; font-weight: 600; font-size: 9px; padding: 5px 0; }
+    .cell.task-h { font-weight: 700; background: #f7f7f7; color: #333; }
+
+    /* Grid */
+    .timeline { position: relative; }
+    .week-grid { position: absolute; inset: 0; display: flex; z-index: 0; }
+    .week-grid > div { flex: 1; border-right: 1px solid #e5e7eb; }
+
+    /* Rows */
+    .row { display: flex; border-bottom: 1px solid #ececec; height: 28px; }
+    .row.main { background: #f5f9ff; }
+    .task-label { font-size: 10px; padding: 6px 10px; display: flex; align-items: center; font-weight: 700; color: #0f172a; }
+    .subtask-label { font-size: 9px; padding: 6px 10px 6px 22px; color: #334155; position: relative; }
+    .subtask-label::before { content: "→"; position: absolute; left: 10px; color: #94a3b8; }
+
+    /* Bars */
+    .bars { position: relative; height: 28px; }
+    .bar { position: absolute; top: 4px; height: 20px; border-radius: 4px; color: #fff; font-size: 9px; font-weight: 800; line-height: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Colors */
+    .c-kick { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+    .c-surv { background: linear-gradient(135deg, #4ecdc4, #00a8cc); }
+    .c-eng  { background: linear-gradient(135deg, #45b7d1, #2c3e50); }
+    .c-proc { background: linear-gradient(135deg, #96ceb4, #27ae60); }
+    .c-site { background: linear-gradient(135deg, #5f27cd, #341f97); }
+    .c-intg { background: linear-gradient(135deg, #feca57, #f39c12); color: #112; }
+    .c-test { background: linear-gradient(135deg, #ff6348, #e17055); }
+    .c-doc  { background: linear-gradient(135deg, #3d4466, #2f3640); }
+    .c-hand { background: linear-gradient(135deg, #ff3838, #c44569); }
+
+    /* Legend */
+    .legend { margin-top: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .legend-item { display: flex; gap: 8px; align-items: center; font-size: 9px; }
+    .swatch { width: 18px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+
+    /* Print */
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .legend { break-inside: avoid; }
+    }
+
+    /* Compact mode (fits more on one A3 sheet without losing clarity) */
+    body.compact .col-task { width: 280px; flex: 0 0 280px; }
+    body.compact .row { height: 24px; }
+    body.compact .bars { height: 24px; }
+    body.compact .bar { height: 16px; line-height: 16px; font-size: 8px; }
+    body.compact .task-label { font-size: 9px; padding: 5px 8px; }
+    body.compact .subtask-label { font-size: 8px; padding: 5px 8px 5px 20px; }
+    body.compact .weeks .cell { font-size: 8px; padding: 4px 0; }
+    body.compact .months .cell { font-size: 10px; padding: 6px 0; }
+    body.compact .legend { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    body.compact .legend-item { font-size: 8px; }
+    body.compact .swatch { width: 14px; height: 10px; }
+    /* Toggle button */
+    .toggle-wrap { float: right; margin-top: -26px; }
+    .toggle-btn { font-size: 10px; padding: 4px 8px; border: 1px solid #b7c6dd; background: #f8fafc; border-radius: 6px; cursor: pointer; color: #1f2937; }
+    .toggle-btn:hover { background: #eef2f7; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">Chevron Lekki Critical Power Equipment (RMU) Monitoring — Project Timelines</h1>
+    <p class="subtitle">Schedule Window: August — December 2025 • Format: A3 Landscape • Bars are continuous across weeks</p>
+    <div class="toggle-wrap"><button id="toggleCompact" class="toggle-btn" type="button">Compact: Off</button></div>
+  </div>
+
+  <div class="gantt">
+    <!-- Month header: 17 week slots (Aug W3–W4, Sep W1–W4, Oct W1–W4, Nov W1–W4, Dec W1–W3) -->
+    <div class="months">
+      <div class="cell task-h col-task">Task</div>
+      <div class="cell" style="flex:2">August 2025</div>
+      <div class="cell" style="flex:4">September 2025</div>
+      <div class="cell" style="flex:4">October 2025</div>
+      <div class="cell" style="flex:4">November 2025</div>
+      <div class="cell" style="flex:3">December 2025</div>
+    </div>
+
+    <div class="weeks">
+      <div class="cell task-h col-task">Week</div>
+      <!-- 17 evenly split week cells (5.882% each) -->
+      <div class="cell" style="flex:1">W3</div><div class="cell" style="flex:1">W4</div>
+      <div class="cell" style="flex:1">W1</div><div class="cell" style="flex:1">W2</div><div class="cell" style="flex:1">W3</div><div class="cell" style="flex:1">W4</div>
+      <div class="cell" style="flex:1">W1</div><div class="cell" style="flex:1">W2</div><div class="cell" style="flex:1">W3</div><div class="cell" style="flex:1">W4</div>
+      <div class="cell" style="flex:1">W1</div><div class="cell" style="flex:1">W2</div><div class="cell" style="flex:1">W3</div><div class="cell" style="flex:1">W4</div>
+      <div class="cell" style="flex:1">W1</div><div class="cell" style="flex:1">W2</div><div class="cell" style="flex:1">W3</div>
+    </div>
+
+    <!-- Helper grid overlay replicated per bars row -->
+
+    <!-- Note: 1 week = 5.882% of width. left/width approximated from provided schedule. -->
+
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Sep 03 – Sep 03</span> — Project Kickoff Meeting</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-kick" style="left: 13.4%; width: 0.8%;">Project Kickoff Meeting</div>
+      </div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Sep 03 – Sep 12</span> — Detailed Site Survey</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-surv" style="left: 13.4%; width: 7.6%;">Detailed Site Survey</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 03 – Sep 04</span> — Inspection &amp; Evaluation of Existing Control &amp; Telemetry Infrastructure</div>
+      <div class="bars col-time"><div class="bar c-surv" style="left: 13.6%; width: 1.2%;">Inspection &amp; Evaluation of Existing Control &amp; Telemetry Infrastructure</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 04 – Sep 06</span> — Inspection for Overall Architecture &amp; Integration Plan</div>
+      <div class="bars col-time"><div class="bar c-surv" style="left: 15.1%; width: 1.2%;">Inspection for Overall Architecture &amp; Integration Plan</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 06 – Sep 08</span> — Survey for Communication/Data (FOC etc. routes) Paths</div>
+      <div class="bars col-time"><div class="bar c-surv" style="left: 16.6%; width: 1.2%;">Survey for Communication/Data (FOC etc. routes) Paths</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 08 – Sep 09</span> — Survey for Equipment &amp; Panel Support</div>
+      <div class="bars col-time"><div class="bar c-surv" style="left: 18.1%; width: 1.2%;">Survey for Equipment &amp; Panel Support</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 10 – Sep 11</span> — Technical Engagement Session with CNL to Review Engineering Concept</div>
+      <div class="bars col-time"><div class="bar c-surv" style="left: 19.6%; width: 1.2%;">Technical Engagement Session with CNL to Review Engineering Concept</div></div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Sep 15 – Oct 14</span> — Engineering</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-eng" style="left: 23.5%; width: 24.4%;">Engineering</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 15 – Sep 16</span> — Detailed Integration Planning</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 23.7%; width: 1.5%;">Detailed Integration Planning</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 17 – Sep 19</span> — Development of Final Overall Architecture</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 25.6%; width: 1.5%;">Development of Final Overall Architecture</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 19 – Sep 21</span> — Hardware Location Plot &amp; Cable Route Mapping</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 27.5%; width: 1.5%;">Hardware Location Plot &amp; Cable Route Mapping</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 21 – Sep 23</span> — Development of Final Harware MTO</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 29.3%; width: 1.5%;">Development of Final Harware MTO</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 23 – Sep 25</span> — Updating of Control Philosophy to Capture The Smart RMUs</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 31.2%; width: 1.5%;">Updating of Control Philosophy to Capture The Smart RMUs</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 26 – Sep 27</span> — Verification of Existing Software (PLC Logic Program &amp; HMI Design) Backups </div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 33.1%; width: 1.5%;">Verification of Existing Software (PLC Logic Program &amp; HMI Design) Backups </div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 28 – Sep 30</span> — Verification of Migration Compatibility from Current HMI Version to Latest Version</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 35.0%; width: 1.5%;">Verification of Migration Compatibility from Current HMI Version to Latest Version</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Sep 30 – Oct 02</span> — Updating of PLC Logic</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 36.8%; width: 1.5%;">Updating of PLC Logic</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 02 – Oct 04</span> — Updating of HMI Graphics </div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 38.7%; width: 1.5%;">Updating of HMI Graphics </div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 05 – Oct 06</span> — Development of Final List of Required Software </div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 40.6%; width: 1.5%;">Development of Final List of Required Software </div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 07 – Oct 09</span> — Provide Final List of DED Deliverables for CNL Approval</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 42.5%; width: 1.5%;">Provide Final List of DED Deliverables for CNL Approval</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 09 – Oct 11</span> — Development of DED Documentation &amp; Seek AFC</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 44.3%; width: 1.5%;">Development of DED Documentation &amp; Seek AFC</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 11 – Oct 13</span> — Pre-decommissioning Program Backup &amp; Logic Upgrading</div>
+      <div class="bars col-time"><div class="bar c-eng" style="left: 46.2%; width: 1.5%;">Pre-decommissioning Program Backup &amp; Logic Upgrading</div></div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Sep 29 – Oct 20</span> — Procurement Part A (FOC, Media Converters &amp; Control Hardwares)</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-proc" style="left: 35.3%; width: 17.6%;">Procurement Part A (FOC, Media Converters &amp; Control Hardwares)</div>
+      </div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Oct 09 – Oct 20</span> — Procurement Part B (Software Licenses)</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-proc" style="left: 43.7%; width: 9.2%;">Procurement Part B (Software Licenses)</div>
+      </div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Oct 27 – Nov 24</span> — Site Installation </div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-site" style="left: 58.8%; width: 23.5%;">Site Installation </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 27 – Oct 30</span> — Mobilization of Personnels &amp; Basic Tools</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 59.2%; width: 2.7%;">Mobilization of Personnels &amp; Basic Tools</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Oct 31 – Nov 03</span> — Installation of Equipment &amp; Panel Support</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 62.5%; width: 2.7%;">Installation of Equipment &amp; Panel Support</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 04 – Nov 07</span> — Installation of Patch Panels &amp; Media Converter Panels</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 65.9%; width: 2.7%;">Installation of Patch Panels &amp; Media Converter Panels</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 08 – Nov 11</span> — Installation of New MODBUS Card in PLC Panel (If necessary)</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 69.2%; width: 2.7%;">Installation of New MODBUS Card in PLC Panel (If necessary)</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 12 – Nov 15</span> — Run Cables from Media Converter to PLC MODBUS Card</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 72.6%; width: 2.7%;">Run Cables from Media Converter to PLC MODBUS Card</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 16 – Nov 19</span> — Crimping, Termination &amp; Testing of FOC Link</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 76.0%; width: 2.7%;">Crimping, Termination &amp; Testing of FOC Link</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 20 – Nov 23</span> — Ternimation of TCP or Serial Cable at MODBUS Card</div>
+      <div class="bars col-time"><div class="bar c-site" style="left: 79.3%; width: 2.7%;">Ternimation of TCP or Serial Cable at MODBUS Card</div></div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Nov 24 – Dec 05</span> — Integration</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-intg" style="left: 82.4%; width: 9.2%;">Integration</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 24 – Nov 26</span> — Simulate and Upload Updated PLC Program</div>
+      <div class="bars col-time"><div class="bar c-intg" style="left: 82.7%; width: 2.5%;">Simulate and Upload Updated PLC Program</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Nov 27 – Nov 30</span> — Simulate and Upload Updated HMI Graphics</div>
+      <div class="bars col-time"><div class="bar c-intg" style="left: 85.7%; width: 2.5%;">Simulate and Upload Updated HMI Graphics</div></div>
+    </div>
+    <div class="row">
+      <div class="subtask-label col-task"><span style="color:#94a3b8">Dec 01 – Dec 04</span> — Verify PLC Program &amp; HMI Graphics after Installation on Client Machine</div>
+      <div class="bars col-time"><div class="bar c-intg" style="left: 88.8%; width: 2.5%;">Verify PLC Program &amp; HMI Graphics after Installation on Client Machine</div></div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Dec 05 – Dec 10</span> — iSAT &amp; Commissioning </div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-test" style="left: 91.6%; width: 4.2%;">iSAT &amp; Commissioning </div>
+      </div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Nov 24 – Dec 14</span> — MOC/As-Built Documentation</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-doc" style="left: 82.4%; width: 16.8%;">MOC/As-Built Documentation</div>
+      </div>
+    </div>
+    <div class="row main">
+      <div class="task-label col-task"><span style="color:#64748b;font-weight:600">Dec 15 – Dec 15</span> — Handing Over &amp; Demobilization</div>
+      <div class="bars col-time">
+        <div class="week-grid"> <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div> </div>
+        <div class="bar c-hand" style="left: 100.0%; width: 0.8%;">Handing Over &amp; Demobilization</div>
+      </div>
+    </div>
+
+<!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="swatch c-surv"></span> Site Survey</div>
+    <div class="legend-item"><span class="swatch c-eng"></span> Engineering</div>
+    <div class="legend-item"><span class="swatch c-proc"></span> Procurement</div>
+    <div class="legend-item"><span class="swatch c-site"></span> Site Installation</div>
+    <div class="legend-item"><span class="swatch c-intg"></span> Integration</div>
+    <div class="legend-item"><span class="swatch c-test"></span> iSAT & Commissioning</div>
+    <div class="legend-item"><span class="swatch c-doc"></span> Documentation</div>
+    <div class="legend-item"><span class="swatch c-hand"></span> Handover</div>
+  </div>
+  <script>
+    (function() {
+      const key = 'ganttCompact';
+      const btn = document.getElementById('toggleCompact');
+      const apply = (on) => {
+        document.body.classList.toggle('compact', !!on);
+        if (btn) btn.textContent = `Compact: ${on ? 'On' : 'Off'}`;
+      };
+      try {
+        const saved = localStorage.getItem(key);
+        apply(saved === '1');
+      } catch (e) { /* no-op */ }
+
+      btn && btn.addEventListener('click', () => {
+        const on = !document.body.classList.contains('compact');
+        apply(on);
+        try { localStorage.setItem(key, on ? '1' : '0'); } catch(e) {}
+      });
+    })();
+  </script>
+</body>
+</html>

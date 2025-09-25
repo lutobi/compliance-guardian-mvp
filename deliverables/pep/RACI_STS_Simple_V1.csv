@@ -1,0 +1,18 @@
+Activity,Selex (Contractor),TiN / Company,Third Party (if required)
+Scope Definition & Approval,R,A,I
+Detailed Design (Electrical & Comms),R,A,C
+BoQ & Technical Specifications,R,A,C
+Procurement & Expediting,R,C,A
+Site Access & Permits,I,A,C
+Civil/Trench/Containment Works,C,A,R
+MV JBs & Drum Assemblies Installation,R,C,C
+MV Cable Pulling & Termination,R,C,C
+FO Closures & Star Legs Installation,R,C,C
+Protection Settings & Studies,C,A,R
+Factory/Site Acceptance Tests (FAT/SAT),R,A,C
+Commissioning & Energization,R,A,C
+HSE Management on Site,R,A,C
+QA/QC & Documentation,R,A,C
+Training & Handover,R,A,C
+Warranty & SLA Onboarding,C,A,R
+Change & Risk Management,R,A,C

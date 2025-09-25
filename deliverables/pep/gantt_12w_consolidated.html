@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TiN STS — Consolidated 12‑Week Gantt (A3)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 16px; background:#f8fafc; }
+    .container { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .note { color:#374151; margin: 8px 0 16px; }
+    .toolbar { display:flex; gap:8px; margin-bottom:10px; }
+    .btn { background:#111827; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; }
+    @page { size: A3 landscape; margin: 10mm; }
+    @media print { body { padding:0; background:#fff; } .container { box-shadow:none; border:0; } }
+  </style>
+  <script>function doPrint(){ window.print(); }</script>
+</head>
+<body>
+  <h1>TiN STS — Consolidated 12‑Week Schedule</h1>
+  <p class="note">De‑duplicated and layered: includes Kickoff, Site Access & HSE, Engineering Design, Technical Spec & Vendor Selection, FAT, Equipment Delivery, Site Preparation, Cable Termination & Integration, Pre‑commissioning & Loop Testing, SAT, and System Energization & Testing.</p>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="doPrint()">Print (A3 Landscape)</button>
+    </div>
+
+    <!-- A3-friendly static SVG Gantt -->
+    <svg width="100%" viewBox="0 0 2300 1250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Consolidated 12-week Gantt">
+      <defs>
+        <style>
+          .axis { stroke: #9ca3af; stroke-width: 1; }
+          .grid { stroke: #e5e7eb; stroke-width: 1; }
+          .lbl { font: 16px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+          .lbl-small { font: 13px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+          .muted { fill:#374151; }
+          .milestone { fill:#111827; }
+        </style>
+      </defs>
+
+      <!-- Timeline (12 weeks at 140px/week) -->
+      <g transform="translate(320,110)">
+        <text class="lbl" x="0" y="-28">12‑Week Baseline (set W1 to your project start)</text>
+
+        <!-- Grid -->
+        <g>
+          <line class="grid" x1="0" y1="0" x2="0" y2="1000" />
+          <line class="grid" x1="140" y1="0" x2="140" y2="1000" />
+          <line class="grid" x1="280" y1="0" x2="280" y2="1000" />
+          <line class="grid" x1="420" y1="0" x2="420" y2="1000" />
+          <line class="grid" x1="560" y1="0" x2="560" y2="1000" />
+          <line class="grid" x1="700" y1="0" x2="700" y2="1000" />
+          <line class="grid" x1="840" y1="0" x2="840" y2="1000" />
+          <line class="grid" x1="980" y1="0" x2="980" y2="1000" />
+          <line class="grid" x1="1120" y1="0" x2="1120" y2="1000" />
+          <line class="grid" x1="1260" y1="0" x2="1260" y2="1000" />
+          <line class="grid" x1="1400" y1="0" x2="1400" y2="1000" />
+          <line class="grid" x1="1540" y1="0" x2="1540" y2="1000" />
+          <line class="grid" x1="1680" y1="0" x2="1680" y2="1000" />
+        </g>
+        <!-- Axis labels -->
+        <g>
+          <text class="lbl-small muted" x="0" y="-6">W1</text>
+          <text class="lbl-small muted" x="140" y="-6">W2</text>
+          <text class="lbl-small muted" x="280" y="-6">W3</text>
+          <text class="lbl-small muted" x="420" y="-6">W4</text>
+          <text class="lbl-small muted" x="560" y="-6">W5</text>
+          <text class="lbl-small muted" x="700" y="-6">W6</text>
+          <text class="lbl-small muted" x="840" y="-6">W7</text>
+          <text class="lbl-small muted" x="980" y="-6">W8</text>
+          <text class="lbl-small muted" x="1120" y="-6">W9</text>
+          <text class="lbl-small muted" x="1260" y="-6">W10</text>
+          <text class="lbl-small muted" x="1400" y="-6">W11</text>
+          <text class="lbl-small muted" x="1540" y="-6">W12</text>
+          <line class="axis" x1="0" y1="0" x2="1680" y2="0" />
+          <line class="axis" x1="0" y1="1000" x2="1680" y2="1000" />
+        </g>
+
+        <!-- Row labels (workstreams) -->
+        <g>
+          <text class="lbl" x="-280" y="40">Initiation</text>
+          <text class="lbl" x="-280" y="140">Design</text>
+          <text class="lbl" x="-280" y="260">Procurement</text>
+          <text class="lbl" x="-280" y="420">Installation — Electrical</text>
+          <text class="lbl" x="-280" y="600">Installation — Communications</text>
+          <text class="lbl" x="-280" y="780">Testing & Commissioning</text>
+          <text class="lbl" x="-280" y="940">Handover</text>
+        </g>
+
+        <!-- Initiation (merged) -->
+        <g>
+          <rect x="0" y="20" width="100" height="30" rx="5" fill="#2563eb" stroke="#1e40af" />
+          <text class="lbl-small" x="8" y="40" fill="#fff">Kickoff Meeting (2d)</text>
+
+          <rect x="0" y="60" width="280" height="30" rx="5" fill="#0ea5e9" stroke="#0369a1" />
+          <text class="lbl-small" x="8" y="80" fill="#fff">Site Access & HSE (2w)</text>
+        </g>
+
+        <!-- Design (merged) -->
+        <g>
+          <rect x="140" y="120" width="350" height="30" rx="5" fill="#16a34a" stroke="#166534" />
+          <text class="lbl-small" x="148" y="140" fill="#fff">Engineering Design (12d)</text>
+
+          <rect x="490" y="120" width="210" height="30" rx="5" fill="#f59e0b" stroke="#b45309" />
+          <text class="lbl-small" x="498" y="140">IDC/IDR & Revisions (7d)</text>
+
+          <polygon class="milestone" points="714,108 726,120 714,132 702,120" />
+          <text class="lbl-small muted" x="734" y="126">IFC Issue</text>
+        </g>
+
+        <!-- Procurement (merged: Tech Spec/Vendor, FAT, Delivery) -->
+        <g>
+          <rect x="280" y="220" width="420" height="30" rx="5" fill="#8b5cf6" stroke="#6d28d9" />
+          <text class="lbl-small" x="288" y="240" fill="#fff">Technical Spec & Vendor Selection (3w)</text>
+
+          <rect x="700" y="220" width="350" height="30" rx="5" fill="#06b6d4" stroke="#0e7490" />
+          <text class="lbl-small" x="708" y="240">Long‑lead POs & Expediting (2w)</text>
+
+          <rect x="840" y="260" width="140" height="28" rx="5" fill="#eab308" stroke="#a16207" />
+          <text class="lbl-small" x="848" y="279">FAT (1w)</text>
+
+          <rect x="980" y="260" width="220" height="28" rx="5" fill="#f59e0b" stroke="#b45309" />
+          <text class="lbl-small" x="988" y="279">Logistics & Customs (7d)</text>
+
+          <rect x="1120" y="300" width="200" height="28" rx="5" fill="#84cc16" stroke="#4d7c0f" />
+          <text class="lbl-small" x="1128" y="319">Equipment Delivery (1w)</text>
+        </g>
+
+        <!-- Installation — Electrical -->
+        <g>
+          <rect x="980" y="360" width="160" height="30" rx="5" fill="#9ca3af" stroke="#6b7280" />
+          <text class="lbl-small" x="988" y="380">Site Preparation (4d)</text>
+
+          <rect x="1140" y="400" width="320" height="30" rx="5" fill="#ef4444" stroke="#991b1b" />
+          <text class="lbl-small" x="1148" y="420" fill="#fff">Cable Termination & Integration (2w)</text>
+        </g>
+
+        <!-- Installation — Communications -->
+        <g>
+          <rect x="980" y="560" width="160" height="30" rx="5" fill="#22c55e" stroke="#15803d" />
+          <text class="lbl-small" x="988" y="580">Duct/Chamber Checks (4d)</text>
+
+          <rect x="1140" y="600" width="240" height="30" rx="5" fill="#0ea5e9" stroke="#0369a1" />
+          <text class="lbl-small" x="1148" y="620" fill="#fff">FO Pull & Splice (2w)</text>
+
+          <rect x="1400" y="600" width="160" height="28" rx="5" fill="#6366f1" stroke="#4338ca" />
+          <text class="lbl-small" x="1408" y="619" fill="#fff">Panel Labeling & Audit (5d)</text>
+        </g>
+
+        <!-- Testing & Commissioning (merged: Pre‑comm, SAT, Energization/Test) -->
+        <g>
+          <rect x="1400" y="760" width="280" height="30" rx="5" fill="#f97316" stroke="#c2410c" />
+          <text class="lbl-small" x="1408" y="780">Pre‑commissioning & Loop Testing (2w)</text>
+
+          <rect x="1680" y="760" width="140" height="30" rx="5" fill="#14b8a6" stroke="#0f766e" />
+          <text class="lbl-small" x="1688" y="780">SAT (1w)</text>
+
+          <rect x="1820" y="760" width="140" height="30" rx="5" fill="#dc2626" stroke="#7f1d1d" />
+          <text class="lbl-small" x="1828" y="780" fill="#fff">System Energization & Testing (1w)</text>
+        </g>
+
+        <!-- Handover -->
+        <g>
+          <rect x="1820" y="920" width="160" height="30" rx="5" fill="#10b981" stroke="#047857" />
+          <text class="lbl-small" x="1828" y="940">Training & Handover (1w)</text>
+          <polygon class="milestone" points="1990,908 2002,920 1990,932 1978,920" />
+          <text class="lbl-small muted" x="2010" y="926">Final Handover</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

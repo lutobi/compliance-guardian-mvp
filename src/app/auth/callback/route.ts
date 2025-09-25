@@ -63,8 +63,10 @@ export async function GET(request: Request) {
       }
 
       if (userData) {
+        // Normalize roles join result (can be object or array depending on schema)
+        const roleRecord = Array.isArray(userData.roles) ? userData.roles[0] : userData.roles
         // First check if we can determine the user type from the roles join
-        const userType = userData.roles?.capabilities?.type
+        const userType = roleRecord?.capabilities?.type
         
         if (userType === 'system') {
           return NextResponse.redirect(`${origin}/system/dashboard`)
@@ -85,16 +87,16 @@ export async function GET(request: Request) {
             }
           }
           // Either no workspace or no customer data, redirect to workspace selection
-          return NextResponse.redirect(`${origin}/customer/select-workspace`)
+          return NextResponse.redirect(`${origin}/workspace/select`)
         } 
         
         // If we get here, the user has a role but we couldn't determine the type
         // Try to infer from the role name as a fallback
-        const roleName = userData.roles?.name?.toLowerCase() || ''
+        const roleName = roleRecord?.name?.toLowerCase() || ''
         if (roleName.includes('system')) {
           return NextResponse.redirect(`${origin}/system/dashboard`)
         } else if (roleName.includes('customer')) {
-          return NextResponse.redirect(`${origin}/customer/select-workspace`)
+          return NextResponse.redirect(`${origin}/workspace/select`)
         }
       }
       

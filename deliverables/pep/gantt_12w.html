@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TiN STS Project — 12‑Week Gantt</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 16px; background:#f8fafc; }
+    .note { color: #374151; margin: 8px 0 16px; }
+    .container { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .toolbar { display:flex; gap:8px; margin: 0 0 10px; }
+    .btn { background:#16a34a; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; }
+
+    /* Print to A3 Landscape */
+    @page { size: A3 landscape; margin: 10mm; }
+    @media print {
+      body { padding: 0; background: #fff; }
+      .container { box-shadow: none; border: 0; }
+    }
+  </style>
+  <script>
+    function doPrint(){ window.print(); }
+  </script>
+</head>
+<body>
+  <h1>TiN STS Project — 12‑Week Schedule</h1>
+  <p class="note">Baseline plan over 12 weeks (including procurement lead time). Adjust dates/widths after IDC/IDR.</p>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="doPrint()">Print Schedule</button>
+    </div>
+
+    <!-- Static SVG Gantt (A3 landscape aspect) -->
+    <svg width="100%" viewBox="0 0 2200 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="12-week Gantt chart for TiN STS04-STS06 project">
+      <defs>
+        <style>
+          .axis { stroke: #9ca3af; stroke-width: 1; }
+          .grid { stroke: #e5e7eb; stroke-width: 1; }
+          .lbl { font: 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+          .lbl-small { font: 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #374151; }
+          .bar text { pointer-events: none; }
+          .milestone { fill: #111827; }
+        </style>
+      </defs>
+
+      <!-- Timeline (12 weeks) -->
+      <g transform="translate(280,100)">
+        <text class="lbl" x="0" y="-20">TiN STS04-STS06 Project - 12 Week Baseline</text>
+
+        <!-- Vertical grid lines: week width = 140 -->
+        <g>
+          <line class="grid" x1="0" y1="0" x2="0" y2="960" />
+          <line class="grid" x1="140" y1="0" x2="140" y2="960" />
+          <line class="grid" x1="280" y1="0" x2="280" y2="960" />
+          <line class="grid" x1="420" y1="0" x2="420" y2="960" />
+          <line class="grid" x1="560" y1="0" x2="560" y2="960" />
+          <line class="grid" x1="700" y1="0" x2="700" y2="960" />
+          <line class="grid" x1="840" y1="0" x2="840" y2="960" />
+          <line class="grid" x1="980" y1="0" x2="980" y2="960" />
+          <line class="grid" x1="1120" y1="0" x2="1120" y2="960" />
+          <line class="grid" x1="1260" y1="0" x2="1260" y2="960" />
+          <line class="grid" x1="1400" y1="0" x2="1400" y2="960" />
+          <line class="grid" x1="1540" y1="0" x2="1540" y2="960" />
+          <line class="grid" x1="1680" y1="0" x2="1680" y2="960" />
+        </g>
+        <!-- Axis labels -->
+        <g>
+          <text class="lbl-small" x="0" y="-4">W1</text>
+          <text class="lbl-small" x="140" y="-4">W2</text>
+          <text class="lbl-small" x="280" y="-4">W3</text>
+          <text class="lbl-small" x="420" y="-4">W4</text>
+          <text class="lbl-small" x="560" y="-4">W5</text>
+          <text class="lbl-small" x="700" y="-4">W6</text>
+          <text class="lbl-small" x="840" y="-4">W7</text>
+          <text class="lbl-small" x="980" y="-4">W8</text>
+          <text class="lbl-small" x="1120" y="-4">W9</text>
+          <text class="lbl-small" x="1260" y="-4">W10</text>
+          <text class="lbl-small" x="1400" y="-4">W11</text>
+          <text class="lbl-small" x="1540" y="-4">W12</text>
+          <line class="axis" x1="0" y1="0" x2="1680" y2="0" />
+          <line class="axis" x1="0" y1="960" x2="1680" y2="960" />
+        </g>
+
+        <!-- Rows labels -->
+        <g>
+          <text class="lbl" x="-240" y="40">Initiation</text>
+          <text class="lbl" x="-240" y="120">Design</text>
+          <text class="lbl" x="-240" y="220">Procurement</text>
+          <text class="lbl" x="-240" y="360">Installation - Electrical (MV)</text>
+          <text class="lbl" x="-240" y="540">Installation - Communications (FO)</text>
+          <text class="lbl" x="-240" y="720">Testing & Commissioning</text>
+          <text class="lbl" x="-240" y="880">Handover & Legalisation</text>
+        </g>
+
+        <!-- Initiation -->
+        <g class="bar" aria-label="Kick-off & Surveys">
+          <rect x="0" y="20" width="120" height="28" rx="4" fill="#2563eb" stroke="#1e40af" />
+          <text class="lbl-small" x="8" y="40" fill="#fff">Kick-off & Surveys (5d)</text>
+        </g>
+        <g class="bar" aria-label="HSE Plan & Permits">
+          <rect x="70" y="60" width="240" height="28" rx="4" fill="#0ea5e9" stroke="#0369a1" />
+          <text class="lbl-small" x="78" y="80" fill="#fff">HSE Plan & Permits (10d)</text>
+        </g>
+        <g class="bar" aria-label="RAMS & Method Statements">
+          <rect x="140" y="90" width="210" height="24" rx="4" fill="#14b8a6" stroke="#0f766e" />
+          <text class="lbl-small" x="148" y="108" fill="#111827">RAMS & Method Statements (7d)</text>
+        </g>
+
+        <!-- Design -->
+        <g class="bar" aria-label="Design Development">
+          <rect x="140" y="120" width="350" height="28" rx="4" fill="#16a34a" stroke="#166534" />
+          <text class="lbl-small" x="148" y="140" fill="#fff">Design Development (12d)</text>
+        </g>
+        <g class="bar" aria-label="IDC/IDR & Revisions">
+          <rect x="490" y="120" width="210" height="28" rx="4" fill="#f59e0b" stroke="#b45309" />
+          <text class="lbl-small" x="498" y="140" fill="#111827">IDC/IDR & Revisions (7d)</text>
+        </g>
+        <!-- Milestone: IFC -->
+        <g aria-label="IFC Issue">
+          <polygon class="milestone" points="714,108 726,120 714,132 702,120" />
+          <text class="lbl-small" x="734" y="126">IFC Issue</text>
+        </g>
+        <g class="bar" aria-label="As-built Template Prep">
+          <rect x="630" y="160" width="140" height="28" rx="4" fill="#14b8a6" stroke="#0f766e" />
+          <text class="lbl-small" x="638" y="180" fill="#111827">As-built Template Prep (5d)</text>
+        </g>
+        <g class="bar" aria-label="Protection Settings Coordination">
+          <rect x="630" y="190" width="210" height="24" rx="4" fill="#06b6d4" stroke="#0e7490" />
+          <text class="lbl-small" x="638" y="208" fill="#111827">Protection Settings Coordination (7d)</text>
+        </g>
+
+        <!-- Procurement (lead time included) -->
+        <g class="bar" aria-label="Long‑lead POs & Expediting (Lead Time)">
+          <rect x="280" y="220" width="700" height="28" rx="4" fill="#8b5cf6" stroke="#6d28d9" />
+          <text class="lbl-small" x="288" y="240" fill="#fff">Long‑lead POs & Expediting (4w)</text>
+        </g>
+        <g class="bar" aria-label="Site Materials & Consumables">
+          <rect x="700" y="260" width="350" height="28" rx="4" fill="#06b6d4" stroke="#0e7490" />
+          <text class="lbl-small" x="708" y="280" fill="#111827">Site Materials & Consumables (2w)</text>
+        </g>
+        <g class="bar" aria-label="FAT / Factory Readiness">
+          <rect x="840" y="300" width="140" height="28" rx="4" fill="#eab308" stroke="#a16207" />
+          <text class="lbl-small" x="848" y="320" fill="#111827">FAT / Factory Readiness (5d)</text>
+        </g>
+        <g class="bar" aria-label="Logistics & Customs">
+          <rect x="980" y="260" width="220" height="24" rx="4" fill="#f59e0b" stroke="#b45309" />
+          <text class="lbl-small" x="988" y="278" fill="#111827">Logistics & Customs (7d)</text>
+        </g>
+        <g class="bar" aria-label="Onsite Receiving & Inspection">
+          <rect x="1120" y="300" width="180" height="24" rx="4" fill="#84cc16" stroke="#4d7c0f" />
+          <text class="lbl-small" x="1128" y="318" fill="#111827">Onsite Receiving & Inspection (5d)</text>
+        </g>
+
+        <!-- Installation - Electrical (MV) -->
+        <g class="bar" aria-label="Site Establishment & Safety">
+          <rect x="910" y="340" width="160" height="28" rx="4" fill="#9ca3af" stroke="#6b7280" />
+          <text class="lbl-small" x="918" y="360" fill="#111827">Site Establishment & Safety (4d)</text>
+        </g>
+        <g class="bar" aria-label="Prefab JB/Drum Assemblies">
+          <rect x="1050" y="380" width="220" height="28" rx="4" fill="#f43f5e" stroke="#be123c" />
+          <text class="lbl-small" x="1058" y="400" fill="#fff">Prefab JB/Drum Assemblies (7d)</text>
+        </g>
+        <g class="bar" aria-label="STS04 Migration at CTP5">
+          <rect x="1220" y="420" width="140" height="28" rx="4" fill="#10b981" stroke="#047857" />
+          <text class="lbl-small" x="1228" y="440" fill="#111827">STS04 Migration at CTP5 (5d)</text>
+        </g>
+        <g class="bar" aria-label="CTP6 JB/Drum for STS05/06">
+          <rect x="1200" y="380" width="220" height="28" rx="4" fill="#a855f7" stroke="#7e22ce" />
+          <text class="lbl-small" x="1208" y="400" fill="#fff">CTP6 JB/Drum for STS05/06 (7d)</text>
+        </g>
+        <g class="bar" aria-label="Terminations & Earthing">
+          <rect x="1300" y="460" width="220" height="24" rx="4" fill="#ef4444" stroke="#991b1b" />
+          <text class="lbl-small" x="1308" y="478" fill="#fff">Terminations & Earthing (6d)</text>
+        </g>
+        <g class="bar" aria-label="Protection Settings Upload">
+          <rect x="1380" y="490" width="140" height="24" rx="4" fill="#06b6d4" stroke="#0e7490" />
+          <text class="lbl-small" x="1388" y="508" fill="#111827">Protection Settings Upload (3d)</text>
+        </g>
+        <g class="bar" aria-label="Pre-energization Checks">
+          <rect x="1470" y="520" width="160" height="24" rx="4" fill="#f59e0b" stroke="#b45309" />
+          <text class="lbl-small" x="1478" y="538" fill="#111827">Pre-energization Checks (4d)</text>
+        </g>
+
+        <!-- Installation - Communications (FO) -->
+        <g class="bar" aria-label="Pre-works: Duct/Chamber Checks">
+          <rect x="910" y="560" width="140" height="28" rx="4" fill="#22c55e" stroke="#15803d" />
+          <text class="lbl-small" x="918" y="580" fill="#111827">Pre-works: Duct/Chamber Checks (4d)</text>
+        </g>
+        <g class="bar" aria-label="Cargo to CTP6 Pull & Splice">
+          <rect x="1050" y="600" width="200" height="28" rx="4" fill="#84cc16" stroke="#4d7c0f" />
+          <text class="lbl-small" x="1058" y="620" fill="#111827">Cargo to CTP6 Pull & Splice (6d)</text>
+        </g>
+        <g class="bar" aria-label="Cargo to CTP5 Pull & Splice">
+          <rect x="1050" y="640" width="180" height="28" rx="4" fill="#eab308" stroke="#a16207" />
+          <text class="lbl-small" x="1058" y="660" fill="#111827">Cargo to CTP5 Pull & Splice (6d)</text>
+        </g>
+        <g class="bar" aria-label="Rack Terminations (Cargo)">
+          <rect x="1240" y="640" width="160" height="28" rx="4" fill="#0ea5e9" stroke="#0369a1" />
+          <text class="lbl-small" x="1248" y="660" fill="#fff">Rack Terminations (Cargo) (5d)</text>
+        </g>
+        <g class="bar" aria-label="Panel Labeling & Audit">
+          <rect x="1400" y="640" width="160" height="24" rx="4" fill="#6366f1" stroke="#4338ca" />
+          <text class="lbl-small" x="1408" y="658" fill="#fff">Panel Labeling & Audit (5d)</text>
+        </g>
+        <g class="bar" aria-label="Cleaning & Inspection (IEC/TIA)">
+          <rect x="1400" y="670" width="140" height="24" rx="4" fill="#10b981" stroke="#047857" />
+          <text class="lbl-small" x="1408" y="688" fill="#111827">Cleaning & Inspection (4d)</text>
+        </g>
+        <g class="bar" aria-label="Service Loops & Dressing">
+          <rect x="1400" y="700" width="120" height="24" rx="4" fill="#8b5cf6" stroke="#6d28d9" />
+          <text class="lbl-small" x="1408" y="718" fill="#fff">Service Loops & Dressing (3d)</text>
+        </g>
+
+        <!-- Testing & Commissioning -->
+        <g class="bar" aria-label="Electrical IR/VLF & Settings">
+          <rect x="1260" y="740" width="200" height="28" rx="4" fill="#f97316" stroke="#c2410c" />
+          <text class="lbl-small" x="1268" y="760" fill="#111827">Electrical IR/VLF & Settings (6d)</text>
+        </g>
+        <g class="bar" aria-label="FO OTDR/IL/Polarity">
+          <rect x="1400" y="780" width="200" height="28" rx="4" fill="#14b8a6" stroke="#0f766e" />
+          <text class="lbl-small" x="1408" y="800" fill="#111827">FO OTDR/IL/Polarity (6d)</text>
+        </g>
+        <g class="bar" aria-label="Client Witness & Punchlist">
+          <rect x="1560" y="780" width="120" height="28" rx="4" fill="#f43f5e" stroke="#be123c" />
+          <text class="lbl-small" x="1568" y="800" fill="#fff">Client Witness & Punchlist (3d)</text>
+        </g>
+        <g class="bar" aria-label="Integrated Dry Run">
+          <rect x="1560" y="820" width="120" height="24" rx="4" fill="#22c55e" stroke="#15803d" />
+          <text class="lbl-small" x="1568" y="838" fill="#111827">Integrated Dry Run (2d)</text>
+        </g>
+        <g class="bar" aria-label="Energization Window">
+          <rect x="1680" y="820" width="80" height="24" rx="4" fill="#ef4444" stroke="#991b1b" />
+          <text class="lbl-small" x="1688" y="838" fill="#fff">Energization Window (1d)</text>
+        </g>
+
+        <!-- Handover & Legalisation -->
+        <g class="bar" aria-label="Dossier Compilation">
+          <rect x="1600" y="900" width="140" height="28" rx="4" fill="#6366f1" stroke="#4338ca" />
+          <text class="lbl-small" x="1608" y="920" fill="#fff">Dossier Compilation (4d)</text>
+        </g>
+        <g class="bar" aria-label="Training & O&M Handover">
+          <rect x="1740" y="900" width="160" height="24" rx="4" fill="#06b6d4" stroke="#0e7490" />
+          <text class="lbl-small" x="1748" y="918" fill="#111827">Training & O&M Handover (3d)</text>
+        </g>
+        <!-- Milestone: Final Handover -->
+        <g aria-label="Final Handover (Client Sign)">
+          <polygon class="milestone" points="1880,888 1892,900 1880,912 1868,900" />
+          <text class="lbl-small" x="1900" y="906">Final Handover (Client Sign)</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

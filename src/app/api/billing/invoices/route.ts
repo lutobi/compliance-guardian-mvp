@@ -1,13 +1,49 @@
-import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+/**
+ * BILLING INVOICES API - MULTI-TENANT (MIGRATED TO NEW SECURE PATTERN)
+ * 
+ * Handles workspace invoice management with workspace context:
+ * - GET: Retrieve invoices for current workspace with pagination
+ */
 
-// GET invoices
-export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies });
-  const { data, error } = await supabase.from('invoices').select('*').order('date', { ascending: false });
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  return NextResponse.json({ success: true, data });
+import { NextRequest } from 'next/server';
+import { 
+  withWorkspaceContext, 
+  extractPaginationParams, 
+  createPaginatedResponse,
+  getWorkspaceScopedClient,
+  getWorkspaceMetadata 
+} from '@/lib/api/request-utils';
+
+export async function GET(request: NextRequest) {
+  return withWorkspaceContext(request, 'view_billing', async (context) => {
+    const { user } = context;
+    const pagination = extractPaginationParams(request);
+    
+    console.log(`[API] GET /api/billing/invoices - User: ${user.profile.email}, Workspace: ${user.currentWorkspace?.name}`);
+
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(user.currentWorkspace!.id);
+
+    const { data, error, count } = await supabase
+      .from('invoices')
+      .select('*', { count: 'exact' })
+      .eq('workspace_id', user.currentWorkspace!.id)
+      .order('created_at', { ascending: false })
+      .range(pagination.offset, pagination.offset + pagination.limit - 1);
+
+    if (error) {
+      console.error('Database error fetching invoices:', error);
+      throw new Error(`Failed to fetch invoices: ${error.message}`);
+    }
+
+    // Return paginated response with workspace metadata
+    return createPaginatedResponse(
+      data || [],
+      count || 0,
+      pagination,
+      {
+        workspace: getWorkspaceMetadata(user)
+      }
+    );
+  });
 }

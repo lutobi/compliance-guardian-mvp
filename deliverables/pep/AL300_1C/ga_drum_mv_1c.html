@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GA — MV Cable Drums (3 × 1C 300 mm² Al, Trefoil)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --bg:#fafbfc; --panel:#fff; --stroke:#94a3b8; --text:#0f172a; --muted:#475569; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:16px 16px 8px} header h1{margin:0 0 4px;font-size:20px} header p{margin:0;color:var(--muted)}
+  .wrap{max-width:1200px;margin:8px auto 24px;padding:0 16px 24px}
+  svg{width:100%;height:auto;background:#fff;border:1px solid #e2e8f0}
+  .drum{fill:#fff;stroke:#0f172a;stroke-width:2}
+  .dim{font:12px/1.2 ui-sans-serif;fill:#0f172a}
+  .note{font:12px/1.4 ui-sans-serif;fill:#475569}
+  .title{font:600 14px/1.2 ui-sans-serif;fill:#0f172a}
+  .label{font:12px/1.2 ui-sans-serif;fill:#0f172a}
+</style>
+</head>
+<body>
+<header>
+  <h1>GA — MV Cable Drums — 3 × 1C 300 mm² Al (IEC 60502‑2 · 6.35/11 kV)</h1>
+  <p>Formation: Trefoil · Each core supplied on its own drum. Geometry derived from per‑core OD of the selected cable datasheet.</p>
+</header>
+<div class="wrap">
+  <svg viewBox="0 0 1200 760" role="img" aria-label="Three drums, side elevation and width, dimension rules from per-core OD, handling and marking notes">
+    <!-- Three drums side elevation -->
+    <g transform="translate(100,120)">
+      <circle cx="120" cy="220" r="110" class="drum"/>
+      <text x="80" y="355" class="label">Core A</text>
+    </g>
+    <g transform="translate(360,120)">
+      <circle cx="120" cy="220" r="110" class="drum"/>
+      <text x="80" y="355" class="label">Core B</text>
+    </g>
+    <g transform="translate(620,120)">
+      <circle cx="120" cy="220" r="110" class="drum"/>
+      <text x="80" y="355" class="label">Core C</text>
+    </g>
+
+    <!-- Width view (schematic) -->
+    <g transform="translate(900,110)">
+      <rect x="0" y="60" width="220" height="320" class="drum"/>
+      <text x="0" y="40" class="title">Front Elevation — Reel Width</text>
+    </g>
+
+    <!-- Dimension rules from per-core OD -->
+    <text x="100" y="520" class="dim">Per‑core OD (from datasheet): ____ mm</text>
+    <text x="100" y="545" class="dim">Barrel diameter ≥ 18 × OD → ≥ ______ mm</text>
+    <text x="100" y="570" class="dim">Flange diameter ≥ barrel + 6 × OD → ≥ ______ mm</text>
+    <text x="100" y="595" class="dim">Minimum bend radius ≥ 12–15 × OD → ≥ ______ mm</text>
+
+    <!-- Notes -->
+    <text x="550" y="520" class="note">• Three drums (one per core) per feeder length; coordinate core lengths for equal slack.
+• Use rated reel jacks/stands with braking; chock flanges; control payout direction.
+• Mark each drum with: Route, Feeder, Core ID (A/B/C), Length, Direction of Pay‑out, Cable Spec, and Test Cert ID.</text>
+    <text x="550" y="610" class="note">• Handling near JB: maintain trefoil lay‑up into entry; install first cleat ≤ 150 mm from gland.
+• Storage: protect from UV/salt spray; cover flanges; avoid tight bends below min radius.</text>
+  </svg>
+</div>
+<footer style="max-width:1200px;margin:0 auto;padding:8px 16px 24px;color:#475569;font-size:12px">
+  File: deliverables/pep/AL300_1C/ga_drum_mv_1c.html — Final diameters to be set from selected cable per‑core OD. Use OEM steel reels sized to the above rules.
+</footer>
+</body>
+</html>

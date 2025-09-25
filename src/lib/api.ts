@@ -38,6 +38,18 @@ export const api = {
       if (error) throw error;
       return data;
     },
+
+    /** List all assessments for the current user without workspace filtering */
+    listAll: async () => {
+      // Fetch all user assessments without workspace filtering
+      // Uses the bypassFilter query param to tell our API route to ignore workspace filtering
+      const response = await fetch('/api/assessments?bypassFilter=true');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch assessments: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    },
     
     get: async (id: string) => {
       return withCache(
@@ -153,29 +165,32 @@ export const api = {
       );
     },
     
-    create: async (assessment: Omit<Tables['assessments']['Insert'], 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase
-        .from('assessments')
-        .insert(assessment)
-        .select()
-        .single();
- 
-      if (error) throw error;
-      // Assign all controls of the selected framework to this assessment
-      const { data: ctrlRows, error: ctrlError } = await supabase
-        .from('controls')
-        .select('id')
-        .eq('framework_id', data.framework_id as string);
-      if (ctrlError) throw ctrlError;
-      if (ctrlRows && ctrlRows.length > 0) {
-        const acRows = ctrlRows.map(c => ({ assessment_id: data.id, control_id: c.id }));
-        const { error: acError } = await supabase
-          .from('assessment_controls')
-          .insert(acRows);
-        if (acError) throw acError;
+    create: async (
+      assessment: Partial<
+        Omit<Tables['assessments']['Insert'], 'id' | 'created_at' | 'updated_at'>
+      > & { name?: string }
+    ) => {
+      // Map various client payload shapes to server API expectations
+      const body = {
+        title: (assessment as any).title || (assessment as any).name,
+        framework_id: assessment.framework_id,
+        control_id: (assessment as any).control_id,
+        status: assessment.status || 'in_progress',
+      } as any;
+
+      const res = await fetch('/api/assessments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Failed to create assessment: ${res.statusText}`);
       }
+      const payload = await res.json();
       clearCache();
-      return data;
+      // Return the assessment object from server response for compatibility
+      return payload.assessment ?? payload;
     },
     
     update: async (id: string, assessment: Partial<Tables['assessments']['Update']>) => {

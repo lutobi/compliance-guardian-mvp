@@ -6,6 +6,7 @@
  */
 
 import { createClientComponentClient, createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
 import type { Database } from '../database.types';
@@ -28,16 +29,36 @@ export interface UserProfile {
  * Gets the Supabase client for server components and API routes
  */
 export function getServerSupabase() {
-  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase environment variables not set');
+  }
+
+  const authHeader = headers().get('authorization');
+  const globalHeaders: Record<string, string> = {};
+  if (authHeader) {
+    globalHeaders['Authorization'] = authHeader;
+  }
+
+  // Use pure supabase-js client to avoid cookie side-effects on the server
+  const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+    global: { headers: globalHeaders },
+    auth: { persistSession: false },
+  });
   return supabase;
 }
 
 /**
  * Gets the current session from the server
  */
+import { headers } from 'next/headers';
+
 export async function getServerSession() {
   try {
     const supabase = getServerSupabase();
+    // Support token-based auth via Authorization header (Bearer <token>)
+    // Authorization header already forwarded via getServerSupabase global headers
     const { data, error } = await supabase.auth.getSession();
     
     if (error) {
@@ -66,7 +87,7 @@ export async function getServerUserProfile() {
     
     const supabase = getServerSupabase();
     const { data, error } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
       .eq('id', session.user.id)
       .single();
@@ -102,21 +123,59 @@ export async function getServerUserProfile() {
  * Use this in API routes to require authentication
  */
 export async function requireAuthentication() {
-  const { session, error } = await getServerSession();
+  // Always try cookie-based session first as it's more reliable
+  log('debug', '[requireAuth] Checking cookie session');
+  const supabase = createRouteHandlerClient<Database>({ cookies });
+  const { data: { session }, error } = await supabase.auth.getSession();
+  log('debug', '[requireAuth] Cookie session result', { hasSession: !!session, error: error?.message });
   
-  if (error || !session) {
-    return { 
-      authenticated: false, 
-      error: error || new Error('Authentication required'), 
-      userId: null 
-    };
+  if (session?.user && !error) {
+    return {
+      authenticated: true,
+      error: null,
+      userId: session.user.id,
+    } as const;
   }
+
+  // Fallback to Bearer token validation if cookies fail
+  const headersList = headers();
+  const authHeader = headersList.get('authorization') || headersList.get('Authorization');
+  log('debug', '[requireAuth] Authorization header presence', { hasHeader: !!authHeader });
   
-  return { 
-    authenticated: true, 
-    error: null, 
-    userId: session.user.id 
-  };
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.split(' ')[1];
+    log('debug', '[requireAuth] Validating Bearer token', { tokenPrefix: token?.slice(0, 20) });
+    
+    try {
+      // Create a new Supabase client with the token in headers
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+      
+      const tokenSupabase = createClient(supabaseUrl, supabaseKey, {
+        global: { 
+          headers: { 
+            'Authorization': `Bearer ${token}` 
+          } 
+        },
+        auth: { persistSession: false }
+      });
+      
+      const { data: { user }, error: userError } = await tokenSupabase.auth.getUser();
+      log('debug', '[requireAuth] getUser with token result', { error: userError?.message, hasUser: !!user });
+      
+      if (user && !userError) {
+        return { authenticated: true, error: null, userId: user.id };
+      }
+    } catch (tokenError) {
+      log('debug', '[requireAuth] Token validation failed', { error: tokenError });
+    }
+  }
+
+  return {
+    authenticated: false,
+    error: error || new Error('Authentication required'),
+    userId: null,
+  } as const;
 }
 
 /**
@@ -164,7 +223,7 @@ export const getUserProfileCached = cache(async () => {
     if (!session) return { profile: null, error: new Error('No session found') };
     
     const { data, error } = await supabase
-      .from('users')
+      .from('user_profiles')
       .select('*')
       .eq('id', session.user.id)
       .single();

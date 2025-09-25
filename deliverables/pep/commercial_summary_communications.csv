@@ -1,0 +1,27 @@
+Section,Description,Amount (USD)
+Materials,Per FO BOM (OS2 cable on OEM drums, closures, trays, panels, LC optics/pigtails/patches, glands, labels, route markers, cleaning kits, launch fibers),8985
+Tools & Equipment,OTDR (1310/1550 nm) (purchase),8500
+Tools & Equipment,Optical Power Meter & Light Source (purchase),900
+Tools & Equipment,Fiber Inspection Scope (purchase),450
+Tools & Equipment,Visual Fault Locator (purchase),80
+Tools & Equipment,Fusion Splicer (purchase),5500
+Tools & Equipment,Fiber Cleaver (purchase),900
+Tools & Equipment,Closure Tooling Kit (purchase),350
+Tools & Equipment,Fiber Drum Stand with Brake x2 (purchase),900
+Tools & Equipment,Cable Rollers/Corner Guides set x2 (purchase),440
+Tools & Equipment,Patch Panel Tooling (purchase),180
+Tools & Equipment,Fiber Tool Kit (purchase),300
+Tools & Equipment Subtotal,,18500
+Engineering & Design (Comms),Backbone design, strand count, labeling,6000
+Detailed CAD & As-Builts (Comms),Rack elevations, redlines, as-built updates,2500
+Project Management (Comms),Planning/coordination/reporting,4000
+Procurement Management (Comms),Vendor liaison and expediting,2000
+Field Installation (Comms),FO crew, permits, pull/splice/terminate,12000
+Testing & Commissioning (Comms),OTDR/IL testing and documentation,2500
+Training (Comms),Operator and maintenance training,1500
+HSE Management (Comms),Method statements, permits, supervision,1500
+QA/QC & Documentation (Comms),ITP/ITR, test packs, O&M,2000
+Logistics & Handling (Comms),Freight, site handling, storage,2500
+Subtotal Materials+Tools+Services,,63985
+Contingency (10%),To be tuned after finalization,6399
+Grand Total (Estimated),,70384

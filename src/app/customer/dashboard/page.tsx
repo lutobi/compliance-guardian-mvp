@@ -31,6 +31,7 @@ export default function CustomerDashboard() {
 
   const loadDashboardData = async () => {
     const wsId = workspace?.id;
+    const wsSlug = (workspace as any)?.slug || (workspace as any)?.workspaceSlug || undefined;
     console.log('[Dashboard] ==> WORKSPACE DEBUG <==');
     console.log('[Dashboard] workspace object:', workspace);
     console.log('[Dashboard] workspace.id:', wsId);
@@ -38,8 +39,8 @@ export default function CustomerDashboard() {
     console.log('[Dashboard] user:', user);
     console.log('[Dashboard] ==> END WORKSPACE DEBUG <==');
     
-    if (!wsId) {
-      console.error('[Dashboard] No workspace ID available, cannot load assessments');
+    if (!wsId || !wsSlug) {
+      console.error('[Dashboard] Missing workspace context (id or slug). Cannot load dashboard.', { wsId, wsSlug });
       setLoadingData(false);
       return;
     }
@@ -47,8 +48,12 @@ export default function CustomerDashboard() {
     setLoadingData(true);
     try {
       // Fetch dashboard data via API route (now includes assessments)
-      console.log('[Dashboard] Fetching dashboard data for workspace:', wsId);
-      const dashboardRes = await fetch(`/api/dashboard?workspaceId=${wsId}`, { credentials: 'include' });
+      console.log('[Dashboard] Fetching dashboard data for workspace:', { wsId, wsSlug });
+      // withWorkspaceContext expects workspace slug via query param `workspace` or header `x-workspace-slug`
+      const dashboardRes = await fetch(`/api/dashboard?workspace=${encodeURIComponent(wsSlug)}`, {
+        credentials: 'include',
+        headers: { 'x-workspace-slug': wsSlug }
+      });
       
       if (!dashboardRes.ok) {
         const errorText = await dashboardRes.text();
@@ -127,13 +132,12 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     if (!authLoading && !workspaceLoading) {
-      if (!isCustomerUser && !isSystemUser) {
-        router.replace('/auth/login');
-      } else if (!workspace && isCustomerUser) {
-        router.replace('/customer/select-workspace');
+      // Do not redirect to /auth/login on the client; middleware handles unauthenticated redirects.
+      if (!workspace && isCustomerUser) {
+        router.replace('/workspace/select');
       }
     }
-  }, [authLoading, workspaceLoading, isCustomerUser, isSystemUser, workspace, router]);
+  }, [authLoading, workspaceLoading, isCustomerUser, workspace, router]);
 
   // Handle task completion
   const handleTaskComplete = async (taskId: string) => {

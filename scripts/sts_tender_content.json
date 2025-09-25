@@ -1,0 +1,500 @@
+{
+  "title": "STS Connections Tender – Appendix 1 V3.1",
+  "client": "Terminal Investment Namibia (TiN)",
+  "documentVersion": "V1.0 (Draft)",
+  "notes": [
+    "Source of truth: Appendix 1 - RFP connection of STSs V3.1 and new 'Appendices copy/'",
+    "FO termination at Cargo Building per V3.1; legacy Substation 1 FO is superseded",
+    "Mobile substation used during works; permanent MV tie-in point to be confirmed with TiN",
+    "LC/UPC connectors assumed unless TiN mandates APC",
+    "Quantities marked TBC pending field survey and TiN confirmation"
+  ],
+  "scopeCoverage": {
+    "Engineering & Design": [
+      "MV SLD and feeder architecture (mobile substation → CTP6 → STS05/06; STS04 migration to CTP5)",
+      "CTP6 and CTP5 pit GA: MV junction box and drum designs, earthing, labeling",
+      "Cable sizing method, protection & coordination per TiN settings",
+      "FO star topology Cargo Building ↔ CTP6/CTP5; splice plans; rack elevations",
+      "Network segmentation, VLAN/ACL, OT edge security",
+      "Optical budget and acceptance criteria"
+    ],
+    "Procurement": [
+      "MV XLPE cable (IEC 60502-2), termination/joint kits, SS IP67/IK10 enclosures (C5M)",
+      "OS2 9/125 μm cable, IP68 closures, LC/UPC panels/pigtails, labels",
+      "Certificates of conformity and type test reports"
+    ],
+    "Installation": [
+      "STS04 controlled isolation at CTP6, reroute to CTP5, new JB/drum and terminations",
+      "STS05/STS06 drums and JBs at CTP6; feeders from mobile substation",
+      "FO pull from Cargo Building to CTP6; splice at closure; rack terminations"
+    ],
+    "Testing & Commissioning": [
+      "MV IR/continuity, withstand/VLF as specified; protection setting verification",
+      "FO OTDR 1310/1550 nm; insertion loss; polarity",
+      "SCADA/Network VLAN/ACL verification and link checks"
+    ],
+    "Documentation & Handover": [
+      "As-built DWG/PDF, splice maps, cable schedules, protection settings",
+      "Test packs (MV/FO), O&M manuals, training records, handover checklist",
+      "Legalisation dossier per V3.1"
+    ],
+    "Project Mgmt & Admin": [
+      "Programme (Gantt), RACI, risk register, permitting schedule",
+      "Document control (10 working day review SLA), meeting cadence, escalation"
+    ]
+  },
+  "partA_electrical": {
+    "technical": {
+      "designBasis": [
+        "Standards: DIN/EN/ISO; Electrical: DIN/VDE, EN, IEC; European standards prevail",
+        "MV level TBC; feeder current and volt drop sized from ZPMC OEM data",
+        "Earthing per IEC 61936-1; sheath bonding scheme to avoid circulating currents"
+      ],
+      "architectureDiagram": [
+        "[Employer MV Switchgear] --(config per TiN)--> [Mobile Substation]* --> Feeder(s) --> [CTP6]",
+        "                                                                    +--> [CTP6 JB+Drum → STS05]",
+        "                                                                    +--> [CTP6 JB+Drum → STS06]",
+        "STS04 Migration: [CTP6 Disconnect] X → Duct reroute → [CTP5 New JB+Drum → STS04]",
+        "*Mobile substation for works; permanent tie-in point TBC"
+      ],
+      "junctionBoxDesign": [
+        "Stainless enclosure IP67/IK10, C5M; padlockable; filtered breathers",
+        "IN feeder termination with stress-control kits (IEC 60502-2)",
+        "OUT A to STS05 drum/tail; OUT B to STS06 drum/tail (stress-control kits)",
+        "Copper earth bar with test link; external earth lug to grid",
+        "Engraved UV-stable labels; torque labels on terminations"
+      ],
+      "methodStatementNarrative": [
+        "Prior to any site activity, permits to work and LOTO authorizations are obtained, IFC drawings and ITPs issued, RAMS briefed to the crew (including lifting plans for drums and confined-space controls for pit work), materials inspected against CoCs, and weather-protected staging areas established.",
+        "STS04 migration (CTP6 → CTP5): Coordinate an outage and apply LOTO at the source and at CTP6; prove dead with a calibrated tester and apply portable earths where required. Verify ducts CTP6→CTP5 by rod-and-mandrel/CCTV and dewater as needed. Install the CTP5 stainless enclosure with earth bar and test link; prepare gland plates and seal unused entries; mount the cable drum assembly with mechanical protection at exits.",
+        "Pull and handle cable using rollers, bell mouths and approved lubricant with a capstan winch and in-line dynamometer; maintain minimum bend radius and sidewall pressure; log pull tension and length. Terminate at CTP5 per kit sequence (stress-control, insulation tube, crimped lugs with calibrated dies, sealing/anti-tracking), torque to manufacturer values, dress conductors and apply permanent phase/feeder labels.",
+        "At CTP6, safely disconnect STS04 feeders, cap/insulate as required, update labels to reflect new routing and remove temporary earths after tests.",
+        "STS05/STS06 new feeders at CTP6: Prepare pits and mount two JB enclosures with filtered breathers and gland plates; bond each to the earth grid with labeled test links and verify continuity (< 1 Ω target). Position drums with spindle stands and braking control; pull feeders from the mobile substation to the JBs with mechanical protections at entries; complete stress-control terminations, torque and labeling per TiN schema; apply and record protection settings per TiN-approved sheet."
+      ],
+      "methodStatement": [
+        "STS04: LOTO; disconnect at CTP6; reroute through verified ducts to CTP5; install JB/drum; terminate; IR tests; re-energize with TiN",
+        "STS05/06: Prepare CTP6 pits; install JB/drums; pull feeders from mobile substation; terminate; earthing; protection settings; staged energization",
+        "Hold points: isolation verification; termination inspection; pre-energization tests"
+      ],
+      "testingNarrative": [
+        "Visual/mechanical checks: confirm enclosure IP integrity, gland seals, conductor dressing, terminal torque and labeling; verify earthing connections and test link status; review torque and pull logs for completeness.",
+        "Insulation resistance and continuity: perform IR per conductor and to earth using a calibrated megohmmeter at the correct kV class (e.g., 5 kV DC for 6–11 kV); record temperature-corrected values vs thresholds; verify phase ID and end-to-end continuity (R1/R2 as applicable).",
+        "VLF/withstand: conduct 0.1 Hz withstand at specified level (e.g., 2×U0) for the prescribed duration; monitor for instability or PD indications; acceptance is completion at setpoint without breakdown and with stable current profile.",
+        "Earthing tests: measure pit-to-grid continuity (< 1 Ω target) and, where required, earth resistance by clamp or 3-point method; verify sheath bonding continuity per design.",
+        "Protection verification: secondary injection to verify pickup, time-current characteristics, instantaneous elements and lockout logic against the TiN setting sheet; check CT polarity/ratio; perform functional trip checks where feasible.",
+        "Energization: hold a pre-energization review; remove temporary earths, restore enclosures and clear the area; energize no-load (phase rotation/voltage presence), then incremental load; perform a thermal scan after 2–4 h, rectify anomalies and re-scan if needed; compile a signed test dossier with as-built redlines."
+      ],
+      "testing": [
+        "IR (per phase and phase-earth), continuity",
+        "Withstand/VLF as required by MV rating",
+        "Protection relay setting verification (per TiN setting sheet)",
+        "Thermal scan after load (optional)"
+      ],
+      "acceptance": [
+        "IR ≥ manufacturer thresholds; no partial discharge evidence",
+        "Withstand/VLF passed; protection settings signed off",
+        "Earthing continuity within limits; labels complete and correct"
+      ]
+    },
+    "assumptionsClarifications": [
+      "MV level and permanent tie-in point to be confirmed with TiN. Final terminations and protection settings will align with TiN’s issued parameters.",
+      "Quantities/Unit Prices indicative pending field survey and vendor confirmation; BoQ will be updated post-confirmation.",
+      "Assumed MV level: 11 kV unless TiN advises otherwise; assumed tie-in at Cargo Building MV switchgear (spare feeder). Protection settings per TiN policy.",
+      "Route length basis: 1.2 km MV cable (matches BoQ: 1,200 Lm) inclusive of installation slack and bends across STS04–06 pit/junction box locations toward the Cargo Building MV room.",
+      "Terminations/joints: 12 terminations (kits) and 4 joint kits as spares/contingency per BoQ; final counts will follow the approved route and pit layout.",
+      "Junction boxes: stainless-steel IP67/IK10, C5M, qty 3 (CTP6×2, CTP5×1) as provisioned in BoQ."
+    ],
+    "boq": [
+      ["Item", "Description / Spec", "Qty", "Unit", "Unit Price (USD)", "Amount (USD)"],
+      ["MV Cable", "3C XLPE, IEC 60502-2, cross-section TBC, kV rating per TiN", "1200", "Lm", "$85.00", "$102000.00"],
+      ["MV Terminations", "Indoor/Outdoor termination kits, stress-control, IEC type-tested", "12", "Set", "$450.00", "$5400.00"],
+      ["MV Joints (spares)", "Heat/cold-shrink joint kits, IEC type-tested", "4", "Set", "$600.00", "$2400.00"],
+      ["MV Junction Boxes", "SS IP67/IK10, C5M, earth bar, labels (CTP6×2, CTP5×1)", "3", "EA", "$3500.00", "$10500.00"],
+      ["Cable Drums", "Marine-grade reels with IP67 tails for STS04/05/06", "3", "EA", "$1200.00", "$3600.00"],
+      ["Earthing Kit", "25–50 mm² Cu, clamps, test links", "1", "Lot", "$2800.00", "$2800.00"],
+      ["Surge Protection", "Per TiN policy for pit equipment", "3", "EA", "$450.00", "$1350.00"],
+      ["Labels/Marking", "UV-stable engraved plates; markers", "1", "Lot", "$600.00", "$600.00"],
+      ["Testing Services", "VLF/withstand, IR, certificates", "1", "Lot", "$4500.00", "$4500.00"],
+      ["Installation & Commissioning", "MV works labor", "1", "Lot", "$38000.00", "$38000.00"]
+    ],
+    "commercial": {
+      "payment": ["20% advance", "30% materials on site", "30% substantial completion", "10% T&C", "10% final handover & legalisation"],
+      "warranty": "12 months minimum; optional 24 months",
+      "exclusions": ["Permanent MV tie-in hardware if outside scope", "Civil works beyond pit reinstatement"],
+      "employerSupplied": ["MV switchgear (per V3.1)"]
+    }
+  ,
+    "executiveSummary": [
+      "We propose a turnkey electrical connection scope for STS cranes in accordance with Appendix 1 – RFP V3.1. Our solution delivers safe isolation and migration of STS04 to CTP5 and new junction box and drum assemblies at CTP6 for STS05/STS06. The approach prioritizes safety (no energized work), marine-grade materials (C5M), rigorous QA/ITP, and complete documentation for legalisation."
+    ],
+    "engineeringDesignApproach": [
+      "Our electrical design begins with a clear definition of operational scenarios and design criteria agreed with TiN. We derive design current from ZPMC OEM data and confirm upstream fault levels and protection philosophy. Cable sizing considers ampacity, voltage drop, short-circuit thermal withstand, and installation conditions. Protection settings are coordinated across source breakers, feeders and any intermediate relays; outputs include a formal setting sheet, coordination curves, and remarks on selectivity and clearing times. Earthing is designed to IEC 61936-1 with explicit targets for step/touch voltage and pit-to-grid continuity; sheath bonding is specified to avoid circulating currents while maintaining fault return paths. Marine exposure is addressed through C5M-grade stainless hardware, IP67 enclosures, sealed glands, and protected routing. All terminations are specified with manufacturer torque values and permanent labeling per TiN schema, with torque logs captured in the ITP."
+    ],
+    "procurementPlan": [
+      "We operate a structured source-to-site process governed by a procurement plan and a live materials tracker. RFQs are issued to approved vendors with technical datasheets, standards compliance (IEC/EN), and environmental requirements (C5M, IP ratings). Bids undergo a technical evaluation against mandatory criteria (type-test reports, CoCs, warranty terms, lead times) before commercial adjudication. Purchase Orders embed quality clauses (inspection rights, documentation deliverables, packing/marking) and define hold/witness points.",
+      "Expediting begins at award: vendors submit manufacturing schedules, inspection & test plans, and submittals (drawings, labels, torque tables) for approval. Logistics is aligned to the installation sequence and outage windows; packaging specifies moisture barriers, desiccants/inhibitors for marine environments, and shock/tilt indicators. Shipments include full documentation sets (CoC, type tests, packing lists) and are insured under the agreed Incoterms. Site receiving uses an RFI process: items are inspected, logged to the materials register (including serial/lot numbers), and quarantined if nonconforming. Sensitive items (MV kits) are stored in controlled conditions; kitting aligns to ITP steps to prevent premature unboxing."
+    ],
+    "installationApproach": [
+      "Site works commence after mobilisation, safety induction, and permit acceptance. Each activity is governed by an approved Method Statement and task risk assessment (RAMS). Supervisors brief the team daily (TBT), confirming roles, interface constraints, and hold points. Barriers, signage, and exclusion zones are established before work; confined-space and lifting plans are enforced where applicable. Sequencing prioritizes safety and operations continuity: we stage isolations, pre-stage materials, and validate temporary works before introducing any outage. Quality is built-in: checkpoints are recorded with photos, torque/measurement logs, and redlines captured contemporaneously for as-builts. Housekeeping, environmental protections (spill kits, dewatering controls), and reinstatement are maintained throughout."
+    ],
+    "valueEngineering": [
+      "We evaluate alternatives that reduce lifecycle cost and risk without compromising compliance. Examples include optimized enclosure sizes/material grades for C5M exposure and selection of termination kit technologies suitable for humidity and salt fog. Each option is documented with cost/schedule/maintenance impact and submitted for approval."
+    ],
+    "sustainability": [
+      "Our Environmental Management Plan addresses waste minimization, segregation, and responsible disposal; control of dewatering discharges; spill prevention and response; and noise/light management for adjacent operations. We prefer low-VOC consumables, reusable packaging where practical, and local sourcing to reduce transport emissions. All activities comply with TiN environmental policies and statutory requirements; incidents are logged and reviewed in weekly HSE reports."
+    ],
+    "interfaceManagement": [
+      "Interfaces span Operations, Power, HSE, and external authorities. We maintain an interface register identifying owners, data dependencies (e.g., settings sheets), and approval gates. Weekly coordination meetings track look-ahead constraints and access windows; changes are channelled through the change control process with impact assessments."
+    ],
+    "assetRegistration": [
+      "All new assets are tagged per TiN’s schema and registered into the asset register/CMMS. Tagging covers enclosures, terminations, cables, and protective devices. Serial numbers, test certificates, torque records, and location references are linked to each asset. We can provide QR-coded labels to expedite future maintenance and audits."
+    ],
+    "detailedScope": [
+      "MV: STS04 isolation and migration to CTP5; new JBs/drums at CTP6 for STS05/06; MV terminations; earthing; labeling.",
+      "Documentation: IFC/IFU drawings, ITPs, test packs, O&M, training, legalisation dossier.",
+      "Project Mgmt: programme, RACI, risk, meetings, change control, HSE."
+    ],
+    "projectDeliverables": [
+      "Drawings: SLDs, pit GA, cable schedules, labeling schedules.",
+      "Calculations: cable sizing, volt drop, protection coordination.",
+      "QA/ITP: inspection/test records, factory certificates (IEC type tests), torque logs.",
+      "Handover: as-built DWG/PDF, O&M manuals, training records, legalisation dossier."
+    ],
+    "stepByStepPlan": [
+      "1) Pre-Mobilisation (Week 0–2): Kick-off; pit and route surveys; safety file; permits; prelim designs; risk workshop; long-leads.",
+      "2) Detailed Design & Approvals (Week 2–6): IFC drawings; protection settings; ITPs; method statements; TiN approvals.",
+      "3) Procurement & FAT (Week 4–10): Order MV kits/enclosures; certificates; pre-assembly checks.",
+      "4) Installation (Week 8–14): MV STS04 LOTO/migration; CTP6 JBs/drums; earthing; labels.",
+      "5) Testing & Commissioning (Week 14–16): MV IR, continuity, VLF/withstand; protection verification.",
+      "6) Handover & Legalisation (Week 16–18): As-builts, test packs, training, legalisation dossier; punch list close-out."
+    ],
+    "qualityPlanITP": [
+      ["Stage", "Checkpoint", "Hold/Witness", "Record"],
+      ["Material Receiving", "CoC, visual, type tests", "W", "RFI-01"],
+      ["JB/Drum Installation", "Fixings, IP rating, earthing continuity", "H", "ITR-10"],
+      ["MV Terminations", "Prep/fit, torque, labels", "W", "ITR-20"],
+      ["Testing (MV)", "IR/VLF", "H", "ITR-40"],
+      ["Pre-energization Review", "Docs complete, permits, LOTO", "H", "ITR-50"]
+    ],
+    "hseRAMS": [
+      "No energized work; LOTO mandatory; PTW process per TiN.",
+      "Confined space/duct entry controls; lifting plans for drums; hot work permits if any.",
+      "Environmental: dewatering controls, spill kits, waste disposal; corrosion mitigation (C5M)."
+    ],
+    "detailedBoq": [
+      ["Item", "Qty", "Unit", "Unit Price (USD)", "Amount (USD)"],
+      ["Preliminaries (PM, HSE, QA)", "1", "Lot", "18,500.00", "18,500.00"],
+      ["Detailed Design & IFC", "1", "Lot", "12,000.00", "12,000.00"],
+      ["MV Cable 3C XLPE (IEC 60502-2)", "1,200", "Lm", "85.00", "102,000.00"],
+      ["MV Termination Kits", "12", "Set", "450.00", "5,400.00"],
+      ["MV Joint Kits (spares)", "4", "Set", "600.00", "2,400.00"],
+      ["SS JB Enclosures (C5M)", "3", "EA", "3,500.00", "10,500.00"],
+      ["Cable Drums with tails", "3", "EA", "1,200.00", "3,600.00"],
+      ["Earthing Kit & Materials", "1", "Lot", "2,800.00", "2,800.00"],
+      ["Surge Protection", "3", "EA", "450.00", "1,350.00"],
+      ["Labels/Marking", "1", "Lot", "600.00", "600.00"],
+      ["Testing Services (MV)", "1", "Lot", "4,500.00", "4,500.00"],
+      ["Installation & Commissioning", "1", "Lot", "38,000.00", "38,000.00"]
+    ]
+  },
+  "partB_communications": {
+    "technical": {
+      "designBasis": [
+        "OS2 9/125 μm single-mode; LC/UPC unless TiN mandates APC",
+        "Star topology: Cargo Building FO rack → CTP6 closure → STS05/STS06; CTP5 → STS04",
+        "Labeling per TIA-606 and TiN schema; OT edge security"
+      ],
+      "foDiagram": [
+        "[Core A/B @ Cargo Building]",
+        "  |           |",
+        "  +--[FO Rack: LC/UPC Panels]--+",
+        "                               |",
+        "                        OS2 24F to CTP6",
+        "                               |",
+        "                         [CTP6 FO Closure]",
+        "                           |          |",
+        "                         STS05      STS06",
+        "Additional: OS2 to CTP5 → STS04"
+      ],
+      "splicePlan": [
+        "Tray1: STS05 C1↔Backbone C1, C2↔C2; Tray2: STS05 C3↔C3, C4↔C4",
+        "Tray3: STS06 C1↔C5, C2↔C6; Tray4: STS06 C3↔C7, C4↔C8; Tray5–6 spares"
+      ],
+      "rackElevation": [
+        "U35: FO Panel #1 (STS05)",
+        "U34: FO Panel #2 (STS06)",
+        "U33: Cable Management",
+        "U32: OT Core Switch",
+        "U31: Industrial Firewall/OT Edge",
+        "U30: PDU/UPS"
+      ],
+      "opticalBudget": [
+        "Assume 0.8 km @1310 nm: 0.28 dB fiber loss; 2×0.25 dB connectors; 4×0.1 dB splices; margin 3 dB; design budget ≈ 4.18 dB",
+        "Acceptance: IL ≤ 2.0 dB typical; ≤ 3.0 dB max with extra panels; clean OTDR traces"
+      ],
+      "methodStatementNarrative": [
+        "Pre-works and duct preparation: confirm route from Cargo Building to CTP6, obtain PTWs, establish confined-space controls for manhole access (gas testing, ventilation, tripod/harness if required), rod the ducts, pass a mandrel to confirm clearances, install pull rope and label intermediate access points; dewater and clean chambers as needed.",
+        "Cable pulling (OS2 single-mode): stage the cable reel with spindle stands and braking control; set up a capstan winch with in-line dynamometer to monitor pulling tension; apply approved cable lubricant and use rollers/bell mouths at all bends; maintain minimum bend radius/sidewall pressure; record peak tension and pull length; fit bushings at entries and seal penetrations with rated compounds.",
+        "CTP6 closure installation and splicing: mount the IP68 closure, allocate trays per the splice plan and provide service loops; prepare fibers (strip, clean with lint-free wipes and alcohol, cleave) and fusion-splice to pigtails per tray allocation; apply splice protectors and dress fibers to maintain bend radius; close and seal the closure and pressure test if required.",
+        "Cargo Building rack terminations: prepare LC/UPC patch panels in the designated U-spaces; route incoming cables through cable management, bond metallic strength members to rack ground and terminate pigtails to adapters; label ports and cables per TIA-606/TiN schema; document tray maps and rack elevations.",
+        "Cleaning, inspection and housekeeping: clean all connectors with one-click tools and inspection scopes; verify grommets, seals and grounding are in place; update the splice schedule and labeling register."
+      ],
+      "methodStatement": [
+        "Duct prep: mandrel pass, pull rope, lubricants; tension monitored",
+        "Pull OS2 from Cargo Building to CTP6; seal entries; label MHs",
+        "Splice at CTP6 closure; LC/UPC terminations at rack; label per schedule",
+        "Test OTDR 1310/1550; IL; polarity; document traces"
+      ],
+      "testingNarrative": [
+        "Visual and label audit: confirm labels match the schedule, closures and panels are sealed and grounded, and fiber management is neat.",
+        "Polarity/continuity: use a visual fault locator and light source to verify A-to-B polarity according to the mapping; correct any cross-overs.",
+        "OTDR bi-directional: test at 1310/1550 nm using launch and tail fibers; record event tables for connectors/splices and overall attenuation; investigate reflective events or high loss splices.",
+        "Insertion loss (OLTS): measure end-to-end IL; acceptance per budget (≤ 2.0 dB typical path; ≤ 3.0 dB maximum if extra panels present); record reflectance where instruments support it.",
+        "Documentation: save OTDR traces (both directions), IL results and updated tray maps; compile into the test pack with sign-off sheets."
+      ],
+      "acceptance": [
+        "OTDR/IL within thresholds; polarity OK; labels match schedule",
+        "Rack terminations neat; grounding per standard; documentation complete"
+      ],
+      "foCloseUpChecklist": [
+        "Closure: trays allocated and labeled; splice protectors seated; fibres dressed with bend radius respected; desiccant (if specified) in place.",
+        "Seals/glands: correct sizes installed; IP rating maintained; strain relief fitted; no sharp edges; entry ports plugged if unused.",
+        "Grounding: metallic strength member/bond wire grounded to rack earth; continuity verified and logged.",
+        "Panel: pigtail slack managed; ports labeled per TIA-606/TiN; port map posted inside rack door.",
+        "Cleanliness: all connectors cleaned and inspected (scope) prior to close-up; endface photos sampled.",
+        "Evidence: photo set (overall, trays, seals, labels); ITR reference noted; hold/witness sign-off completed."
+      ]
+    },
+    "assumptionsClarifications": [
+      "Optical budget inputs (route length, splice/connector counts) will be verified against duct survey/as-built data; thresholds will be updated if required.",
+      "Quantities/Unit Prices are indicative pending vendor confirmation; BoQ will be updated post-confirmation."
+    ],
+    "boq": [
+      ["Item", "Description / Spec", "Qty", "Unit", "Unit Price (USD)", "Amount (USD)"],
+      ["OS2 FO Cable", "9/125 μm single-mode, duct-grade, dielectric/armoured TBC", "1600", "Lm", "$1.50", "$2400.00"],
+      ["FO Closures", "IP68 splice closures with trays (CTP6)", "2", "EA", "$350.00", "$700.00"],
+      ["Patch Panels", "19\" LC/UPC 24F/48F panels (Cargo Building)", "2", "EA", "$280.00", "$560.00"],
+      ["Pigtails & Patch Cords", "LC/UPC G.652.D", "36", "EA", "$12.00", "$432.00"],
+      ["Rack Accessories", "Cable mgmt, blanks, grounding", "1", "Lot", "$350.00", "$350.00"],
+      ["Labels/Tags", "TIA-606 compliant", "1", "Lot", "$200.00", "$200.00"],
+      ["Splicing & Testing", "Fusion splice, OTDR/IL with reports", "1", "Lot", "$2200.00", "$2200.00"],
+      ["Installation & Commissioning", "FO works labor", "1", "Lot", "$6000.00", "$6000.00"]
+    ],
+    "commercial": {
+      "payment": ["20% advance", "30% materials on site", "30% substantial completion", "10% T&C", "10% final handover & legalisation"],
+      "warranty": "12 months minimum; optional 24 months",
+      "exclusions": ["Active network switches unless specified", "Civil works beyond duct access"],
+      "employerSupplied": ["FO racks in Cargo Building (per V3.1)"]
+    },
+    "atpMicroChecklistsFO": [
+      "ITR-10 (Closure/Panel Installation): mounting/fixings level; seals/glands; grounding bonds; labeling applied; service loops and tray allocation; photos.",
+      "ITR-20 (Cable Pull Log): route pre-check; rollers/bell mouths set; lubricant type/batch; load-cell readings (start/peak/end); sidewall pressure/bend-radius checks; weather; pay-off direction.",
+      "ITR-30 (Splicing/Terminations): cleaning/inspection; cleave quality; splice loss per joint recorded; tray/core mapping; polarity verified; panel terminations dressed.",
+      "ITR-40 (Testing): OTDR bi-di with launch/tail; IL (OLTS) results; instrument calibration IDs; anomalies logged and rectified.",
+      "ITR-50 (Pre-energization/Readiness): documents complete (splice maps, port maps, traces); label audit passed; punch list closed/owners/dates."
+    ],
+    "closureHandoverStepsFO": [
+      "Pit/chamber reinstatement: remove debris; verify drainage; seal entries; update photos.",
+      "Spares & O&M: deliver closure seal kits, spare trays, pigtails/patch cords, cleaning kits; inventory sheet signed.",
+      "Training: brief TiN maintainers on port maps, cleaning/inspection routine, test pack retrieval; attendance recorded.",
+      "Documentation: update asset register with tag IDs and port maps; upload OTDR traces and IL tables; index in handover dossier."
+    ]
+  ,
+    "executiveSummary": [
+      "We propose a turnkey communications (fiber optic and OT edge) connection scope for STS cranes in accordance with Appendix 1 – RFP V3.1. Our solution delivers a resilient OS2 fibre star linking CTP6/CTP5 to the Cargo Building with disciplined splicing, labeling, and acceptance testing. The approach prioritizes cleanliness and optical performance, rigorous QA/ITP, and complete documentation for legalisation."
+    ],
+    "engineeringDesignApproach": [
+      "The FO design adopts OS2 G.652.D single-mode throughout, with LC/UPC connectors unless TiN mandates APC for specific links. We define a star topology from the Cargo Building to field closures, allocate tray maps to preserve spares and growth, and specify service loop policies. An optical budget is computed per path with allowances for fiber loss, connector and splice losses, and a 3 dB design margin; acceptance thresholds are tied to this budget. Splicing is planned as fusion with tray allocation and polarity verified end-to-end; connector cleanliness and inspection are mandated. Mechanical considerations include maintaining minimum bend radius, controlling pull tension/sidewall pressure, and sealing all entries. The design package comprises rack elevations, splice plans, labeling schedules, and test acceptance criteria aligned to the ITP."
+    ],
+    "procurementPlan": [
+      "We operate a structured source-to-site process governed by a procurement plan and a live materials tracker. RFQs are issued to approved vendors with technical datasheets, standards compliance (IEC/EN), and environmental requirements. Bids undergo a technical evaluation against mandatory criteria (type-test reports, CoCs, warranty terms, lead times) before commercial adjudication. Purchase Orders embed quality clauses and define hold/witness points.",
+      "Expediting begins at award: vendors submit manufacturing schedules, inspection & test plans, and submittals (drawings, labels) for approval. Logistics is aligned to the installation sequence; packaging specifies moisture barriers and handling indicators. Site receiving uses an RFI process; sensitive FO components are stored in controlled conditions; kitting aligns to ITP steps."
+    ],
+    "installationApproach": [
+      "Site works commence after mobilisation, safety induction, and permit acceptance. Each activity is governed by an approved Method Statement and RAMS. Supervisors brief the team daily (TBT). Barriers, signage, and exclusion zones are established before work; confined-space and lifting plans are enforced where applicable. Quality is built-in: checkpoints are recorded with photos and test logs; redlines captured contemporaneously."
+    ],
+    "valueEngineering": [
+      "We evaluate alternatives that reduce lifecycle cost and risk without compromising compliance. Examples include optimizing closures/panel counts, selecting APC on long spans to improve return loss where TiN standards allow, and alternative fiber routes to avoid congested ducts. Each option is documented with cost/schedule/maintenance impact and submitted for approval."
+    ],
+    "sustainability": [
+      "Our Environmental Management Plan addresses waste minimization, segregation, and responsible disposal; control of dewatering discharges; spill prevention and response; and noise/light management for adjacent operations. Preference for low-VOC consumables and local sourcing to reduce transport emissions."
+    ],
+    "interfaceManagement": [
+      "Interfaces span Operations, ICT/OT, HSE, and external authorities. We maintain an interface register identifying owners, data dependencies (e.g., rack allocations), and approval gates. Weekly coordination meetings track look-ahead constraints and access windows; changes are channelled through change control with impact assessments."
+    ],
+    "assetRegistration": [
+      "All new assets are tagged per TiN’s schema and registered into the asset register/CMMS. Tagging covers closures, panels, terminations, and cabling. Serial numbers, test certificates, and location references are linked to each asset. Optional QR-coded labels can be provided."
+    ],
+    "detailedScope": [
+      "FO: Cargo Building ↔ CTP6 star links; closures; rack panels; labeling; OTDR/IL tests.",
+      "Documentation: IFC/IFU drawings, ITPs, test packs, O&M, training, legalisation dossier.",
+      "Project Mgmt: programme, RACI, risk, meetings, change control, HSE."
+    ],
+    "projectDeliverables": [
+      "Drawings: splice maps, rack elevations, labeling schedules.",
+      "Calculations: optical budget.",
+      "QA/ITP: inspection/test records, factory certificates, OTDR/IL reports.",
+      "Handover: as-built DWG/PDF, O&M manuals, training records, legalisation dossier."
+    ],
+    "stepByStepPlan": [
+      "1) Pre-Mobilisation (Week 0–2): Kick-off; duct/chamber surveys; safety file; permits; prelim designs; risk workshop; long-leads.",
+      "2) Detailed Design & Approvals (Week 2–6): IFC drawings; splice plans; ITPs; method statements; TiN approvals.",
+      "3) Procurement & FAT (Week 4–10): Order FO hardware; certificates; pre-assembly checks.",
+      "4) Installation (Week 8–14): Pull Cargo→CTP6; closures; rack terminations; labeling.",
+      "5) Testing & Commissioning (Week 14–16): OTDR (1310/1550), IL, polarity; documentation of traces.",
+      "6) Handover & Legalisation (Week 16–18): As-builts, test packs, training, legalisation dossier; punch list close-out."
+    ],
+    "qualityPlanITP": [
+      ["Stage", "Checkpoint", "Hold/Witness", "Record"],
+      ["Material Receiving", "CoC, visual, type tests", "W", "RFI-01"],
+      ["Closure/Panel Installation", "Level/fixings, seals, grounding, labels", "H", "ITR-10"],
+      ["FO Cable Pulling", "Rollers, lubricant batch, tension log, bend/sidewall", "W", "ITR-20"],
+      ["FO Splicing/Terminations", "Tray map, splice loss, polarity", "W", "ITR-30"],
+      ["Testing (FO)", "OTDR/IL", "H", "ITR-40"],
+      ["Pre-energization Review", "Docs complete, permits", "H", "ITR-50"]
+    ],
+    "hseRAMS": [
+      "PTW process per TiN; confined space/duct entry controls; lifting plans for reels.",
+      "Environmental: dewatering controls, spill kits, waste disposal; corrosion mitigation."
+    ],
+    "detailedBoq": [
+      ["Item", "Qty", "Unit", "Unit Price (USD)", "Amount (USD)"],
+      ["OS2 FO Cable", "1,600", "Lm", "1.50", "2,400.00"],
+      ["IP68 FO Closures", "2", "EA", "350.00", "700.00"],
+      ["LC/UPC Rack Panels", "2", "EA", "280.00", "560.00"],
+      ["Pigtails & Patch Cords", "36", "EA", "12.00", "432.00"],
+      ["Rack Accessories", "1", "Lot", "350.00", "350.00"],
+      ["Labels/Tags (TIA-606)", "1", "Lot", "200.00", "200.00"],
+      ["Splicing & Testing", "1", "Lot", "2,200.00", "2,200.00"],
+      ["Installation & Commissioning", "1", "Lot", "6,000.00", "6,000.00"]
+    ]
+  },
+  "programme": [
+    ["Phase", "Duration (wks)", "Notes"],
+    ["Surveys & Data Collection", "2", "Duct CTP6↔Cargo Building; rack audit; earthing"],
+    ["Detailed Design & Approvals", "4", "IFC package and ITPs"],
+    ["Procurement & Logistics", "6", "Overlaps design tail; long-leads"],
+    ["Installation (MV+FO)", "6", "Method statements executed; RAMS"],
+    ["Testing & Commissioning", "2", "MV + FO acceptance"],
+    ["Legalisation & Closeout", "2", "Docs, O&M, training, handover"]
+  ],
+  "raci": [
+    ["Role", "Design", "Procure", "Install", "Test/Comm", "Docs/Handover"],
+    ["Contractor", "R", "R", "R", "R", "R"],
+    ["TiN PM/Tech", "A/C", "C", "C", "C", "A/C"],
+    ["TiN IT/ICT", "C", "C", "C", "A/C", "C"],
+    ["HSE", "A", "C", "A", "A", "C"]
+  ],
+  "risks": [
+    ["Risk", "Impact", "Mitigation"],
+    ["Duct congestion/water ingress", "Delay/route change", "Rod/CCTV, dewater, alt path"],
+    ["Protection miscoordination", "Trips/unsafe ops", "Review TiN settings; coordination study"],
+    ["FO attenuation high", "Link failure", "Splice quality, budget margin, rework"],
+    ["Corrosion (marine)", "Premature failure", "C5M materials, IP67/68, SS hardware"],
+    ["Ops disruption", "Outage risk", "Work windows, notices, staging"]
+  ],
+  "engineeringCalculations": {
+    "mvCableSizingVoltDrop": [
+      "Design current Ib from ZPMC load; select cable with Iz ≥ Ib·k (derating for ambient, grouping).",
+      "Short-circuit check: I²t withstand vs prospective Ik''; verify thermal/mechanical withstand per IEC 60949.",
+      "Volt drop: ΔV = I·(R·cosφ + X·sinφ)·L. Acceptance: ≤ 5% at full load feeder end (project criterion), ≤ 3% typical.",
+      "Termination torque per manufacturer; record in torque log."
+    ],
+    "earthingBonding": [
+      "Target earth resistance and step/touch voltage compliance per IEC 61936-1; continuity test ≤ 1 Ω pit-to-grid.",
+      "Sheath bonding scheme to avoid circulating currents; bond drums/JBs to grid with labeled test links."
+    ],
+    "fibreOpticalBudget": [
+      "Loss_total = α·L + N_c·L_c + N_s·L_s + margin.",
+      "Example: α=0.35 dB/km @1310 nm, L=0.8 km, N_c=2, L_c=0.25 dB, N_s=4, L_s=0.1 dB, margin=3 dB → ≈ 4.18 dB.",
+      "Acceptance: IL ≤ 2.0 dB typical for single splice/patch path; OTDR traces clean, no macro-bends; polarity verified."
+    ]
+  },
+  "networkCybersecurity": {
+    "logicalTopology": [
+      "VLANs: 200 Mgmt, 210 STS05 OT, 220 STS06 OT; 802.1Q trunk to OT core; ACLs block inter-VLAN except mgmt jump host."
+    ],
+    "aclExample": [
+      "deny ip vlan210 any vlan220 any",
+      "permit tcp vlan210 host <mgmt> eq 22",
+      "permit icmp vlan210 host <ntp>",
+      "deny ip any any log"
+    ],
+    "services": [
+      "Time: NTP/PTP as per TiN; Syslog to SIEM; SNMPv3 to NMS; backups encrypted; role-based access.",
+      "Security: firewall OT/IT demilitarized zone; MFA for admin; allowlist MACs on edge switches."
+    ]
+  },
+  "hardwareBOM": [
+    "MV termination/joint kits (e.g., Raychem/3M, IEC 60502-2 type-tested).",
+    "SS enclosures IP67/IK10, C5M (e.g., Rittal/Rose) with breathers and gland plates.",
+    "OS2 24F cable (e.g., Corning/Commscope), IP68 closures with trays (e.g., 3M/Corning).",
+    "LC/UPC panels, pigtails, patch cords; labeling consumables (engraved plates, sleeves).",
+    "Test equipment: OTDR (e.g., EXFO MaxTester), IL meter, insulation tester, VLF set."
+  ],
+  "softwareTools": [
+    "ETAP/EasyPower for coordination; AutoCAD for drawings; SharePoint/Confluence for document control.",
+    "EXFO TestSuite (or equivalent) for OTDR/IL reports; checklist apps for ITP execution."
+  ],
+  "projectManagementNarrative": [
+    "We apply a PMI/PRINCE2-aligned governance framework tailored for terminal operations. A dedicated Project Manager (PM) leads planning, coordination, and reporting; a Site Supervisor controls day-to-day works; Engineering manages design changes and technical queries. Baseline scope, schedule, and cost are established at kick-off and controlled through a formal change process. Weekly site coordination meetings align look-ahead activities, access windows, and permits; a monthly steering forum resolves escalations and reviews KPIs (HSE, schedule performance, quality, risks, commercial).",
+    "Schedule is managed with a resource-loaded Gantt and a 3-week rolling look-ahead. Constraints (permits, outages, materials) are tracked and cleared prior to task start. Risks are reviewed weekly, with owners, mitigations, and residual ratings updated. Issues and RFIs are logged and answered within agreed SLAs. Commercial management includes progress valuations, milestone invoicing, and change orders. Interfaces with TiN Power, ICT/OT, HSE and Operations are governed by an interface register that defines data requirements and hold/witness points.",
+    "Quality is embedded via an approved ITP; each hold/witness point ties to objective evidence (photos, logs, test results). HSE is enforced through PTW/LOTO, toolbox talks, and task-specific RAMS. Communications follow a documented plan covering progress reports, dashboard metrics, and distribution lists. All decisions and approvals are recorded in meeting minutes and form part of the handover dossier."
+  ],
+  "documentationHandoverNarrative": [
+    "We implement disciplined document control with a dedicated coordinator and a structured register (drawings, RFIs, NCRs, ITPs, test records, vendor data). Submittals follow a standard numbering convention and revision policy; reviews are completed within a 10-working-day SLA unless accelerated by agreement. Only approved IFC/IFU drawings are used for site works; redlines are captured daily and rolled into as-builts prior to energization.",
+    "Test packs are organized by system and location, linking ITP checkpoints to evidence (photos, test reports). O&M manuals compile datasheets, warranties, recommended maintenance, and spare parts. The handover dossier includes: as-built DWG/PDF sets, ITP/test records, certificates of conformity and type tests, training agendas and attendance, asset register (tags/serials/locations), and the legalisation dossier required by Appendix 1 V3.1. Digital deliverables are provided in both native (DWG, XLSX) and PDF formats with an index for traceability. A formal handover meeting reviews punch list status and acceptance certificates."
+  ],
+  "wbs": [
+    "1. Project Initiation – 1.1 Kick-off, 1.2 Safety file, 1.3 Survey & data collection, 1.4 Risk workshop",
+    "2. Design – 2.1 SLDs, 2.2 JB/Drum GA, 2.3 Cable sizing/VD, 2.4 Coordination settings, 2.5 FO splice maps, 2.6 ITPs/MoMs",
+    "3. Procurement – 3.1 RFQs, 3.2 Tech eval, 3.3 POs, 3.4 FAT/certificates, 3.5 Logistics",
+    "4. Installation – 4.1 MV STS04 migration, 4.2 CTP6 JBs/drums, 4.3 Earthing/labels, 4.4 FO pull/splice/terminate",
+    "5. Testing & Commissioning – 5.1 MV IR/VLF, 5.2 Protection verification, 5.3 FO OTDR/IL/polarity, 5.4 Integrated checks",
+    "6. Handover & Legalisation – 6.1 As-builts, 6.2 O&M/training, 6.3 Dossier, 6.4 Punch list close"
+  ],
+  "atp": {
+    "mv": [
+      "Visual/ID checks, torque log complete, IR ≥ threshold, VLF pass, settings signed by TiN."
+    ],
+    "fo": [
+      "Polarity pass, IL within limit, OTDR traces attached, labels verified to schedule."
+    ],
+    "documentation": [
+      "Drawings as-built, test packs signed, asset register updated, training delivered."
+    ]
+  },
+  "sparesOandM": {
+    "mv": [
+      "2× termination kits, 1× joint kit, labels set, spare glands."
+    ],
+    "fo": [
+      "Spare pigtails/patch cords, splice trays, labels; closure consumables."
+    ],
+    "oam": [
+      "Preventive maintenance checklist, cleaning kits, documentation updates."
+    ]
+  },
+  "trainingPlan": [
+    "Operator module (4h): isolation/energization, labeling, inspections.",
+    "Maintenance module (6h): MV termination inspection, earthing checks, FO cleaning/testing basics.",
+    "Documentation & HSE module (2h): records, permits, PPE, incident reporting."
+  ],
+  "warrantySLA": [
+    "12 months workmanship/materials; option to extend. Response: 4h remote, 24–48h on-site; defect rectification within 5 working days typical."
+  ],
+  "riskMatrix": [
+    ["Risk", "L", "C", "Rating", "Mitigation"],
+    ["Duct blockage", "M", "M", "M", "Pre-rod/CCTV; alternate route"],
+    ["Weather delays", "M", "L", "M", "Float in programme; weather windows"],
+    ["Material lead time", "H", "M", "H", "Early PO; vendor expediting"]
+  ],
+  "templates": [
+    "RFI form",
+    "NCR form",
+    "Change Request",
+    "ITP checklist sheets",
+    "Daily Site Report",
+    "Toolbox Talk form"
+  ]
+}

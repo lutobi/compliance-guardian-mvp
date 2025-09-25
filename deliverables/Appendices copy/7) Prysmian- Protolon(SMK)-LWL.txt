@@ -1,0 +1,168 @@
+                           PROTOLON(SMK)-LWL (N)TSKCGEWOEU 6/10 kV:
+                            medium voltage reeling cable with fibre-optics
+
+
+
+
+Application
+Flexible medium voltage reeling cable with integrated fibre-optics for the combined transmission of energy and data, for application under high
+or extreme mechanical stresses, e.g. high travel speeds, dynamic tensile loads, multiple changes of direction into different planes, churning on
+running over rollers and torsional stresses.
+Mainly for mobile equipment, e.g. fast-moving container cranes and large moving equipment.
+
+
+Global data
+Brand                                            PROTOLON(SMK)-LWL
+Type designation                                 (N)TSKCGEWOEU
+Standard                                         Based on DIN VDE 0250-813
+Certifications / Approvals                       GOST-R
+
+
+Notes on installation
+Notes on installation                            Preparation of fibre-optics requires special skills and use of elaborate tools. It is therefore
+                                                 recommended that performance of this work is entrusted to our customer service (Factory
+                                                 assembly). Please provide the connection dimensions.
+
+
+Design features
+Conductor                                        Conductor and earth conductor made of electrolytic copper tinned, very finely stranded, class FS
+                                                 (refer also to DIN VDE 0295)
+Insulation                                       PROTOLON HS
+                                                 High grade special compound based on high-quality EPR (at least 3GI3); improved mechanical and
+                                                 electrical characteristics (refer also to DIN VDE 0207, Part 20).
+Electrical field control                         Inner semiconductive layer of EPR, outer semiconductive layer of modified NBR, capable of being
+                                                 stripped when cold and thus extremely easy to prepare (Easy Strip design)
+Core identification                              Natural coloured insulation with black semiconductive layer
+Optical Fiber                                    Fibre core diameter: 62.5, 50 or 9μm; diameter across the cladding: 125μm; diameter over the
+                                                 coating: 250μm.
+                                                 Design available with 6,12, 18 or 24 fibres.
+
+                                                 Fibre class:                   G50/125μm          G62,5/125μm               E9/125μm
+                                                 Type:                          Graded-index fibre Graded-index fibre        Monomode fibre
+
+                                                 - Attenuation at 850 nm:       <2,8 dB/km             <3,3 dB/km                 -
+                                                 - Attenuation at 1310 nm:      <0,8 dB/km             <0,9 dB/km            <0,4 dB/km
+                                                 - Attenuation at 1550 nm:           -                       -               <0,3 dB/km
+                                                 - Bandwidth at 850 nm:         >400 MHz               >400 MHz                  -
+                                                 - Bandwidth at 1300 nm:        >1200 MHz              >600 MHz                  -
+                                                 - Numerical aperture:          0,2 ± 0,02             0,275 ± 0,02          0,14 ± 0,02
+                                                 - Chromatic dispersion at         -                       -                 <3,5 ps/nm km
+                                                 1300 nm:
+                                                 - Chromatic dispersion at          -                      -                 <3,5 ps/nm km
+                                                 1550 nm:
+
+Fiber coding                                     Specially developed color code for identification of the individual fibres
+Fiber covering                                   Hollow core with filling compound, Basic material: ETFE, Compound: 7YI 1, Natural color
+Core arrangement                                 Three core design with cradle separator in the centre, earth conductor splitted into 2 parts
+                                                 positioned in two interstices.
+                                                 Optical element: six tubes, laid up around a central support element, with one, two or three
+                                                 optical fibers in each, positioned in the third interstice.
+Sheath system                                    - PROTOFIRM Sandwich - double layer inner sheath:
+                                                 Special compound based on EPR, quality at least 5GM3, also served as water barrier, color: red;
+                                                 - Anti-torsion braid:
+                                                 Reinforced braid made of polyester threads, in a vulcanized bond between the sheaths, resulting
+                                                 in high strength of the sheath system;
+                                                 - PROTOFIRM Sandwich - double layer outer sheath:
+                                                 A sheath system with a unique combination of flexibility and robustness has been achieved
+                                                 through the use of a new sandwich structure. Abrasion and tear-proof high grade rubber
+                                                 compounds based on PCP, quality at least 5GM5, colour: bright red/red.
+Marking                                          PROTOLON (SMK) LWL (N)TSKCGEWOEU
+                                                 (number of cores)x(cross-section) (rated voltage) (year of manufacture) (serial number)
+
+
+
+
+PROTOLON(SMK)-LWL (N)TSKCGEWOEU 6/10 Prysmian Kabel und Systeme GmbH                                      Technical data, dimensions and weights are
+kV: medium voltage reeling cable with fibre- Alt Moabit 91D, 10559 Berlin                                 subject to change.
+optics                                       phone: +49 30 3675 40                                        © Prysmian Group, Germany 2015
+Revision: 23. Feb 2016                       email: kontakt@prysmiangroup.com                             www.prysmiangroup.com
+                       PROTOLON(SMK)-LWL (N)TSKCGEWOEU 6/10 kV:
+                        medium voltage reeling cable with fibre-optics
+
+
+
+
+Electrical parameters
+Rated voltage                                   6/10 kV
+Max. permissible operating voltage AC           6.9/12 kV
+Max. permissible operating voltage DC           9/18 kV
+AC test voltage                                 11 kV
+EMC                                             This design exhibits an extremely low interference level as a result of use a symmetrical three-
+                                                core design with very narrow manufacturing rates.
+Data transmission                               Special design with fibre-optics for trouble free data transmission at high data rates.
+Current Carrying Capacity description           According to DIN VDE 0298, Part 4. Higher values are permissible in specific cases (please consult
+                                                the manufacturer).
+
+
+Chemical parameters
+Resistance to oil                               Acc. to DIN EN 60811-404 and DIN VDE 0473-811-404, paragraph 10
+Weather resistance                              Unrestricted use outdoors and indoors, resistant to ozone, UV and moisture.
+Water resistance                                According to HD 2216
+
+
+Thermal parameters
+Max. permissible temperature at conductor       90 °C
+Max. short circuit temperature of the conductor 250 °C
+Ambient temperature for fixed installation      min -50 °C ; max +80 °C
+Ambient temperature in fully flexible operation min -35 °C ; max +80 °C
+
+
+Mechanical parameters
+Max. tensile load on the conductor              20 N/mm²
+Max. tensile load on the conductor during       Up to 30 (acc. to DIN VDE 0298 part 3: 15 N/mm²) N/mm²
+acceleration
+Torsional stress                                ± 25 °/m
+Min. bending radius                             Acc. to DIN VDE 0298 part 3
+Min. distance with S-type directional changes   20 x D (cable diameter)
+Travel speed                                    - Gantry (reeling operation): no restriction. For speeds beyond 240 m/min it is recommended to
+                                                consult the cable manufacturer
+Additional tests                                Reversed bending test, torsional stress test
+
+
+
+
+PROTOLON(SMK)-LWL (N)TSKCGEWOEU 6/10 Prysmian Kabel und Systeme GmbH                                  Technical data, dimensions and weights are
+kV: medium voltage reeling cable with fibre- Alt Moabit 91D, 10559 Berlin                             subject to change.
+optics                                       phone: +49 30 3675 40                                    © Prysmian Group, Germany 2015
+Revision: 23. Feb 2016                       email: kontakt@prysmiangroup.com                         www.prysmiangroup.com
+ Number of cores x   Part     MLFB      Conduc-    Earth      Outer      Outer      Bending   Weight   Permis-      Dynamic      Con-      Current    Short
+ cross section       number   Number    tor        conduc-    diameter   diameter   radius    (ca.)    sible        tensile      ductor    carrying   Circuit
+                                        diameter   tor        min.       max.       free      kg/km    tensile      force max.   resis-    capacity   Current
+                                        max.       diameter   mm         mm         moving             force max.   N            tance     (1)        (conduc-
+                                        mm         max.                             min.               N                         at 20°C   A          tor)
+                                                   mm                               mm                                           max.                 kA
+                                                                                                                                 Ω/km
+
+ 3x25 + 2x25/2 +     20004548 5DK4081   7.1        5          40.7       43.7       437       2640     1500         2250         0.8       131        3.58
+ 1x(6G62,5)
+ 3x35 + 2x25/2 +     20004549 5DK4082   8.3        5          42.7       45.7       457       3060     2100         3150         0.57      162        5.01
+ 1x(6G62,5)
+ 3x50 + 2x25/2 +     20004550 5DK4083   9.9        5          46.1       49.1       491       3730     3000         4500         0.39      202        7.15
+ 1x(6G62,5)
+ 3x70 + 2x35/2 +     20004551 5DK4084   11.8       5.9        51.1       55.1       551       4870     4200         6300         0.28      250        10.01
+ 1x(6G62,5)
+ 3x95 + 2x50/2 +     20004552 5DK4085   13.8       7.2        56.1       60.1       601       6070     5700         8550         0.21      301        13.59
+ 1x(6G62,5)
+ 3x120 + 2x70/2 +    20006945 5DK4086   15.4       8.3        60.9       64.9       649       7500     7200         10800        0.16      352        17.16
+ 1x(6G62,5)
+ 3x150 + 2x70/2 +    20004553 5DK4087   17.2       8.3        64.8       68.8       688       8670     9000         13500        0.13      404        21.45
+ 1x(6G62,5)
+ 3x185 + 2x95/2 +    20007673 5DK4088   19         9.8        69.3       73.3       733       10290    11100        16650        0.11      461        26.46
+ 1x(6G62,5)
+ 3x240 + 2x120/2     20035801 5DK4090   21.8       11         76.7       80.7       807       12960    14400        21600        0.08      540        34.32
+ + 1x(6G62,5)
+ 3x300 + 2x150/2              5DK4091   24.4       12         84.2       89.2       892       15880    18000        27000        0.07      620        42.9
+ + 1x(6G62,5)
+
+
+ Design with 12,18 or 24 fibers and/or G50 or E9 types available upon request.
+ (1) Nominal current carrying capacity for rubber cables laid on a surface, at 30°C ambient temperature (see also VDE 0298-4, Table 15).
+
+
+
+
+PROTOLON(SMK)-LWL (N)TSKCGEWOEU 6/10 Prysmian Kabel und Systeme GmbH                                     Technical data, dimensions and weights are
+kV: medium voltage reeling cable with fibre- Alt Moabit 91D, 10559 Berlin                                subject to change.
+optics                                       phone: +49 30 3675 40                                       © Prysmian Group, Germany 2015
+Revision: 23. Feb 2016                       email: kontakt@prysmiangroup.com                            www.prysmiangroup.com
+

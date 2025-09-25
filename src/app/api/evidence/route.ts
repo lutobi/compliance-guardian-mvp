@@ -1,67 +1,82 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+/**
+ * EVIDENCE API - MULTI-TENANT (MIGRATED TO NEW SECURE PATTERN)
+ * 
+ * Handles evidence/document management operations with workspace context:
+ * - GET: List evidence by framework, subcontrol, or assessment with pagination
+ * - POST: Create new evidence in workspace
+ * - PUT: Update existing evidence
+ * - DELETE: Remove evidence from workspace
+ */
+
+import { NextRequest } from 'next/server';
 import { Evidence } from '@/types/evidence';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
+import { 
+  withWorkspaceContext, 
+  extractPaginationParams, 
+  createPaginatedResponse,
+  getWorkspaceScopedClient,
+  getWorkspaceMetadata 
+} from '@/lib/api/request-utils';
 
-export async function GET(request: Request) {
-  console.log('Evidence API GET called');
-  const { searchParams } = new URL(request.url);
-  const frameworkId = searchParams.get('frameworkId');
-  const subcontrolId = searchParams.get('subcontrolId');
-  const assessmentId = searchParams.get('assessmentId');
+export async function GET(request: NextRequest) {
+  return withWorkspaceContext(request, 'view_evidence', async (context) => {
+    const { user } = context;
+    const pagination = extractPaginationParams(request);
+    
+    // Get query parameters
+    const url = new URL(request.url);
+    const rawFrameworkId = url.searchParams.get('frameworkId');
+    const subcontrolId = url.searchParams.get('subcontrolId');
+    const assessmentId = url.searchParams.get('assessmentId');
 
-  console.log('Evidence API params:', { frameworkId, subcontrolId, assessmentId });
+    console.log(`[API] GET /api/evidence - User: ${user.profile.email}, Workspace: ${user.currentWorkspace?.name}`);
 
-  if (!frameworkId && !subcontrolId && !assessmentId) {
-    return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
-  }
+    // Get workspace-scoped database client (used for auth context only)
+    const supabase = getWorkspaceScopedClient(user.currentWorkspace!.id);
 
-  const supabase = createRouteHandlerClient({ cookies });
+    // Build workspace-scoped query with filters
+    let query = supabase
+      .from('evidence')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false });
 
-  // Resolve frameworkId (slug or UUID)
-  let frameworkUuid: string | null = null;
-  if (frameworkId) {
-    try {
-      frameworkUuid = await resolveFrameworkUuid(supabase, frameworkId);
-    } catch {
-      return NextResponse.json({ data: [] });
-    }
-  }
-
-  try {
-    let data, error;
-    if (assessmentId) {
-      // Fetch evidence by assessment_id directly
-      const result = await supabase
-        .from('evidence')
-        .select('*')
-        .eq('assessment_id', assessmentId)
-        .order('created_at', { ascending: false });
-      data = result.data;
-      error = result.error;
-    } else {
-      // Build query based on framework or subcontrol
-      let query = supabase
-        .from('evidence')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (frameworkId) {
-        query = query.eq('framework_id', frameworkUuid);
+    // Resolve and apply framework filter (accept UUID or slug)
+    if (rawFrameworkId) {
+      let frameworkId = rawFrameworkId;
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(rawFrameworkId)) {
+        const { data: fw, error: fwErr } = await supabase
+          .from('frameworks')
+          .select('id')
+          .eq('slug', rawFrameworkId)
+          .maybeSingle();
+        if (fwErr) {
+          console.error('Error resolving framework slug for evidence GET:', fwErr);
+        }
+        if (!fw?.id) {
+          // Slug not found in DB: return empty results instead of invalid UUID filter
+          return [];
+        }
+        frameworkId = fw.id;
       }
-      if (subcontrolId) {
-        query = query.eq('subcontrol_id', subcontrolId);
-      }
-      const result = await query;
-      data = result.data;
-      error = result.error;
+      query = query.eq('framework_id', frameworkId);
     }
-    console.log('Evidence query result:', { data, error });
+    if (subcontrolId) {
+      query = query.eq('subcontrol_id', subcontrolId);
+    }
 
-    if (error) throw error;
+    // Apply pagination
+    query = query.range(pagination.offset, pagination.offset + pagination.limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('Database error fetching evidence:', error);
+      throw new Error(`Failed to fetch evidence: ${error.message}`);
+    }
 
     // Map database results to Evidence type
-    const formattedData = data?.map(item => ({
+    const formattedData = data?.map((item: any) => ({
       id: item.id,
       subcontrolId: item.subcontrol_id,
       frameworkId: item.framework_id,
@@ -73,124 +88,167 @@ export async function GET(request: Request) {
       controlName: item.title?.replace('Evidence for ', '') || ''
     })) || [];
 
-    return NextResponse.json({ data: formattedData });
-  } catch (error: any) {
-    console.error('Error fetching evidence:', error);
-    if (error.message.includes('invalid input syntax for type uuid')) {
-      return NextResponse.json({ data: [] });
-    }
-    return NextResponse.json({ error: error.message || 'Failed to fetch evidence' }, { status: 500 });
-  }
+    // Return array directly; wrapper will place under data
+    return formattedData;
+  });
 }
 
-export async function POST(request: Request) {
-  console.log('Evidence API POST called');
-  const supabase = createRouteHandlerClient({ cookies });
-  
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function POST(request: NextRequest) {
+  return withWorkspaceContext(request, 'create_evidence', async (context) => {
+    const { user, body } = context;
     
-    const body = await request.json();
-    console.log('Evidence POST body:', body);
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(user.currentWorkspace!.id);
     
-    // Resolve frameworkId (slug or UUID)
-    let frameworkUuid: string;
-    try {
-      frameworkUuid = await resolveFrameworkUuid(supabase, body.frameworkId);
-    } catch {
-      return NextResponse.json({ error: 'Invalid frameworkId' }, { status: 400 });
+    console.log(`[API] POST /api/evidence - User: ${user.profile.email}, Body:`, body);
+    
+    // Validation
+    if (!body.frameworkId) {
+      throw new Error('frameworkId is required');
     }
-
-    // No strict requirement for subcontrolId/frameworkId here; proceed with available data
-    if (!body.frameworkId) console.warn('POST /api/evidence missing frameworkId');
-    if (!body.subcontrolId) console.warn('POST /api/evidence missing subcontrolId');
 
     // Determine title
-    let controlName = body.controlName || 'control';
-    let title = `Evidence for ${controlName}`;
+    const controlName = body.controlName || 'control';
+    const title = `Evidence for ${controlName}`;
     
-    // Build base record
+    // Resolve frameworkId if provided as slug
+    let frameworkId: string | null = body.frameworkId || null;
+    if (frameworkId) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(frameworkId)) {
+        const { data: fw, error: fwErr } = await supabase
+          .from('frameworks')
+          .select('id')
+          .eq('slug', frameworkId)
+          .maybeSingle();
+        if (fwErr) {
+          console.error('Error resolving framework slug for evidence POST:', fwErr);
+          throw new Error(`Failed to create evidence: ${fwErr.message}`);
+        }
+        frameworkId = fw?.id || null;
+      }
+    }
+    if (!frameworkId) {
+      throw new Error('Invalid frameworkId');
+    }
+
+    // Build evidence record
     const record: any = {
-      subcontrol_id: body.subcontrolId,
-      framework_id: frameworkUuid,
-      user_id: user.id,
+      subcontrol_id: body.subcontrolId || null,
+      framework_id: frameworkId,
+      user_id: user.profile.id,
+      workspace_id: user.currentWorkspace!.id,
       title,
       notes: body.notes || '',
       tags: body.tags || [],
-      files: body.files || []
+      files: body.files || [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     };
     
-    // Link evidence to assessment directly
-    if (body.assessmentId) {
-      record.assessment_id = body.assessmentId;
-    }
-    
-    console.log('Inserting evidence record:', record);
-    const { data, error } = await supabase
+    console.log('Inserting evidence record (with workspace_id):', record);
+    let insertRes = await supabase
       .from('evidence')
       .insert(record)
       .select('*')
       .single();
-      
-    if (error) {
-      console.error('Error adding evidence:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Handle missing workspace_id column gracefully (older schema)
+    if (insertRes.error && typeof insertRes.error.message === 'string') {
+      const msg = insertRes.error.message.toLowerCase();
+      const missingColumn = msg.includes("could not find the 'workspace_id' column") || msg.includes('column "workspace_id" does not exist');
+      if (missingColumn) {
+        console.warn('[Evidence POST] workspace_id column missing, retrying insert without it');
+        const { workspace_id, ...fallbackRecord } = record;
+        insertRes = await supabase
+          .from('evidence')
+          .insert(fallbackRecord)
+          .select('*')
+          .single();
+      }
+    }
+
+    if (insertRes.error) {
+      console.error('Database error creating evidence:', insertRes.error);
+      throw new Error(`Failed to create evidence: ${insertRes.error.message}`);
     }
     
-    console.log('Evidence added successfully:', data);
+    console.log('Evidence created successfully:', insertRes.data);
     
     // Map the response to the Evidence type
+    const row = insertRes.data as any;
     const mappedData: Evidence = {
-      id: data.id,
-      subcontrolId: data.subcontrol_id,
-      frameworkId: data.framework_id,
-      files: data.files || [],
-      notes: data.notes || '',
-      tags: data.tags || [],
-      createdAt: data.created_at,
-      updatedAt: data.updated_at,
-      controlName: body.controlName
+      id: row.id,
+      subcontrolId: row.subcontrol_id,
+      frameworkId: row.framework_id,
+      files: row.files || [],
+      notes: row.notes || '',
+      tags: row.tags || [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      controlName: body.controlName || ''
     };
     
-    return NextResponse.json({ data: mappedData, success: true });
-  } catch (error: any) {
-    console.error('Error in evidence POST:', error);
-    return NextResponse.json({ error: error.message || 'Failed to add evidence' }, { status: 500 });
-  }
+    // Return created Evidence directly
+    return mappedData;
+  });
 }
 
-// Handle evidence update
-export async function PUT(request: Request) {
-  console.log('Evidence API PUT called');
-  const supabase = createRouteHandlerClient({ cookies });
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const body = await request.json();
-    const id = body.id;
+export async function PUT(request: NextRequest) {
+  return withWorkspaceContext(request, 'edit_evidence', async (context) => {
+    const { user, body } = context;
+    
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(user.currentWorkspace!.id);
+    
+    const { id } = body;
     if (!id) {
-      return NextResponse.json({ error: 'Missing evidence ID' }, { status: 400 });
+      throw new Error('Evidence ID is required');
     }
-    const record: any = {};
+    
+    console.log(`[API] PUT /api/evidence - User: ${user.profile.email}, Evidence: ${id}`);
+    
+    // Verify evidence exists and belongs to workspace
+    const { data: existingEvidence, error: fetchError } = await supabase
+      .from('evidence')
+      .select('id, user_id')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError || !existingEvidence) {
+      throw new Error('Evidence not found');
+    }
+    
+    // Check permissions (owner or admin can edit)
+    const isOwner = existingEvidence.user_id === user.profile.id;
+    const isAdmin = user.currentMembership?.role === 'admin' || user.currentMembership?.role === 'owner';
+    
+    if (!isOwner && !isAdmin) {
+      throw new Error('Insufficient permissions to edit this evidence');
+    }
+    
+    // Build update record
+    const record: any = {
+      updated_at: new Date().toISOString()
+    };
+    
     if (body.notes !== undefined) record.notes = body.notes;
     if (body.tags !== undefined) record.tags = body.tags;
     if (body.files !== undefined) record.files = body.files;
-    record.updated_at = new Date().toISOString();
+    
     const { data, error } = await supabase
       .from('evidence')
       .update(record)
       .eq('id', id)
       .select('*')
       .single();
+      
     if (error) {
-      console.error('Error updating evidence:', error);
-      return NextResponse.json({ error: error.message || 'Failed to update evidence' }, { status: 500 });
+      console.error('Database error updating evidence:', error);
+      throw new Error(`Failed to update evidence: ${error.message}`);
     }
+    
+    // Map response to Evidence type
     const mappedData: Evidence = {
       id: data.id,
       subcontrolId: data.subcontrol_id,
@@ -202,34 +260,59 @@ export async function PUT(request: Request) {
       updatedAt: data.updated_at,
       controlName: data.title?.replace('Evidence for ', '') || ''
     };
-    return NextResponse.json({ data: mappedData, success: true });
-  } catch (error: any) {
-    console.error('Error in evidence PUT:', error);
-    return NextResponse.json({ error: error.message || 'Failed to update evidence' }, { status: 500 });
-  }
+    
+    // Return updated Evidence directly
+    return mappedData;
+  });
 }
 
-// Handle evidence deletion
-export async function DELETE(request: Request) {
-  console.log('Evidence API DELETE called');
-  const supabase = createRouteHandlerClient({ cookies });
-  try {
-    const body = await request.json();
-    const id = body.id;
+export async function DELETE(request: NextRequest) {
+  return withWorkspaceContext(request, 'delete_evidence', async (context) => {
+    const { user, body } = context;
+    
+    const { id } = body;
     if (!id) {
-      return NextResponse.json({ error: 'Missing evidence ID' }, { status: 400 });
+      throw new Error('Evidence ID is required');
     }
+    
+    console.log(`[API] DELETE /api/evidence - User: ${user.profile.email}, Evidence: ${id}`);
+
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(user.currentWorkspace!.id);
+    
+    // Verify evidence exists and belongs to workspace
+    const { data: existingEvidence, error: fetchError } = await supabase
+      .from('evidence')
+      .select('id, user_id')
+      .eq('id', id)
+      .single();
+    
+    if (fetchError || !existingEvidence) {
+      throw new Error('Evidence not found');
+    }
+    
+    // Check permissions (owner or admin can delete)
+    const isOwner = existingEvidence.user_id === user.profile.id;
+    const isAdmin = user.currentMembership?.role === 'admin' || user.currentMembership?.role === 'owner';
+    
+    if (!isOwner && !isAdmin) {
+      throw new Error('Insufficient permissions to delete this evidence');
+    }
+    
     const { error } = await supabase
       .from('evidence')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      ;
+      
     if (error) {
-      console.error('Error deleting evidence:', error);
-      return NextResponse.json({ error: error.message || 'Failed to delete evidence' }, { status: 500 });
+      console.error('Database error deleting evidence:', error);
+      throw new Error(`Failed to delete evidence: ${error.message}`);
     }
-    return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Error in evidence DELETE:', error);
-    return NextResponse.json({ error: error.message || 'Failed to delete evidence' }, { status: 500 });
-  }
+    
+    return { 
+      id,
+      message: 'Evidence deleted successfully'
+    };
+  });
 }

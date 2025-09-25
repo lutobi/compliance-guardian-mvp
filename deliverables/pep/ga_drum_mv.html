@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>GA – MV Cable Drum — OD-based sizing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 16px; background:#f8fafc; }
+    .container { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    .toolbar { display:flex; gap:8px; margin-bottom:12px; }
+    .btn { background:#111827; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; }
+    h1, h2, h3 { margin: 0 0 12px; }
+    .small { color:#6b7280; font-size:12px; }
+    @page { size: A3 landscape; margin: 10mm; }
+    @media print { body { padding:0; background:#fff; } .container { box-shadow:none; border:0; } }
+    svg { width: 100%; height: auto; }
+    .dim { fill:#111827; font-size:14px; }
+    .label { fill:#111827; font-size:16px; font-weight:600; }
+    .callout { fill:#374151; font-size:13px; }
+    .line { stroke:#111827; stroke-width:2; }
+    .dash { stroke:#9ca3af; stroke-width:2; stroke-dasharray:6 6; }
+  </style>
+  <script>function doPrint(){ window.print(); }</script>
+</head>
+<body>
+  <h1>General Arrangement — MV Cable Drum (single cable)</h1>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="doPrint()">Print (A3 Landscape)</button>
+    </div>
+    <div class="small">Design basis: One MV cable per drum. Assumed cable OD ≈ 65 mm (Prysmian table ~3×120 mm²). Sizing rules: Barrel Ø ≥ 18×OD (≥ 1170 mm, use 1200 mm nominal). Flange Ø ≥ Barrel + 6×OD (≥ 1560 mm, use 1600 mm nominal). Min edge clearance from cable pack to flange ≥ 2×OD (≥ 130 mm). Traverse pitch ≈ 1.05×OD (≈ 68 mm). Bore sized for spindle/jacks.</div>
+
+    <svg viewBox="0 0 2200 1450" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GA drawing MV Drum detailed">
+      <!-- SIDE (ELEVATION) VIEW -->
+      <text class="label" x="520" y="120">Side (Elevation) View</text>
+      <!-- Flange and barrel -->
+      <circle cx="520" cy="720" r="800" fill="#f3f4f6" stroke="#111827" stroke-width="3" />
+      <circle cx="520" cy="720" r="600" fill="#ffffff" stroke="#9ca3af" stroke-width="2" /> <!-- Cable pack limit example -->
+      <circle cx="520" cy="720" r="300" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2" /> <!-- Barrel -->
+      <!-- Bore -->
+      <circle cx="520" cy="720" r="60" fill="#9ca3af" stroke="#111827" stroke-width="2" />
+      <text class="callout" x="600" y="730">Bore Ø ≈ 120 mm (to suit spindle)</text>
+      <!-- Flange Ø dimension -->
+      <line class="line" x1="520" y1="-40" x2="520" y2="160" />
+      <line class="line" x1="490" y1="-40" x2="550" y2="-40" />
+      <line class="line" x1="490" y1="160" x2="550" y2="160" />
+      <text class="dim" x="540" y="60" transform="rotate(90 540,60)">Flange Ø = 1600 mm (≥ Barrel + 6×OD)</text>
+      <!-- Barrel Ø dimension -->
+      <line class="line" x1="520" y1="420" x2="520" y2="720" />
+      <line class="line" x1="490" y1="420" x2="550" y2="420" />
+      <line class="line" x1="490" y1="720" x2="550" y2="720" />
+      <text class="dim" x="540" y="580" transform="rotate(90 540,580)">Barrel Ø = 1200 mm (≥ 18×OD)</text>
+      <!-- Exit path and clamp/guide with bend radius -->
+      <path d="M 520 100 C 520 100, 820 140, 950 260" fill="none" stroke="#ef4444" stroke-width="4" />
+      <rect x="950" y="260" width="160" height="22" fill="#9ca3af" />
+      <text class="callout" x="1120" y="275">Lead clamp/guide bar; payout path R ≥ 12×OD (≥ 780 mm)</text>
+
+      <!-- FRONT (WIDTH) VIEW with edge clearances and traverse pitch) -->
+      <text class="label" x="1420" y="120">Front (Width) View</text>
+      <rect x="1120" y="240" width="920" height="760" fill="#f9fafb" stroke="#111827" stroke-width="3" />
+      <rect x="1140" y="260" width="880" height="720" fill="#ffffff" stroke="#9ca3af" stroke-width="2" />
+      <!-- Edge clearances zones (≥ 130 mm) -->
+      <rect x="1140" y="260" width="130" height="720" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 6" />
+      <rect x="1890" y="260" width="130" height="720" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="6 6" />
+      <text class="dim" x="1205" y="1000">≥ 130 mm</text>
+      <text class="dim" x="1955" y="1000">≥ 130 mm</text>
+      <!-- Traverse pitch rulers (≈ 68 mm) across the fill area -->
+      <g stroke="#9ca3af" stroke-width="1">
+        <line x1="1270" y1="260" x2="1270" y2="980" />
+        <line x1="1338" y1="260" x2="1338" y2="980" />
+        <line x1="1406" y1="260" x2="1406" y2="980" />
+        <line x1="1474" y1="260" x2="1474" y2="980" />
+        <line x1="1542" y1="260" x2="1542" y2="980" />
+        <line x1="1610" y1="260" x2="1610" y2="980" />
+        <line x1="1678" y1="260" x2="1678" y2="980" />
+        <line x1="1746" y1="260" x2="1746" y2="980" />
+      </g>
+      <text class="callout" x="1440" y="1020">Traverse pitch ≈ 68 mm (≈ 1.05×OD)</text>
+
+      <!-- Width dimension (set during procurement) -->
+      <line class="line" x1="1140" y1="1020" x2="2020" y2="1020" />
+      <line class="line" x1="1140" y1="990" x2="1140" y2="1020" />
+      <line class="line" x1="2020" y1="990" x2="2020" y2="1020" />
+      <text class="dim" x="1580" y="1050">Drum width W: set per ordered length and lay (typ. 900–1400 mm)</text>
+
+      <!-- Cable OD reference -->
+      <rect x="160" y="1180" width="220" height="44" fill="#111827" />
+      <text class="label" x="270" y="1210" text-anchor="middle" fill="#fff">Cable OD ≈ 65 mm</text>
+    </svg>
+
+    <div class="small">Notes: Confirm final OD from selected MV cable datasheet; adjust barrel/flange accordingly. For very long lengths, increase width and check total mass vs. lifting equipment. Maintain OEM reeling instructions and min. free radius in payout path.</div>
+  </div>
+</body>
+</html>

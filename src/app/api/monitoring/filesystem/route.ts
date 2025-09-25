@@ -1,11 +1,29 @@
-import { NextResponse } from 'next/server';
+/**
+ * FILESYSTEM MONITORING API - MULTI-TENANT (STANDARDIZED)
+ * 
+ * Handles filesystem monitoring operations with workspace context:
+ * - POST: Process filesystem monitoring actions (validate, configure, check)
+ */
+
+import { NextRequest } from 'next/server';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { MonitoringPoint } from '@/types/monitoring';
 
+// Extended interface for filesystem monitoring points
+interface FileSystemMonitoringPoint extends MonitoringPoint {
+  path: string;
+  metric: string;
+  threshold: string;
+}
+import { 
+  withWorkspaceContext,
+  getWorkspaceMetadata
+} from '@/lib/api/request-utils';
+
 export const runtime = 'nodejs';
 
-async function checkFileStatus(point: MonitoringPoint & { path: string }) {
+async function checkFileStatus(point: FileSystemMonitoringPoint) {
   try {
     const stats = await fs.stat(point.path);
     
@@ -91,36 +109,43 @@ async function validatePaths(config: Record<string, any>) {
   };
 }
 
-export async function POST(request: Request) {
-  try {
-    const { action, data } = await request.json();
+export async function POST(request: NextRequest) {
+  return withWorkspaceContext(request, 'manage_monitoring', async (context) => {
+    const { user, body } = context;
+    const { action, data } = body;
+    
+    if (!action || !data) {
+      throw new Error('Action and data are required');
+    }
 
+    console.log(`[API] POST /api/monitoring/filesystem - User: ${user.profile.email}, Action: ${action}`);
+    
     switch (action) {
       case 'validate':
-        return NextResponse.json(await validatePaths(data));
+        return {
+          ...await validatePaths(data),
+          workspace: getWorkspaceMetadata(user)
+        };
 
       case 'configure':
         // Configuration is handled client-side, just validate
         const validation = await validatePaths(data);
         if (!validation.valid) {
-          return NextResponse.json(validation, { status: 400 });
+          throw new Error(`Invalid configuration: ${validation.errors?.join(', ')}`);
         }
-        return NextResponse.json({ success: true });
+        return { 
+          success: true,
+          workspace: getWorkspaceMetadata(user)
+        };
 
       case 'check':
-        return NextResponse.json(await checkFileStatus(data));
+        return {
+          ...await checkFileStatus(data),
+          workspace: getWorkspaceMetadata(user)
+        };
 
       default:
-        return NextResponse.json(
-          { error: 'Invalid action' },
-          { status: 400 }
-        );
+        throw new Error(`Invalid action: ${action}`);
     }
-  } catch (error) {
-    console.error('FileSystem Integration Error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  });
 }

@@ -1,16 +1,19 @@
-import { NextResponse } from 'next/server';
+/**
+ * HTML-PDF REPORT API - MULTI-TENANT (STANDARDIZED)
+ * 
+ * Generates HTML-based PDF reports for assessment compliance data with workspace context:
+ * - GET: Generate PDF report from HTML with charts, narrative, and evidence
+ */
 
-
+import { NextRequest, NextResponse } from 'next/server';
 import QuickChart from 'quickchart-js';
 import OpenAI from 'openai';
-import { createClient } from '@supabase/supabase-js';
-
-import { createWorker } from 'tesseract.js';
 import fs from 'fs';
 import path from 'path';
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(SUPABASE_URL ?? '', SERVICE_ROLE_KEY ?? '');
+import { 
+  withWorkspaceContext,
+  getWorkspaceScopedClient
+} from '@/lib/api/request-utils';
 
 // AI Provider configuration
 const AI_PROVIDER = process.env.AI_PROVIDER ?? 'openai';
@@ -75,18 +78,34 @@ async function chatAI(
   return '';
 }
 
-// New HTML-to-PDF endpoint using Puppeteer
-export async function GET(request: Request) {
-    console.log('DEBUG-HTML-PDF-ROUTE: invoked, URL =', request.url);
+// HTML-to-PDF endpoint using Puppeteer with workspace context security
+export async function GET(request: NextRequest) {
+  return withWorkspaceContext(request, 'view_reports', async (context) => {
+    // Get query parameters and workspace context
+    const { user, workspaceContext } = context;
+    console.log(`[API] GET /api/report/html-pdf - User: ${user.profile.email}`);    
     console.log('DEBUG-HTML-PDF-ROUTE: AI_PROVIDER =', AI_PROVIDER, 'OPENAI_API_KEY present =', !!OPENAI_API_KEY, 'DEEPSEEK_API_KEY present =', !!DEEPSEEK_API_KEY);
     // ... (rest of the code remains the same)
 
-  try {
     const url = new URL(request.url);
     const assessmentId = url.searchParams.get('assessmentId');
     console.log('DEBUG-HTML-PDF-ROUTE: assessmentId', assessmentId);
     if (!assessmentId) {
-      return NextResponse.json({ error: 'assessmentId is required' }, { status: 400 });
+      throw new Error('Assessment ID is required');
+    }
+    
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(workspaceContext.slug);
+    
+    // Verify assessment belongs to workspace
+    const { data: assessment, error: assessmentError } = await supabase
+      .from('assessments')
+      .select('id, workspace_id')
+      .eq('id', assessmentId)
+      .single();
+
+    if (assessmentError || !assessment) {
+      throw new Error('Assessment not found');
     }
     const origin = request.headers.get('origin') || url.origin;
     // require pdf-parse at runtime
@@ -427,11 +446,13 @@ const evidenceFilesHtml = evidencesList.map(e => `<tr><td>${e.file_url?.split('/
 
     console.log('DEBUG-HTML-PDF-ROUTE: returning PDF, size =', pdfBuffer.byteLength);
     return new NextResponse(pdfBuffer, { status: 200, headers: { 'Content-Type': 'application/pdf' } });
-  } catch (err: any) {
-    console.error('/api/report/html-pdf error:', err.stack || err);
-    const errorMessage = err.stack || err.message || 'Unknown error';
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
-  }
+  }).catch(error => {
+    console.error('Error generating HTML-PDF report:', error);
+    return new NextResponse(JSON.stringify({ error: 'Failed to generate HTML-PDF report' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  });
 }
 
 export const runtime = 'nodejs';

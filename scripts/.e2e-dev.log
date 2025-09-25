@@ -1,0 +1,83 @@
+  ▲ Next.js 14.2.29
+  - Local:        http://localhost:3003
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 4.8s
+ ✓ Compiled /api/auth/callback in 319ms (228 modules)
+(node:17998) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET /api/auth/callback 307 in 506ms
+ GET /api/auth/callback 307 in 31ms
+ ✓ Compiled /src/middleware in 259ms (143 modules)
+[MW] NODE_ENV=development isE2E=true path=/onboarding cookies=
+ ○ Compiling /onboarding ...
+ ✓ Compiled /onboarding in 1447ms (1393 modules)
+[Sidebar] rendered workspace → null
+ GET /onboarding 200 in 1702ms
+ ✓ Compiled /api/auth/dev-sync in 335ms (822 modules)
+ POST /api/auth/dev-sync 200 in 1180ms
+ ○ Compiling /api/dev/whoami ...
+ ✓ Compiled /api/dev/whoami in 2.4s (824 modules)
+ GET /api/dev/whoami 200 in 2791ms
+[MW] NODE_ENV=development isE2E=true path=/onboarding cookies=sb-nrfpsbbkynykubcaarpg-auth-token
+[Sidebar] rendered workspace → null
+ GET /onboarding?isNewSignIn=true 200 in 155ms
+[auth-callback] event SIGNED_IN
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? 3o523iniloom
+[auth-callback] event INITIAL_SESSION
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? 3o523iniloom
+ POST /api/auth/callback 200 in 38ms
+ POST /api/auth/callback 200 in 216ms
+[auth-callback] event TOKEN_REFRESHED
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? w4sqd7kl6f3e
+ POST /api/auth/callback 200 in 496ms
+ POST /api/auth/dev-sync 200 in 1372ms
+ GET /api/dev/whoami 200 in 779ms
+[auth-callback] event TOKEN_REFRESHED
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? dzm5vxr43ryy
+ POST /api/auth/callback 200 in 420ms
+ ✓ Compiled /api/team/init in 423ms (913 modules)
+[/api/team/init] Request headers { authorization: 'Bearer eyJhbGciOiJIU', cookieCount: 1 }
+[/api/team/init] Incoming cookie names [ 'sb-nrfpsbbkynykubcaarpg-auth-token' ]
+[/api/team/init] User verified via routeHandler cookies {
+  id: '6de5c8be-763d-42d1-96f5-f5f60e3d7a44',
+  email: 'test@example.com'
+}
+[/api/team/init] Auth result { method: 'bearer', userId: '6de5c8be-763d-42d1-96f5-f5f60e3d7a44' }
+ POST /api/team/init 200 in 1445ms
+[MW] NODE_ENV=development isE2E=true path=/workspace/test-workspace/dashboard cookies=sb-nrfpsbbkynykubcaarpg-auth-token
+Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ○ Compiling /workspace/[slug]/dashboard ...
+ ✓ Compiled /workspace/[slug]/dashboard in 1470ms (1537 modules)
+[MW] NODE_ENV=development isE2E=true path=/onboarding cookies=sb-nrfpsbbkynykubcaarpg-auth-token
+[Sidebar] rendered workspace → null
+ GET /workspace/test-workspace/dashboard 200 in 3232ms
+[MW] NODE_ENV=development isE2E=true path=/workspace/test-workspace/settings cookies=sb-nrfpsbbkynykubcaarpg-auth-token
+ ○ Compiling /workspace/[slug]/settings ...
+ ✓ Compiled /workspace/[slug]/settings in 2.9s (1543 modules)
+[auth-callback] event INITIAL_SESSION
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? dzm5vxr43ryy
+[auth-callback] event SIGNED_IN
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? dzm5vxr43ryy
+ POST /api/auth/callback 200 in 319ms
+[Sidebar] rendered workspace → null
+ GET /workspace/test-workspace/settings 200 in 3293ms
+ POST /api/auth/callback 200 in 889ms
+[auth-callback] event SIGNED_IN
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? dzm5vxr43ryy
+ POST /api/auth/callback 200 in 224ms
+[auth-callback] event INITIAL_SESSION
+[auth-callback] access? eyJhbGciOiJIUzI1NiIs
+[auth-callback] refresh? dzm5vxr43ryy
+ POST /api/auth/callback 200 in 11ms
+[?25h

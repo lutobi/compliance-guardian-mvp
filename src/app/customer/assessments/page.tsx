@@ -18,10 +18,30 @@ export default function CustomerAssessmentsPage() {
   const {
     data: rawData,
     isLoading: loading,
+    error
   } = useQuery<AssessmentWithFramework[], Error>({
     queryKey: ['assessments', workspaceId],
-    queryFn: () => api.assessments.list(workspaceId) as Promise<AssessmentWithFramework[]>,
-    enabled: !!workspace,
+    queryFn: async () => {
+      console.log('[AssessmentsPage] Fetching assessments for workspace:', workspaceId);
+      try {
+        // First try to fetch with workspace filtering
+        if (workspaceId) {
+          const data = await api.assessments.list(workspaceId) as AssessmentWithFramework[];
+          console.log(`[AssessmentsPage] Found ${data.length} assessments with workspace filter`);
+          return data;
+        } else {
+          throw new Error('No workspace selected');
+        }
+      } catch (err) {
+        console.warn('[AssessmentsPage] Failed to fetch with workspace, trying without filter:', err);
+        // Fallback: fetch all assessments for the user without workspace filtering
+        const data = await api.assessments.listAll() as AssessmentWithFramework[];
+        console.log(`[AssessmentsPage] Found ${data.length} assessments without workspace filter`);
+        return data;
+      }
+    },
+    // Only require user to be authenticated, don't require workspace
+    enabled: true,
   });
   const assessments = (rawData ?? []).map(a => ({
     ...a,

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth/context';
 import { useTeam } from '@/hooks/useTeam';
 import { useRouter } from 'next/navigation';
+import { frameworks as staticFrameworks } from '@/data/frameworks';
 
 export default function FrameworksSettingsPage() {
   const router = useRouter();
@@ -43,11 +44,15 @@ export default function FrameworksSettingsPage() {
   };
 
   if (isLoading) return <div>Loading frameworks...</div>;
-  if (isError) return <div>Error: {error?.message}</div>;
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Frameworks</h1>
+      {(isError || (frameworks?.length ?? 0) === 0) && (
+        <div className="text-sm text-gray-600 bg-gray-50 border rounded p-3">
+          Showing static framework list. {isError ? `Error: ${error?.message}` : 'No frameworks found in database yet.'}
+        </div>
+      )}
       {/* DEBUG panel removed */}
       {isAdmin && (
         <Button onClick={handleSync} disabled={syncing}>
@@ -56,7 +61,7 @@ export default function FrameworksSettingsPage() {
       )}
 
       <ul className="space-y-4">
-        {frameworks.map((fw) => (
+        {(frameworks && frameworks.length > 0 ? frameworks : staticFrameworks).map((fw: any) => (
           <li
             key={fw.id}
             className={`p-4 border rounded cursor-pointer ${

@@ -163,10 +163,8 @@ export const LegacyEvidenceDialog: React.FC<EvidenceDialogProps> = ({
       toast.error('Framework ID is required');
       return;
     }
-    
-    if (!controlId) {
-      toast.error('Control ID is required');
-      return;
+    if (!validateFrameworkId(frameworkId)) {
+      console.warn('Framework ID is not a UUID; proceeding with fallback identifier:', frameworkId);
     }
     
     if (!subcontrolId) {
@@ -318,6 +316,13 @@ export const LegacyEvidenceDialog: React.FC<EvidenceDialogProps> = ({
     if (!open) {
       onClose();
     }
+  };
+
+  // Accept either a v4 UUID or a non-empty identifier (slug fallback)
+  const validateFrameworkId = (value: string): boolean => {
+    if (!value || typeof value !== 'string') return false;
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidV4Regex.test(value) || value.trim().length > 0;
   };
 
   // Only render the dialog when it's open to prevent infinite update loops

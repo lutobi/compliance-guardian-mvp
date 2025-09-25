@@ -1,0 +1,46 @@
+Category,Item,Specification,Unit,Quantity,Basis/Notes
+Materials,CTP6 MV Junction Box A (STS05),SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure HxWxD 1000x800x400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,Per scope: new JB at CTP6 for STS05 (2 MV entries: feeder IN + drum OUT)
+Materials,CTP6 MV Junction Box B (STS06),SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure HxWxD 1000x800x400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,Per scope: new JB at CTP6 for STS06 (2 MV entries: feeder IN + drum OUT)
+Materials,CTP5 MV Junction Box (STS04),SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure HxWxD 1000x800x400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,STS04 migration path (2 MV entries: feeder IN + drum OUT)
+Materials,Cable Drum Assemblies,Drum + tail assembly per crane (marine-rated hardware). Sizing based on MV cable OD≈65 mm: barrel ≥ 18×OD ≈ 1170 mm; flange ≥ barrel + 6×OD ≈ 1560 mm; width per ordered length; GA: ga_drum_mv.html,Each,3,One per STS04/05/06 (1 MV cable per drum)
+Materials,MV XLPE Cable (11 kV class),IEC 60502-2; 3C 185 mm² Copper; armored/sheath per route method; nominal OD≈65 mm,M,1200,Locking spec to 3C 185 mm² Cu; split per feeder after route survey; OD aligns with glands M75/M80 and drum geometry
+Materials,MV Termination Kits (Indoor/Outdoor),IEC 60502-2 stress-control heat/cold shrink; include Cu lugs/boots sized for 185 mm²; voltage class 12/20 kV,Set,12,Ends: JB IN/OUT + drum tails; assume 4 terminations per crane x3; confirm indoor/outdoor mix
+Materials,Double-Compression Cable Glands,Brass/Ni-plated SS with armor continuity where applicable; IP67; size to suit OD≈65 mm (thread size per vendor e.g., M75/M80),Each,18,Per termination; confirm exact thread with vendor datasheet
+Materials,Armor/Braid Bonding Kits,Compatible with gland for MV cable armor continuity,Each,6,If applicable by cable type
+Materials,Cable Lugs,IEC compliant tinned Cu lugs; 185 mm²; crimp type per dielist,Each,36,3 phases x 2 ends x 3 cranes x 2 terminations per end as required; sized to 185 mm² Cu
+Materials,Cu Earth Conductor,25–35 mm² tinned copper to grid,M,60,For bonding each JB to earth grid with spare
+Materials,Cu Earth Bar with Test Link,Pre-drilled with labeled test link,Each,3,One per JB (included in JB but spare allowed)
+Materials,Filtered Breathers,IP-rated low differential pressure,Each,6,2 per JB (in/out airflow)
+Materials,Neoprene Gaskets/Seals,Door and gland plate gaskets,Set,3,Per JB replacement/spares
+Materials,Blanking Plugs,IP-rated for unused entries,Each,24,Allowances per JB
+Materials,Fasteners & Fixings,A4-80 SS bolts, washers, isolating washers kit,Set,6,Mounting + spares
+Materials,Mounting Backplates/Frames,SS316 backplate or frame for JB mounting,Each,3,Per JB
+Materials,Cable Support Saddles,For strain relief within 150 mm of entry,Each,12,Per entry points
+Materials,Cable Route Markers,UV-stable route tags/plates,Each,30,Every pit entry and 20 m intervals where exposed
+Materials,Labels & Plates,UV-stable engraved phenolic labels (JB IDs, feeder IDs),Set,3,Per JB plus spares
+Materials,Phase ID Sleeves,Heat-shrink phase markers (L1/L2/L3/PE),Set,6,Per termination set
+Materials,Desiccant Packs,Moisture control for enclosures,Each,12,Changeable; 4 per JB with spares
+Materials,Sealants/Compounds,IP-rated sealing compounds for entries,Cartridge,6,Allowance
+Materials,Cable Lubricant,Approved pulling lubricant,Bottle,6,Allowance for pulls
+Materials,Mechanical Protection at Pit Exits,Grommets/bushings/rub blocks,Set,6,Allowance for exits and bends
+Materials,Portable Earths,Rated for prospective fault current,Set,2,For isolation safety during works
+Materials,Padlocks & LOTO Hasps,For LOTO kits,Set,2,Site safety equipment
+Materials,Warning Signage,Electrical hazard and identification signage,Set,3,Per pit/JB
+
+Tools/Equipment,Hydraulic Crimper + Die Set,12–400 mm² range; calibrated; with dielist,Each,1,Installation tooling
+Tools/Equipment,Heat Gun/Heat Blower,Industrial grade with temp control,Each,2,For heat-shrink terminations
+Tools/Equipment,Torque Wrench Set,Range 5–200 Nm with calibration,Set,2,For terminations per torque log
+Tools/Equipment,Capstan Winch,With controlled speed,Each,1,Cable pulls
+Tools/Equipment,Inline Dynamometer,Tension measurement 0–5 kN (or as needed),Each,1,Record pulling tension
+Tools/Equipment,Spindle Stands/Drum Jacks,Rated for drum mass; with brake,Pair,2,For 2 drums concurrently
+Tools/Equipment,Cable Rollers & Corner Blocks,Heavy-duty, Set,Set,2,Pulling route control
+Tools/Equipment,OTDR (for FO scope interface),1310/1550 nm; event/IL analysis,Each,1,If FO checks needed near electrical scope
+Tools/Equipment,Megger (IR Tester),5 kV DC insulation tester; calibrated,Each,1,IR testing
+Tools/Equipment,VLF Test Set,0.1 Hz, suitable for 12/20 kV class; calibrated,Each,1,Withstand testing @ 2×U0
+Tools/Equipment,Earth Tester,Clamp or 3-point method instrument; calibrated,Each,1,Earthing tests
+Tools/Equipment,Secondary Injection Test Set,Protection relay testing; calibrated,Each,1,Protection verification
+Tools/Equipment,Thermal Camera,320x240 or better; calibrated,Each,1,Post-energization scan
+Tools/Equipment,Confined Space Gas Detector,4-gas monitor; calibrated,Each,1,For pit entry safety
+Tools/Equipment,LOTO Kit,Hasps, tags, locks, testers,Set,2,Safety
+Tools/Equipment,Lifting Slings/Spreader,Rated slings and spreader bar,Set,2,For drum/enclosure lifts
+Tools/Equipment,Hand Tools Set,Insulated tools: cutters, strippers, spanners,Set,2,General installation

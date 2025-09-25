@@ -30,6 +30,7 @@ export interface CustomerSettings {
 
 export interface CustomerWorkspace {
   id: string;
+  slug: string;
   name: string;
   customerId: string;
   industry?: string;
@@ -61,7 +62,7 @@ export interface CustomerContextType {
   updateWorkspaceName: (name: string) => Promise<void>;
 }
 
-const defaultSettings: CustomerSettings = {
+export const defaultSettings: CustomerSettings = {
   theme: {
     primary: '#0066cc',
     brandColors: {}
@@ -136,6 +137,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
         .from('workspaces')
         .select(`
           id, 
+          slug,
           name, 
           settings,
           created_at,
@@ -164,6 +166,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       // Transform data to match our expected structure
       const transformedWorkspaces = workspacesData.map(w => ({
         id: w.id,
+        slug: w.slug,
         name: w.name || w.customers?.[0]?.name,
         customerId: w.customers?.[0]?.id,
         industry: w.customers?.[0]?.industry,
@@ -352,8 +355,18 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       // Reload workspace data
       await loadWorkspaces();
       
-      // Navigate to customer dashboard
-      router.push('/customer/dashboard');
+      // Navigate to the selected workspace dashboard using slug-aware route
+      const { data: ws, error: wsErr } = await supabase
+        .from('workspaces')
+        .select('slug')
+        .eq('id', workspaceId)
+        .single();
+      if (!wsErr && ws?.slug) {
+        router.push(`/workspace/${ws.slug}/dashboard`);
+      } else {
+        // Fallback to generic dashboard
+        router.push('/dashboard');
+      }
     } catch (error) {
       const err: any = error;
       console.error('Error selecting workspace:', err.message, err.details);
@@ -407,6 +420,7 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
       // Create and return the new workspace
       const newWorkspace: CustomerWorkspace = {
         id: workspaceData.id,
+        slug: '',
         name,
         customerId: customerData.id,
         industry,

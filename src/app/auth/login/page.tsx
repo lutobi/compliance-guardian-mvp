@@ -1,13 +1,13 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { useAuth } from '@/lib/auth/context';
+import { useMultiTenantAuth } from '@/lib/auth/MultiTenantContext';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-  const { signIn, loading: authLoading, resetPassword } = useAuth();
+  const { signIn, loading: authLoading, resetPassword } = useMultiTenantAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -38,7 +38,18 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError('');
+      
+      // Add URL parameter to indicate this is a new sign-in
+      // This helps middleware avoid redirect loops
+      window.history.replaceState(null, '', window.location.pathname + '?isNewSignIn=true');
+      
+      const callback = new URLSearchParams(window.location.search).get('callbackUrl');
       await signIn(email, password);
+      
+      if (callback) {
+        window.location.href = callback;
+      }
+      // Note: redirect is now handled inside the signIn method in MultiTenantContext
     } catch (error) {
       console.error('Login error:', error);
       if (error instanceof Error) {

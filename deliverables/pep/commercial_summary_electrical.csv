@@ -1,0 +1,33 @@
+Section,Description,Amount (USD)
+Materials,Per electrical BOM (MV JBs, drums, cable, term kits, glands, earthing, fixings, labels),122434
+Tools & Equipment,Hydraulic Crimper + Die Set (purchase),1800
+Tools & Equipment,Heat Gun/Heat Blower x2 (purchase),160
+Tools & Equipment,Torque Wrench Set x2 (purchase),560
+Tools & Equipment,Capstan Winch (purchase),3500
+Tools & Equipment,Inline Dynamometer (purchase),900
+Tools & Equipment,Spindle Stands/Drum Jacks pair x2 (purchase),1400
+Tools & Equipment,Cable Rollers & Corner Blocks set x2 (purchase),1300
+Tools & Equipment,OTDR (1310/1550 nm) (purchase),7500
+Tools & Equipment,Megger 5 kV IR Tester (purchase),1200
+Tools & Equipment,VLF Test Set 0.1 Hz (purchase),18000
+Tools & Equipment,Earth Tester (purchase),650
+Tools & Equipment,Secondary Injection Test Set (purchase),8000
+Tools & Equipment,Thermal Camera 320x240 (purchase),2500
+Tools & Equipment,Confined Space Gas Detector (purchase),650
+Tools & Equipment,LOTO Kit x2 (purchase),300
+Tools & Equipment,Lifting Slings/Spreader x2 (purchase),1200
+Tools & Equipment,Hand Tools Set x2 (purchase),1200
+Tools & Equipment Subtotal,,50820
+Engineering & Design,Basis of design, load studies, cable sizing,8500
+Detailed CAD & As-Builts,GA drawings, redlines, as-built updates,3500
+Project Management,Planning/coordination/reporting,6000
+Procurement Management,Vendor liaison and expediting,3000
+Field Installation,Electrical crew, rigging, permits,28000
+Testing & Commissioning,IR/VLF, interlocks, energization,7500
+Training,Operator and maintenance training,3000
+HSE Management,Method statements, permits, supervision,2500
+QA/QC & Documentation,ITP/ITR, checklists, O&M,3500
+Logistics & Handling,Freight, site handling, storage,4000
+Subtotal Materials+Tools+Services,,242754
+Contingency (10%),To be tuned after finalization,24275
+Grand Total (Estimated),,267029

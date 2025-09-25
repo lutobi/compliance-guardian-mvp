@@ -23,7 +23,32 @@ export const frameworkData: Record<string, FrameworkData> = {
   'soc2': soc2,
   'nist-ai-rmf': nistAiRmf,
   'nist-800-53': nist80053,
-  'pci-dss': pciDss
+  'pci-dss': pciDss,
+  // Minimal placeholders to avoid page errors; can be enriched later or overridden by DB
+  'nist-800-171': {
+    id: 'nist-800-171',
+    name: 'NIST SP 800-171',
+    description: 'Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations',
+    version: 'Rev. 3',
+    controls: [],
+    last_synced_at: new Date().toISOString(),
+  },
+  'cmmc': {
+    id: 'cmmc',
+    name: 'CMMC',
+    description: 'Cybersecurity Maturity Model Certification',
+    version: '2.0',
+    controls: [],
+    last_synced_at: new Date().toISOString(),
+  },
+  'eudr': {
+    id: 'eudr',
+    name: 'EUDR',
+    description: 'EU Regulation on deforestation-free products',
+    version: '2023/1115',
+    controls: [],
+    last_synced_at: new Date().toISOString(),
+  },
 };
 
 // Framework summaries for listing

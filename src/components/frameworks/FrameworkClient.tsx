@@ -12,10 +12,12 @@ import { useFrameworkData } from '@/hooks/useFrameworkData';
 import { useFrameworkEvidence } from '@/hooks/useFrameworkEvidence';
 import { MonitoringService } from '@/services/monitoring';
 import { supabase } from '@/lib/supabase';
+import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
 import type { Control as FrameworkControl } from '@/types/framework';
 import type { Evidence } from '@/types/evidence';
 import type { EvidenceFile } from '@/types/evidence';
 import type { Framework } from '@/types/framework';
+import { useMultiTenantAuth } from '@/lib/auth/MultiTenantContext';
 
 interface MonitoringConfig {
   id: string;
@@ -110,7 +112,7 @@ const calculateControlProgress = (control: FrameworkControl, evidenceMap: Record
   });
 
   return Math.round(
-    subControlProgress.reduce((acc, curr) => acc + curr, 0) / control.subcontrols.length
+    subControlProgress.reduce<number>((acc, curr) => acc + curr, 0) / control.subcontrols.length
   );
 };
 
@@ -118,6 +120,8 @@ export const FrameworkClient: React.FC<FrameworkClientProps> = ({ id }) => {
   const { data: framework, loading, error } = useFrameworkData(id);
   const { evidenceMap, addEvidence, updateEvidence, deleteEvidence, refreshEvidence } = useFrameworkEvidence(id);
   const [monitoringDetails, setMonitoringDetails] = useState<MonitoringConfig | null>(null);
+  const [monitoringFrameworkId, setMonitoringFrameworkId] = useState<string>(id);
+  const { currentWorkspace } = useMultiTenantAuth();
   const [dialogState, setDialogState] = useState<DialogState>({
     isOpen: false,
     controlId: '',
@@ -125,9 +129,10 @@ export const FrameworkClient: React.FC<FrameworkClientProps> = ({ id }) => {
     controlName: '',
   });
 
-  const handleAddEvidence = useCallback(async (evidence: Evidence) => {
+  const handleAddEvidence = useCallback(async (evidence: Partial<Evidence>) => {
     try {
-      await addEvidence(evidence);
+      // EvidenceDialog passes Partial<Evidence>; addEvidence expects creation payload.
+      await addEvidence(evidence as any);
       toast.success('Evidence added successfully');
       refreshEvidence();
     } catch (error) {
@@ -171,31 +176,59 @@ export const FrameworkClient: React.FC<FrameworkClientProps> = ({ id }) => {
     setDialogState(prev => ({ ...prev, isOpen: false }));
   }, []);
 
+  // Resolve slug -> UUID for monitoring API
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const uuid = await resolveFrameworkUuid(supabase, id);
+        if (isMounted) setMonitoringFrameworkId(uuid || id);
+      } catch (e) {
+        console.warn('Failed to resolve framework UUID for monitoring, using raw id', e);
+        if (isMounted) setMonitoringFrameworkId(id);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [id]);
+
   useEffect(() => {
     const loadMonitoringDetails = async () => {
       try {
-        const res = await fetch(`/api/monitoring?frameworkId=${encodeURIComponent(id)}`);
+        const ws = currentWorkspace?.slug;
+        const url = `/api/monitoring?frameworkId=${encodeURIComponent(monitoringFrameworkId)}${ws ? `&workspace=${encodeURIComponent(ws)}` : ''}`;
+        const res = await fetch(url, {
+          headers: ws ? { 'x-workspace-slug': ws } : undefined,
+          credentials: 'include',
+        });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error);
-        const status = json.data;
+        if (!res.ok) {
+          const errMsg = typeof json?.error === 'string' ? json.error : json?.error?.message || 'Request failed';
+          throw new Error(errMsg);
+        }
+        const status = json?.data?.monitoring ?? json?.data;
 
         if (status?.status === 'active') {
           setMonitoringDetails({
             id: status.id || '',
-            frameworkId: id,
+            frameworkId: monitoringFrameworkId,
             frequency: status.frequency as 'daily' | 'weekly' | 'monthly',
             nextCheckDate: new Date(status.next_check_date).toISOString(),
             created_at: status.created_at || new Date().toISOString(),
             updated_at: status.updated_at || new Date().toISOString(),
           });
+        } else {
+          setMonitoringDetails(null);
         }
       } catch (error) {
         console.error('Error loading monitoring details:', error);
+        setMonitoringDetails(null);
       }
     };
 
-    loadMonitoringDetails();
-  }, [id]);
+    if (monitoringFrameworkId) {
+      loadMonitoringDetails();
+    }
+  }, [monitoringFrameworkId, currentWorkspace?.slug]);
 
   if (loading) {
     return <div className="p-4">Loading...</div>;
@@ -243,7 +276,7 @@ export const FrameworkClient: React.FC<FrameworkClientProps> = ({ id }) => {
         controlId={dialogState.controlId}
         subcontrolId={dialogState.parentControlId}
         subcontrolName={dialogState.controlName}
-        frameworkId={id}
+        frameworkId={monitoringFrameworkId}
         onClose={handleCloseDialog}
         onSubmit={handleAddEvidence}
         onDelete={handleDeleteEvidence}

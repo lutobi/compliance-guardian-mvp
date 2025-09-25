@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { resolveFrameworkUuid } from '@/lib/resolveFrameworkUuid';
 import { Evidence } from '@/types/evidence';
 import { toast } from 'sonner';
+import { useMultiTenantAuth } from '@/lib/auth/MultiTenantContext';
 
 /**
  * Custom hook for managing framework evidence with reliable UI updates
@@ -15,6 +16,7 @@ export function useFrameworkEvidence(frameworkId: string) {
   const [refreshCounter, setRefreshCounter] = useState(0);
   // Store resolved UUID for framework slug
   const [frameworkUuid, setFrameworkUuid] = useState<string | null>(null);
+  const { currentWorkspace } = useMultiTenantAuth();
 
   // Force a refresh of evidence data
   const refreshEvidence = useCallback(() => {
@@ -38,6 +40,24 @@ export function useFrameworkEvidence(frameworkId: string) {
   }, [frameworkId]);
 
   // Using Next.js API routes to avoid direct REST filter issues
+  async function resolveAccessToken(): Promise<string | undefined> {
+    // 1) Try mt_session in localStorage (set by app during login)
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('mt_session');
+        if (raw) {
+          const json = JSON.parse(raw);
+          if (json?.access_token) return json.access_token as string;
+        }
+      } catch {}
+    }
+    // 2) Fallback to Supabase session
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token;
+    } catch {}
+    return undefined;
+  }
 
   // Fetch evidence and build the evidence map
   useEffect(() => {
@@ -49,13 +69,32 @@ export function useFrameworkEvidence(frameworkId: string) {
     const fetchEvidence = async () => {
       setLoading(true);
       try {
-        const idParam = frameworkUuid || frameworkId;
-        const res = await fetch(
-          `/api/evidence?frameworkId=${encodeURIComponent(idParam)}`,
-          { credentials: 'include' }
-        );
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const idParam = frameworkUuid || (uuidRegex.test(frameworkId) ? frameworkId : null);
+        if (!idParam) {
+          // Wait until we have a resolvable UUID to avoid 400s with slugs
+          setLoading(false);
+          return;
+        }
+        // Resolve workspace slug with robust fallback to localStorage
+        let ws = currentWorkspace?.slug as string | undefined;
+        if (!ws && typeof window !== 'undefined') {
+          try {
+            const stored = localStorage.getItem('lastWorkspace');
+            if (stored) ws = stored;
+          } catch {}
+        }
+        const url = `/api/evidence?frameworkId=${encodeURIComponent(idParam)}${ws ? `&workspace=${encodeURIComponent(ws)}` : ''}`;
+        const token = await resolveAccessToken();
+        const headers: Record<string, string> = {};
+        if (ws) headers['x-workspace-slug'] = ws;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(url, {
+          credentials: 'include',
+          headers,
+        });
         const json = await res.json();
-        if (!res.ok) throw new Error(json.error);
+        if (!res.ok) throw new Error(typeof json.error === 'string' ? json.error : JSON.stringify(json.error));
         const data = json.data;
 
         // Use API-returned Evidence objects directly
@@ -74,8 +113,9 @@ export function useFrameworkEvidence(frameworkId: string) {
         
         console.log('Built evidence map with', Object.keys(map).length, 'subcontrols');
         setEvidenceMap(map);
-      } catch (err) {
-        console.error('Error fetching evidence:', err);
+      } catch (err: any) {
+        const msg = err?.message || String(err);
+        console.error('Error fetching evidence:', msg);
         setError(err as Error);
         toast.error('Failed to load evidence');
       } finally {
@@ -106,21 +146,35 @@ export function useFrameworkEvidence(frameworkId: string) {
     // return () => {
     //   supabase.removeChannel(channel);
     // };
-  }, [frameworkId, refreshCounter, frameworkUuid]);
+  }, [frameworkId, refreshCounter, frameworkUuid, currentWorkspace?.slug]);
 
   // Add new evidence
   const addEvidence = async (newEvidence: Omit<Evidence, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
       console.log('Sending new evidence to API:', newEvidence);
       const payload = { ...newEvidence, frameworkId: frameworkUuid || newEvidence.frameworkId };
-      const res = await fetch('/api/evidence', {
+      let ws = currentWorkspace?.slug as string | undefined;
+      if (!ws && typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('lastWorkspace');
+          if (stored) ws = stored;
+        } catch {}
+      }
+      const token = await resolveAccessToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (ws) headers['x-workspace-slug'] = ws;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`/api/evidence${ws ? `?workspace=${encodeURIComponent(ws)}` : ''}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify(payload)
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error);
+      if (!res.ok) {
+        const errMsg = typeof json?.error === 'string' ? json.error : json?.error?.message || 'Request failed';
+        throw new Error(errMsg);
+      }
       const data = json.data;
 
       // Use API-returned Evidence object directly
@@ -154,14 +208,28 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Delete evidence
   const deleteEvidence = async (evidenceId: string) => {
     try {
-      const res = await fetch('/api/evidence', {
+      let ws = currentWorkspace?.slug as string | undefined;
+      if (!ws && typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('lastWorkspace');
+          if (stored) ws = stored;
+        } catch {}
+      }
+      const token = await resolveAccessToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (ws) headers['x-workspace-slug'] = ws;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`/api/evidence${ws ? `?workspace=${encodeURIComponent(ws)}` : ''}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify({ id: evidenceId }),
       });
       const json = await res.json();
-      if (!res.ok || !json.success) throw new Error(json.error || 'Failed to delete evidence');
+      if (!res.ok || !json.success) {
+        const errMsg = typeof json?.error === 'string' ? json.error : json?.error?.message || 'Failed to delete evidence';
+        throw new Error(errMsg);
+      }
       // Update local state immediately for UI responsiveness
       setEvidence(prev => prev.filter(e => e.id !== evidenceId));
       setEvidenceMap(prev => {
@@ -185,14 +253,28 @@ export function useFrameworkEvidence(frameworkId: string) {
   // Update evidence
   const updateEvidence = async (evidenceId: string, updates: Partial<Evidence>) => {
     try {
-      const res = await fetch('/api/evidence', {
+      let ws = currentWorkspace?.slug as string | undefined;
+      if (!ws && typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('lastWorkspace');
+          if (stored) ws = stored;
+        } catch {}
+      }
+      const token = await resolveAccessToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (ws) headers['x-workspace-slug'] = ws;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`/api/evidence${ws ? `?workspace=${encodeURIComponent(ws)}` : ''}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify({ id: evidenceId, ...updates }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error || 'Failed to update evidence');
+      if (!res.ok) {
+        const errMsg = typeof json?.error === 'string' ? json.error : json?.error?.message || 'Failed to update evidence';
+        throw new Error(errMsg);
+      }
       const updated: Evidence = json.data;
       // Update local state immediately
       setEvidence(prev => prev.map(e => e.id === evidenceId ? updated : e));

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/context';
 import { useCustomerWorkspace } from '@/lib/workspace/customer-context';
 import { cn } from '@/lib/utils';
@@ -11,13 +11,7 @@ import {
   DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/outline';
 
-const navigation = [
-  { name: 'Dashboard', href: '/customer/dashboard', icon: ChartBarIcon },
-  { name: 'Compliance', href: '/customer/compliance', icon: ClipboardDocumentCheckIcon },
-  { name: 'Monitoring', href: '/customer/monitoring', icon: DocumentMagnifyingGlassIcon },
-  { name: 'Team', href: '/customer/team', icon: UserGroupIcon },
-  { name: 'Settings', href: '/customer/settings', icon: Cog6ToothIcon },
-];
+// Routes will be built per-workspace inside the component
 
 
 interface SidebarProps {
@@ -27,14 +21,24 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const { workspace } = useCustomerWorkspace();
   
   // Redirect if no workspace is selected
   if (!workspace) {
-    window.location.href = '/customer/select-workspace';
+    router.replace('/workspace/select');
     return null;
   }
+
+  const workspaceSlug = workspace?.slug as string;
+  const navigation = [
+    { name: 'Dashboard', href: `/workspace/${workspaceSlug}/dashboard`, icon: ChartBarIcon },
+    { name: 'Compliance', href: `/workspace/${workspaceSlug}/compliance`, icon: ClipboardDocumentCheckIcon },
+    { name: 'Monitoring', href: `/workspace/${workspaceSlug}/monitoring`, icon: DocumentMagnifyingGlassIcon },
+    { name: 'Team', href: `/workspace/${workspaceSlug}/team`, icon: UserGroupIcon },
+    { name: 'Settings', href: `/workspace/${workspaceSlug}/settings`, icon: Cog6ToothIcon },
+  ];
 
   return (
     <>
@@ -57,8 +61,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             <div className="flex flex-col">
               <span className="text-xl font-bold">{workspace.name}</span>
               <button 
-                onClick={() => window.location.href = '/customer/select-workspace'}
+                onClick={() => router.push('/workspace/select')}
                 className="text-sm text-gray-500 hover:text-primary"
+                data-testid="workspace-menu"
               >
                 Switch Workspace
               </button>

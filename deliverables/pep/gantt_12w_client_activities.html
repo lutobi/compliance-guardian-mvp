@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>12‑Week Gantt — Client Activities</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 16px; background:#f8fafc; }
+    .container { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    .note { color:#374151; margin:8px 0 16px; }
+    .toolbar { display:flex; gap:8px; margin-bottom:10px; }
+    .btn { background:#16a34a; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; }
+    @page { size: A3 landscape; margin: 10mm; }
+    @media print { body { padding:0; background:#fff; } .container { box-shadow:none; border:0; } }
+  </style>
+  <script>function doPrint(){ window.print(); }</script>
+</head>
+<body>
+  <h1>Project Schedule — 12 Weeks (with Procurement Lead Time)</h1>
+  <p class="note">Exact weeks are placeholders (W1–W12). Adjust bar positions/widths to your start date.</p>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="doPrint()">Print (A3 Landscape)</button>
+    </div>
+
+    <svg width="100%" viewBox="0 0 2200 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Client activity Gantt over 12 weeks">
+      <defs>
+        <style>
+          .axis { stroke: #9ca3af; stroke-width: 1; }
+          .grid { stroke: #e5e7eb; stroke-width: 1; }
+          .lbl { font: 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #111827; }
+          .lbl-small { font: 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; fill: #374151; }
+          .bar text { pointer-events: none; }
+        </style>
+      </defs>
+
+      <!-- Timeline (12 weeks, 140px per week) -->
+      <g transform="translate(300,90)">
+        <text class="lbl" x="0" y="-20">12‑Week Plan — Key Activities</text>
+        <g>
+          <line class="grid" x1="0" y1="0" x2="0" y2="880" />
+          <line class="grid" x1="140" y1="0" x2="140" y2="880" />
+          <line class="grid" x1="280" y1="0" x2="280" y2="880" />
+          <line class="grid" x1="420" y1="0" x2="420" y2="880" />
+          <line class="grid" x1="560" y1="0" x2="560" y2="880" />
+          <line class="grid" x1="700" y1="0" x2="700" y2="880" />
+          <line class="grid" x1="840" y1="0" x2="840" y2="880" />
+          <line class="grid" x1="980" y1="0" x2="980" y2="880" />
+          <line class="grid" x1="1120" y1="0" x2="1120" y2="880" />
+          <line class="grid" x1="1260" y1="0" x2="1260" y2="880" />
+          <line class="grid" x1="1400" y1="0" x2="1400" y2="880" />
+          <line class="grid" x1="1540" y1="0" x2="1540" y2="880" />
+          <line class="grid" x1="1680" y1="0" x2="1680" y2="880" />
+        </g>
+        <g>
+          <text class="lbl-small" x="0" y="-4">W1</text>
+          <text class="lbl-small" x="140" y="-4">W2</text>
+          <text class="lbl-small" x="280" y="-4">W3</text>
+          <text class="lbl-small" x="420" y="-4">W4</text>
+          <text class="lbl-small" x="560" y="-4">W5</text>
+          <text class="lbl-small" x="700" y="-4">W6</text>
+          <text class="lbl-small" x="840" y="-4">W7</text>
+          <text class="lbl-small" x="980" y="-4">W8</text>
+          <text class="lbl-small" x="1120" y="-4">W9</text>
+          <text class="lbl-small" x="1260" y="-4">W10</text>
+          <text class="lbl-small" x="1400" y="-4">W11</text>
+          <text class="lbl-small" x="1540" y="-4">W12</text>
+          <line class="axis" x1="0" y1="0" x2="1680" y2="0" />
+          <line class="axis" x1="0" y1="880" x2="1680" y2="880" />
+        </g>
+
+        <!-- Row labels -->
+        <g>
+          <text class="lbl" x="-260" y="40">Initiation</text>
+          <text class="lbl" x="-260" y="140">Design</text>
+          <text class="lbl" x="-260" y="260">Procurement</text>
+          <text class="lbl" x="-260" y="420">Installation</text>
+          <text class="lbl" x="-260" y="640">Testing & Commissioning</text>
+        </g>
+
+        <!-- Initiation -->
+        <g class="bar" aria-label="Kickoff Meeting">
+          <rect x="0" y="20" width="80" height="28" rx="4" fill="#2563eb" stroke="#1e40af" />
+          <text class="lbl-small" x="8" y="40" fill="#fff">Kickoff Meeting (2d)</text>
+        </g>
+        <g class="bar" aria-label="Site Access & HSE">
+          <rect x="0" y="60" width="280" height="28" rx="4" fill="#0ea5e9" stroke="#0369a1" />
+          <text class="lbl-small" x="8" y="80" fill="#fff">Site Access & HSE (2w)</text>
+        </g>
+
+        <!-- Design -->
+        <g class="bar" aria-label="Engineering Design">
+          <rect x="140" y="120" width="280" height="28" rx="4" fill="#16a34a" stroke="#166534" />
+          <text class="lbl-small" x="148" y="140" fill="#fff">Engineering Design (2w)</text>
+        </g>
+
+        <!-- Procurement -->
+        <g class="bar" aria-label="Technical Specification & Vendor Selection">
+          <rect x="280" y="220" width="280" height="28" rx="4" fill="#8b5cf6" stroke="#6d28d9" />
+          <text class="lbl-small" x="288" y="240" fill="#fff">Technical Spec & Vendor Selection (2w)</text>
+        </g>
+        <g class="bar" aria-label="FAT">
+          <rect x="560" y="260" width="140" height="28" rx="4" fill="#eab308" stroke="#a16207" />
+          <text class="lbl-small" x="568" y="280" fill="#111827">FAT (1w)</text>
+        </g>
+        <g class="bar" aria-label="Equipment Delivery">
+          <rect x="700" y="220" width="280" height="28" rx="4" fill="#84cc16" stroke="#4d7c0f" />
+          <text class="lbl-small" x="708" y="240" fill="#111827">Equipment Delivery (2w)</text>
+        </g>
+
+        <!-- Installation -->
+        <g class="bar" aria-label="Site Preparation">
+          <rect x="700" y="360" width="140" height="28" rx="4" fill="#9ca3af" stroke="#6b7280" />
+          <text class="lbl-small" x="708" y="380" fill="#111827">Site Preparation (1w)</text>
+        </g>
+        <g class="bar" aria-label="Cable Termination & Integration">
+          <rect x="840" y="400" width="280" height="28" rx="4" fill="#f43f5e" stroke="#be123c" />
+          <text class="lbl-small" x="848" y="420" fill="#fff">Cable Termination & Integration (2w)</text>
+        </g>
+
+        <!-- Testing & Commissioning -->
+        <g class="bar" aria-label="Pre‑commissioning & Loop Testing">
+          <rect x="1120" y="600" width="280" height="28" rx="4" fill="#f97316" stroke="#c2410c" />
+          <text class="lbl-small" x="1128" y="620" fill="#111827">Pre‑commissioning & Loop Testing (2w)</text>
+        </g>
+        <g class="bar" aria-label="SAT">
+          <rect x="1400" y="640" width="140" height="28" rx="4" fill="#14b8a6" stroke="#0f766e" />
+          <text class="lbl-small" x="1408" y="660" fill="#111827">SAT (1w)</text>
+        </g>
+        <g class="bar" aria-label="System Energization & Testing">
+          <rect x="1540" y="640" width="140" height="28" rx="4" fill="#ef4444" stroke="#991b1b" />
+          <text class="lbl-small" x="1548" y="660" fill="#fff">System Energization & Testing (1w)</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2200 1300" role="img" aria-label="GA drawing MV JB with detailed entries">
+  <title>GA — MV Junction Box (CTP5/CTP6)</title>
+  <style>
+    .dim { fill:#111827; font-size:14px; }
+    .label { fill:#111827; font-size:16px; font-weight:600; }
+    .callout { fill:#374151; font-size:13px; }
+    .line { stroke:#111827; stroke-width:2; fill:none; }
+    .dash { stroke:#9ca3af; stroke-width:2; stroke-dasharray:6 6; fill:none; }
+  </style>
+  <!-- FRONT VIEW -->
+  <text class="label" x="500" y="80">Front View</text>
+  <rect x="120" y="120" width="760" height="1000" rx="6" fill="#f9fafb" stroke="#111827" stroke-width="3" />
+  <rect x="140" y="140" width="720" height="960" fill="#ffffff" stroke="#9ca3af" stroke-width="2" />
+  <rect x="120" y="120" width="20" height="1000" fill="#9ca3af" />
+  <!-- Overall dims -->
+  <line class="line" x1="90" y1="120" x2="90" y2="1120" />
+  <line class="line" x1="90" y1="120" x2="120" y2="120" />
+  <line class="line" x1="90" y1="1120" x2="120" y2="1120" />
+  <text class="dim" x="65" y="620" transform="rotate(-90 65,620)">H = 1000 mm</text>
+  <line class="line" x1="120" y1="1150" x2="880" y2="1150" />
+  <line class="line" x1="120" y1="1150" x2="120" y2="1120" />
+  <line class="line" x1="880" y1="1150" x2="880" y2="1120" />
+  <text class="dim" x="500" y="1180">W = 800 mm</text>
+  <!-- Accessories (front) -->
+  <circle cx="820" cy="220" r="8" fill="#111827" />
+  <text class="callout" x="840" y="225">Breather M20 (high)</text>
+  <circle cx="820" cy="1040" r="8" fill="#111827" />
+  <text class="callout" x="840" y="1045">Drain M20 (low)</text>
+  <circle cx="860" cy="600" r="8" fill="#111827" />
+  <text class="callout" x="880" y="605">Earth stud M10</text>
+
+  <!-- SIDE VIEW (depth) -->
+  <text class="label" x="1150" y="80">Side View</text>
+  <rect x="1000" y="120" width="380" height="1000" fill="#f9fafb" stroke="#111827" stroke-width="3" />
+  <text class="dim" x="1200" y="1150">D = 400 mm</text>
+  <!-- Internal min bend radius arc -->
+  <path d="M 1010 1080 A 780 780 0 0 1 1360 730" fill="none" stroke="#ef4444" stroke-width="3" />
+  <text class="callout" x="1370" y="730">Internal bend radius ≥ 12×OD ≈ 780 mm</text>
+
+  <!-- PLAN VIEW OF GLAND PLATE (detailed) -->
+  <text class="label" x="500" y="1260">Gland Plate Layout (Bottom View)</text>
+  <!-- Plate rectangle: 700 x 200 mm -->
+  <rect x="120" y="1280" width="760" height="220" fill="#ffffff" stroke="#111827" stroke-width="3" />
+  <text class="callout" x="140" y="1500">Plate: 760 × 220 mm</text>
+  <!-- Edge distances and centers: hole Ø 90 mm; edge ≥ 90; spacing ≥ 135 -->
+  <!-- Holes centers -->
+  <circle cx="290" cy="1390" r="45" fill="#e5e7eb" stroke="#111827" stroke-width="2" />
+  <circle cx="710" cy="1390" r="45" fill="#e5e7eb" stroke="#111827" stroke-width="2" />
+  <!-- Dimensions on plate -->
+  <line class="line" x1="120" y1="1530" x2="880" y2="1530" />
+  <line class="line" x1="120" y1="1530" x2="120" y2="1500" />
+  <line class="line" x1="880" y1="1530" x2="880" y2="1500" />
+  <text class="dim" x="500" y="1560">Plate width = 760 mm</text>
+  <line class="line" x1="120" y1="1280" x2="120" y2="1500" />
+  <line class="line" x1="120" y1="1280" x2="150" y2="1280" />
+  <line class="line" x1="120" y1="1500" x2="150" y2="1500" />
+  <text class="dim" x="80" y="1390" transform="rotate(-90 80,1390)">Plate height = 220 mm</text>
+  <!-- Spacing dims -->
+  <line class="dash" x1="290" y1="1380" x2="290" y2="1500" />
+  <text class="dim" x="250" y="1515">Edge ≥ 90 mm</text>
+  <line class="dash" x1="710" y1="1380" x2="710" y2="1500" />
+  <text class="dim" x="670" y="1515">Edge ≥ 90 mm</text>
+  <line class="line" x1="290" y1="1340" x2="710" y2="1340" />
+  <line class="line" x1="290" y1="1340" x2="290" y2="1310" />
+  <line class="line" x1="710" y1="1340" x2="710" y2="1310" />
+  <text class="dim" x="500" y="1300">Center-to-center ≥ 135 mm</text>
+  <text class="callout" x="220" y="1460">Hole Ø 90 mm (M75/M80 gland)</text>
+  <text class="label" x="290" y="1368" text-anchor="middle">IN</text>
+  <text class="label" x="710" y="1368" text-anchor="middle">OUT</text>
+
+  <!-- Cable support saddles inside, 150 mm from entry -->
+  <rect x="250" y="1220" width="80" height="20" fill="#9ca3af" />
+  <rect x="670" y="1220" width="80" height="20" fill="#9ca3af" />
+  <text class="callout" x="250" y="1210">Support saddles ≤150 mm from plate</text>
+</svg>

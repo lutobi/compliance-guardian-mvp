@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GA — MV Cable Drum (AL300 Option, OD 75–80 mm)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --bg:#fafbfc; --panel:#fff; --stroke:#94a3b8; --text:#0f172a; --muted:#475569; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{padding:16px 16px 8px} header h1{margin:0 0 4px;font-size:20px} header p{margin:0;color:var(--muted)}
+  .wrap{max-width:1200px;margin:8px auto 24px;padding:0 16px 24px}
+  svg{width:100%;height:auto;background:#fff;border:1px solid #e2e8f0}
+  .drum{fill:#fff;stroke:#0f172a;stroke-width:2}
+  .dim{font:12px/1.2 ui-sans-serif;fill:#0f172a}
+  .note{font:12px/1.4 ui-sans-serif;fill:#475569}
+  .title{font:600 14px/1.2 ui-sans-serif;fill:#0f172a}
+</style>
+</head>
+<body>
+<header>
+  <h1>General Arrangement — MV Cable Drum — AL 3C 300 mm² Option</h1>
+  <p>Geometry derived from cable OD ≈ 75–80 mm. Use OEM reel standard; ensure handling and braking capacity for mass and inertia.</p>
+</header>
+<div class="wrap">
+  <svg viewBox="0 0 1200 720" role="img" aria-label="GA drawing: steel reel with flange and barrel dimensions sized from OD, with notes">
+    <!-- Side view of drum -->
+    <circle cx="300" cy="360" r="250" class="drum"/>
+    <circle cx="300" cy="360" r="180" class="drum"/>
+    <line x1="180" y1="360" x2="420" y2="360" stroke="#0f172a" stroke-width="6"/>
+    <text x="80" y="80" class="title">Side Elevation — Steel Reel</text>
+
+    <!-- Front view / width indication -->
+    <rect x="560" y="180" width="460" height="360" class="drum"/>
+    <text x="560" y="170" class="title">Front Elevation — Reel Width</text>
+
+    <!-- Dimensions explained -->
+    <text x="820" y="220" class="dim">Cable OD: 75–80 mm (typ.)</text>
+    <text x="820" y="245" class="dim">Barrel Ø ≥ 18 × OD → 1350–1440 mm</text>
+    <text x="820" y="270" class="dim">Flange Ø ≥ Barrel + 6 × OD → 1800–1920 mm</text>
+    <text x="820" y="295" class="dim">Recommended hub bore and keying per OEM</text>
+
+    <text x="80" y="620" class="note">Notes:
+• Use welded steel reels for MV cable; confirm center bore, shaft, and braking with supplier.
+• Mass/length varies by OEM; verify max fill level and flange deflection limits.
+• Keep minimum bend radius ≥ 12–15 × OD during pay‑out (≈ 0.9–1.2 m).
+• Provide drum stands/jacks rated for combined mass; apply chocks and brakes for safety.
+• Mark reel with route, length, cable spec, direction of pay‑out, and test sheets.</text>
+  </svg>
+</div>
+<footer style="max-width:1200px;margin:0 auto;padding:8px 16px 24px;color:#475569;font-size:12px">
+  File: deliverables/architecture/ga_drum_mv_al300.html — For tender reference. Final reel spec to be selected from ReelPower/Sonoco or equivalent per cable datasheet.
+</footer>
+</body>
+</html>

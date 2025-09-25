@@ -74,7 +74,7 @@ export async function GET(request: Request) {
       }
       
       // No workspace or no customer, redirect to workspace selection
-      return NextResponse.redirect(`${origin}/customer/select-workspace`);
+      return NextResponse.redirect(`${origin}/workspace/select`);
     }
     
     // Default case: redirect to generic dashboard

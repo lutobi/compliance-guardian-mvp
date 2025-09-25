@@ -1,0 +1,17 @@
+Activity,Client (TiN),Project Manager (PM),Electrical Lead,Communications Lead,Procurement,Construction Supervisor,Commissioning Lead,QA/QC,HSE,SCADA/Integration,Cybersecurity,Document Controller
+Requirements & Scope Freeze,A,R,C,C,I,I,I,C,I,C,C,I
+Detailed Design (Electrical),I,A,R,C,I,I,C,C,I,C,C,I
+Detailed Design (Comms/FO/OT),I,A,C,R,I,I,C,C,I,C,C,I
+BoQ & Technical Specifications,I,A,R,R,C,I,I,C,I,C,C,I
+Procurement & Vendor Selection,I,A,C,C,R,I,I,C,I,C,C,I
+Site Preparation & Interfaces,I,A,C,C,I,R,I,C,R,I,I,I
+MV JBs & Drum Assemblies Installation,I,A,R,C,C,R,I,C,R,I,I,I
+MV Cable Pulling & Termination,I,A,R,C,C,R,C,C,R,I,I,I
+FO Closures & Star Legs Installation,I,A,C,R,C,R,C,C,R,C,C,I
+Protection Settings, FAT/SAT,I,A,R,C,I,I,R,C,I,C,C,I
+Commissioning & Energization,I,A,R,C,I,R,R,C,R,C,C,I
+Documentation & Handover,C,A,R,R,I,C,C,C,I,I,I,R
+Training,C,A,R,R,I,I,R,I,I,C,C,C
+Warranty & SLA Onboarding,A,R,C,C,I,I,C,I,I,I,I,I
+Risk & Change Management,C,A,R,R,C,C,C,C,C,C,C,I
+QHSE Plan & Compliance,I,A,C,C,I,C,I,R,R,I,I,I

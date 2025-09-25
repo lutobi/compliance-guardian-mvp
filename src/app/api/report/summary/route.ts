@@ -1,45 +1,61 @@
-// src/app/api/report/summary/route.ts
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+/**
+ * REPORT SUMMARY API - MULTI-TENANT (STANDARDIZED)
+ * 
+ * Provides assessment compliance summary with workspace context:
+ * - GET: Generate compliance score and control status counts
+ */
+
+import { NextRequest } from 'next/server';
+import { 
+  withWorkspaceContext,
+  getWorkspaceScopedClient,
+  getWorkspaceMetadata
+} from '@/lib/api/request-utils';
 import { z } from 'zod';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const requestSchema = z.object({ 
+  assessmentId: z.string().uuid() 
+});
 
-// Ensure service role key is provided
-if (!SERVICE_ROLE_KEY) {
-  console.error('Missing Supabase Service Role Key');
-}
+export async function GET(request: NextRequest) {
+  return withWorkspaceContext(request, 'view_reports', async (context) => {
+    // Get query parameters
+    const { user, workspaceContext } = context;
+    const url = new URL(request.url);
+    const assessmentId = url.searchParams.get('assessmentId');
 
-// Initialize Supabase client with service role key
-const supabase = createClient(SUPABASE_URL ?? '', SERVICE_ROLE_KEY ?? '');
+    if (!assessmentId) {
+      throw new Error('Assessment ID is required');
+    }
 
-const requestSchema = z.object({ assessmentId: z.string().uuid() });
+    // Validate assessment ID format
+    const parse = requestSchema.safeParse({ assessmentId });
+    if (!parse.success) {
+      throw new Error('Invalid assessment ID format');
+    }
+    
+    // Get workspace-scoped database client
+    const supabase = getWorkspaceScopedClient(workspaceContext.slug);
+    
+    console.log(`[API] GET /api/report/summary - User: ${user.profile.email}, Assessment: ${assessmentId}`);
 
-export async function GET(request: Request) {
-  // Ensure Supabase URL and service role key are set
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
-    console.error('Missing Supabase URL or Service Role Key');
-    return NextResponse.json({ score: 0, compliant: 0, nonCompliant: 0, pending: 0, total: 0 });
-  }
+    // First verify assessment belongs to workspace
+    const { data: assessment, error: assessmentError } = await supabase
+      .from('assessments')
+      .select('id, workspace_id')
+      .eq('id', assessmentId)
+      .single();
 
-  const { searchParams } = new URL(request.url);
-  const assessmentId = searchParams.get('assessmentId');
-  if (!assessmentId) {
-    return NextResponse.json({ error: 'assessmentId is required' }, { status: 400 });
-  }
+    if (assessmentError || !assessment) {
+      throw new Error('Assessment not found');
+    }
 
-  const parse = requestSchema.safeParse({ assessmentId });
-  if (!parse.success) {
-    return NextResponse.json(
-      { error: 'Invalid assessmentId', details: parse.error.flatten() },
-      { status: 400 }
-    );
-  }
-
-  try {
     // Query assessment_controls table for summary counts
-    const [{ count: total }, { count: compliant }, { count: nonCompliant }] = await Promise.all([
+    const [
+      { count: total }, 
+      { count: compliant }, 
+      { count: nonCompliant }
+    ] = await Promise.all([
       supabase
         .from('assessment_controls')
         .select('*', { head: true, count: 'exact' })
@@ -55,14 +71,26 @@ export async function GET(request: Request) {
         .eq('assessment_id', assessmentId)
         .eq('status', 'not_compliant'),
     ]);
-    const t = total ?? 0;
-    const c = compliant ?? 0;
-    const n = nonCompliant ?? 0;
-    const p = t - c - n;
-    const score = t > 0 ? Number(((c / t) * 100).toFixed(2)) : 0;
-    return NextResponse.json({ score, compliant: c, nonCompliant: n, pending: p, total: t });
-  } catch (err: any) {
-    console.error('Error in summary:', err);
-    return NextResponse.json({ score: 0, compliant: 0, nonCompliant: 0, pending: 0, total: 0 });
-  }
+
+    const totalCount = total ?? 0;
+    const compliantCount = compliant ?? 0;
+    const nonCompliantCount = nonCompliant ?? 0;
+    const pendingCount = totalCount - compliantCount - nonCompliantCount;
+    const score = totalCount > 0 ? Number(((compliantCount / totalCount) * 100).toFixed(2)) : 0;
+
+    return {
+      summary: {
+        score,
+        compliant: compliantCount,
+        nonCompliant: nonCompliantCount,
+        pending: pendingCount,
+        total: totalCount
+      },
+      assessment: {
+        id: assessment.id,
+        workspace_id: assessment.workspace_id
+      },
+      workspace: getWorkspaceMetadata(user)
+    };
+  });
 }

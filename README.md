@@ -98,3 +98,45 @@ src/
 ## License
 
 MIT License - feel free to use this project for your own compliance monitoring needs.
+
+## Puppeteer E2E: Evidence API Sanity
+
+This repository includes a headless E2E script to verify that authentication, workspace switching, and Evidence API operations work end-to-end in a local dev environment.
+
+Script: `scripts/e2e/evidence.e2e.js`
+
+What it does:
+
+- Logs in to the app at `http://localhost:3002/auth/login` using the credentials you provide
+- Confirms the server recognizes the user via `/api/dev/whoami` with a Bearer token
+- Switches to the specified workspace via `POST /api/workspace/switch`
+- Navigates to the dashboard frameworks page for the provided framework ID
+- Calls `GET /api/evidence` and expects 200 OK
+- Creates a test evidence via `POST /api/evidence`, then deletes it with `DELETE /api/evidence`
+
+Run:
+
+```
+TEST_EMAIL="you@example.com" \
+TEST_PASSWORD="yourpass" \
+TEST_WORKSPACE_SLUG="your-workspace-slug" \
+TEST_FRAMEWORK_ID="framework-uuid" \
+npm run e2e:evidence
+```
+
+Defaults (override as needed):
+
+- `E2E_ORIGIN` defaults to `http://localhost:3002`
+- `TEST_WORKSPACE_SLUG` defaults to `abimbolatobi-gmail-com-s-workspace`
+- `TEST_FRAMEWORK_ID` defaults to `84fe5672-eb4b-405c-a913-19f956fbe256`
+
+Prerequisites:
+
+- Dev server is running locally: `npm run dev` (on port 3002 per `package.json`)
+- A test user exists (you can create or use `scripts/seed-test-user.js` if you have service credentials)
+
+Expected output:
+
+- Successful run prints `E2E SUCCESS` and exits with code 0
+- On failure, prints error details (HTTP status + JSON body) and exits with code 1
+

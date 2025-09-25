@@ -1,0 +1,47 @@
+Category,Item,Specification,Unit,Quantity,Unit Cost (USD),Total (USD),Notes
+Materials,OS2 Single‑Mode Outdoor Cable,ITU‑T G.652.D (bend‑improved G.657.A1/A2 preferred), armored where route requires; factory supplied on OEM wooden drums; LC/UPC at rack,M,1200,4.5,5400,Sources: Prysmian/Draka OS2 outdoor; Corning ALTOS; OCC OS2 armored — Continuous length per route; OEM wooden drums
+Materials,IP68 Fiber Closures,IP68; ≥24F; trays included; gel/gasket seal; strand mgmt,Each,3,320,960,Sources: Raychem (TE Connectivity) FOSC; CommScope; Hubei Aijia — Select closure compatible with fiber count
+Materials,Splice Trays (12F),12‑fiber trays with splice holders,Each,12,12,144,Supplied with closures or separate; verify compatibility
+Materials,Splice Protectors,Heat‑shrink splice sleeves 40/45 mm,Each,60,0.5,30,Typical 40–60 mm sleeves; include spares
+Materials,Wall/Rack FO Patch Panel #1,1U 19" 24‑port LC panel (empty),Each,1,180,180,Sources: Panduit, Leviton, Corning — with cable entry glands
+Materials,Wall/Rack FO Patch Panel #2,1U 19" 24‑port LC panel (empty),Each,1,180,180,Sources: Panduit, Leviton, Corning — with cable entry glands
+Materials,LC/UPC Duplex Adapters,Blue LC duplex bulkhead adapters,Each,24,3,72,Typical panels need 12 duplex per 1U 24‑port field
+Materials,LC/UPC Pigtails (12‑pack),900 µm SM OS2, 12‑color set,Pack,2,45,90,One set per panel; fusion splice to backbone
+Materials,LC/UPC Patch Cords,OS2 duplex 2 m (rack),Each,24,6,144,Panel ↔ switch/test patching; length to suit
+Materials,Splice Cassette/Management,Panel splice cassettes where required,Each,4,25,100,For neat pigtail management
+Materials,FO Cable Glands/Seals,IP‑rated glands sized to cable OD,Each,10,12,120,Rack/closure entries; thread per vendor
+Materials,Labels & Plates,TIA‑606 compliant labels/plates,Set,2,60,120,Panels, closures, trays, fibers, route markers
+Materials,Cable Route Markers,UV‑stable route tags/plates,Each,20,3,60,At pit entries and intervals on exposed runs
+Materials,Desiccant/Seal Kits,Closure desiccant & reseal kits,Set,3,20,60,1 per closure + spares
+Materials,Cleaning & Prep Kit,One‑click cleaners, wipes, IPA, dust caps,Set,2,120,240,Endface cleaning per IEC/TIA
+Materials,Pulling Socks/Tapes,Fiber‑rated pulling grips/detectable tape,Set,4,45,180,Tension limited per OEM
+Materials,Slack Management,Splice sleeve holders, slack reels, Velcro ties,Set,3,25,75,Per closure
+Materials,SM SFP Transceivers (1G LX or 10G LR),Single‑mode SFPs for OT core switch uplinks,Each,4,120,480,Confirm 1G vs 10G and switch OEM compatibility
+Materials,Rack Cable Management Panels,1U horizontal managers with fingers,Each,2,35,70,Between FO panels and switch
+Materials,OTDR Launch/Receive Fibers,OS2 SM launch and tail (≥500 m),Each,2,140,280,For accurate OTDR testing and dead‑zone mitigation
+Tools/Equipment,OTDR,1310/1550 nm with event/IL analysis,Each,1,8500,8500,Selected: EXFO MaxTester 730C or VIAVI equivalent — Supplier: TestEquity/EXFO/VIAVI
+Tools/Equipment,Optical Power Meter & Light Source,SM 1310/1550 kit with reference leads,Set,1,900,900,Typical OPM/OLS kit for IL tests — EXFO/VIAVI
+Tools/Equipment,Fiber Inspection Scope,Handheld microscope/inspection camera,Each,1,450,450,Endface inspection — EXFO/MicroCare
+Tools/Equipment,Visual Fault Locator (VFL),650 nm pen/launcher,Each,1,80,80,Continuity/macrobend checks — Jonard/Fluke
+Tools/Equipment,Fusion Splicer,Core‑alignment splicer with cleaver,Each,1,5500,5500,Furukawa/Fujikura/INNO — with high‑precision cleaver
+Tools/Equipment,Fiber Cleaver,High‑precision cleaver,Each,1,900,900,Compatible with splicer
+Tools/Equipment,Closure Tooling Kit,Torque drivers, seal press tools, heat gun,Set,1,350,350,Per closure OEM requirements
+Tools/Equipment,Fiber Drum Stand with Brake,Rated for FO OEM wooden drums,Each,2,450,900,Controlled pay‑out; FO only (not MV steel reels)
+Tools/Equipment,Cable Rollers/Corner Guides,Light‑duty FO rollers/guides,Set,2,220,440,Route control and bend radius protection
+Tools/Equipment,Patch Panel Tooling,Crimpers (if required), torque tools, dust caps set,Set,1,180,180,Panel termination and dressing
+Tools/Equipment,Fiber Tool Kit,Strippers (primary/coating), Kevlar shears, jacket stripper,Set,1,300,300,Toolkit for field prep of fibers
+Services,Engineering & Design (Comms),Backbone design, strand count, labeling,Each,1,6000,6000,Lump sum
+Services,Detailed CAD & As‑Builts (Comms),Rack elevations, redlines, as‑builts,Each,1,2500,2500,Lump sum
+Services,Project Management (Comms),Planning/coordination/reporting,Each,1,4000,4000,Lump sum
+Services,Procurement Management (Comms),Vendor liaison/expediting,Each,1,2000,2000,Lump sum
+Services,Field Installation (Comms),FO crew, permits, pull/splice/terminate,Each,1,12000,12000,Lump sum
+Services,Testing & Commissioning (Comms),OTDR/IL testing, documentation,Each,1,2500,2500,Lump sum
+Services,Training (Comms),Operator/Maintainer training,Each,1,1500,1500,Lump sum
+Services,HSE Management (Comms),Method statements, permits, supervision,Each,1,1500,1500,Lump sum
+Services,QA/QC & Documentation (Comms),ITP/ITR, test packs, O&M,Each,1,2000,2000,Lump sum
+Services,Logistics & Handling (Comms),Freight, site handling, storage,Each,1,2500,2500,Lump sum
+Summary,Subtotal Materials,,Each,1,,8985,Auto-calculated for reference
+Summary,Subtotal Tools/Equipment,,Each,1,,18500,Auto-calculated for reference
+Summary,Subtotal Services,,Each,1,,36500,Auto-calculated for reference
+Summary,Contingency (10% of above),,Each,1,,6399,10% contingency
+Summary,Grand Total (Estimated),,Each,1,,70384,Budgetary estimate pending confirmations

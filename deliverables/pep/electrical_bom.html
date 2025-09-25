@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Electrical BOM — TiN STS Migration & Installation (Materials and Tools)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 16px; background:#f8fafc; }
+    h1, h2 { margin: 0 0 12px; }
+    .container { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+    .toolbar { display:flex; gap:8px; margin-bottom:12px; }
+    .btn { background:#111827; color:#fff; border:0; border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:600; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { border:1px solid #e5e7eb; padding:10px; vertical-align:top; }
+    th { background:#f3f4f6; text-align:left; }
+    tbody tr:nth-child(odd) { background:#fafafa; }
+    .section { margin-top:16px; }
+    .small { color:#6b7280; font-size:12px; }
+    @page { size: A3 landscape; margin: 10mm; }
+    @media print { body { padding:0; background:#fff; } .container { box-shadow:none; border:0; } }
+  </style>
+  <script>
+    function doPrint(){ window.print(); }
+  </script>
+</head>
+<body>
+  <h1>Electrical BOM — TiN STS Migration & Installation</h1>
+  <div class="container">
+    <div class="toolbar">
+      <button class="btn" onclick="doPrint()">Print (A3 Landscape)</button>
+      <a class="btn" href="electrical_bom.csv" download>Download CSV</a>
+      <a class="btn" href="ga_jb_ctp5_ctp6.html" target="_blank">Open GA – JB (CTP5/CTP6)</a>
+      <a class="btn" href="ga_drum_mv.html" target="_blank">Open GA – MV Drum</a>
+    </div>
+
+    <div class="section">
+      <h2>Materials</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">Item</th>
+            <th style="width:48%">Specification</th>
+            <th style="width:8%">Unit</th>
+            <th style="width:8%">Qty</th>
+            <th style="width:14%">Basis/Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>CTP6 MV Junction Box A (STS05)</td><td>SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure H×W×D 1000×800×400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: <a href="ga_jb_ctp5_ctp6.html" target="_blank">JB GA</a></td><td>Each</td><td>1</td><td>New JB at CTP6 for STS05 (Feeder IN + Drum OUT)</td></tr>
+          <tr><td>CTP6 MV Junction Box B (STS06)</td><td>SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure H×W×D 1000×800×400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: <a href="ga_jb_ctp5_ctp6.html" target="_blank">JB GA</a></td><td>Each</td><td>1</td><td>New JB at CTP6 for STS06 (Feeder IN + Drum OUT)</td></tr>
+          <tr><td>CTP5 MV Junction Box (STS04)</td><td>SS316/SS304, C5M, IP67/IK10, filtered breather, Cu earth bar with test link; Enclosure H×W×D 1000×800×400 mm; Gland plate sized for 2× MV cables OD≈65 mm; GA: <a href="ga_jb_ctp5_ctp6.html" target="_blank">JB GA</a></td><td>Each</td><td>1</td><td>STS04 migration path (Feeder IN + Drum OUT)</td></tr>
+          <tr><td>Cable Drum Assemblies</td><td>Drum + tail assembly per crane (marine-rated hardware). OD≈65 mm → Barrel ≥ 18×OD ≈ 1170 mm (nom. 1200); Flange ≥ Barrel + 6×OD ≈ 1560 mm (nom. 1600); Width per ordered length; GA: <a href="ga_drum_mv.html" target="_blank">Drum GA</a></td><td>Each</td><td>3</td><td>One per STS04/05/06 (1 MV cable per drum)</td></tr>
+          <tr><td>MV XLPE Cable (11 kV class)</td><td>IEC 60502-2, Cu/Al per design, 3C or 3×1C, conductor size per calc</td><td>m</td><td>1200</td><td>Approx. total; verify per feeder</td></tr>
+          <tr><td>MV Termination Kits (Indoor/Outdoor)</td><td>IEC 60502-2 stress-control heat/cold shrink; include lugs/boots; 12/20 kV class</td><td>Set</td><td>12</td><td>Ends: JB IN/OUT + drum tails</td></tr>
+          <tr><td>Double-Compression Cable Glands</td><td>Brass/Ni-plated SS; armor continuity; IP67; size to suit OD≈65 mm (thread per vendor e.g., M75/M80)</td><td>Each</td><td>18</td><td>Per termination</td></tr>
+          <tr><td>Armor/Braid Bonding Kits</td><td>Compatible with gland for MV cable armor continuity</td><td>Each</td><td>6</td><td>If applicable</td></tr>
+          <tr><td>Cable Lugs</td><td>Tinned Cu lugs; IEC compliant; size per conductor; crimp type</td><td>Each</td><td>36</td><td>Allowance</td></tr>
+          <tr><td>Cu Earth Conductor</td><td>25–35 mm² tinned copper to grid</td><td>m</td><td>60</td><td>Bonding each JB</td></tr>
+          <tr><td>Cu Earth Bar with Test Link</td><td>Pre-drilled with labeled test link</td><td>Each</td><td>3</td><td>One per JB (spare allowed)</td></tr>
+          <tr><td>Filtered Breathers</td><td>IP-rated low differential pressure</td><td>Each</td><td>6</td><td>2 per JB</td></tr>
+          <tr><td>Neoprene Gaskets/Seals</td><td>Door and gland plate gaskets</td><td>Set</td><td>3</td><td>Spare sets</td></tr>
+          <tr><td>Blanking Plugs</td><td>IP-rated for unused entries</td><td>Each</td><td>24</td><td>Allowances per JB</td></tr>
+          <tr><td>Surge Protection (MV pit)</td><td>MOV/surge diverter suitable for 11 kV</td><td>Each</td><td>3</td><td>If required by design</td></tr>
+          <tr><td>Fasteners & Fixings</td><td>A4-80 SS bolts, washers, isolating washers kit</td><td>Set</td><td>6</td><td>Mounting + spares</td></tr>
+          <tr><td>Mounting Backplates/Frames</td><td>SS316 backplate/frame for JB mounting</td><td>Each</td><td>3</td><td>Per JB</td></tr>
+          <tr><td>Cable Support Saddles</td><td>Strain relief within 150 mm of entry</td><td>Each</td><td>12</td><td>Entry points</td></tr>
+          <tr><td>Cable Route Markers</td><td>UV-stable route tags/plates</td><td>Each</td><td>30</td><td>Pit entry + exposed intervals</td></tr>
+          <tr><td>Labels & Plates</td><td>UV-stable engraved phenolic labels (JB IDs, feeder IDs)</td><td>Set</td><td>3</td><td>Per JB</td></tr>
+          <tr><td>Phase ID Sleeves</td><td>Heat-shrink phase markers (L1/L2/L3/PE)</td><td>Set</td><td>6</td><td>Per termination set</td></tr>
+          <tr><td>Desiccant Packs</td><td>Moisture control for enclosures</td><td>Each</td><td>12</td><td>4 per JB with spares</td></tr>
+          <tr><td>Sealants/Compounds</td><td>IP-rated sealing compounds for entries</td><td>Cartridge</td><td>6</td><td>Allowance</td></tr>
+          <tr><td>Cable Lubricant</td><td>Approved pulling lubricant</td><td>Bottle</td><td>6</td><td>Allowance</td></tr>
+          <tr><td>Mechanical Protection at Pit Exits</td><td>Grommets/bushings/rub blocks</td><td>Set</td><td>6</td><td>Exits and bends</td></tr>
+          <tr><td>Portable Earths</td><td>Rated for prospective fault current</td><td>Set</td><td>2</td><td>Isolation safety</td></tr>
+          <tr><td>Padlocks & LOTO Hasps</td><td>Locks/hasps/tags</td><td>Set</td><td>2</td><td>Safety</td></tr>
+          <tr><td>Warning Signage</td><td>Electrical hazard and identification signage</td><td>Set</td><td>3</td><td>Per pit/JB</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Tools/Equipment</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:22%">Item</th>
+            <th style="width:48%">Specification</th>
+            <th style="width:8%">Unit</th>
+            <th style="width:8%">Qty</th>
+            <th style="width:14%">Basis/Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Hydraulic Crimper + Die Set</td><td>12–400 mm² range; calibrated; with dielist</td><td>Each</td><td>1</td><td>Installation tooling</td></tr>
+          <tr><td>Heat Gun/Heat Blower</td><td>Industrial grade with temp control</td><td>Each</td><td>2</td><td>Heat-shrink terminations</td></tr>
+          <tr><td>Torque Wrench Set</td><td>5–200 Nm with calibration</td><td>Set</td><td>2</td><td>Per torque log</td></tr>
+          <tr><td>Capstan Winch</td><td>Controlled speed</td><td>Each</td><td>1</td><td>Cable pulls</td></tr>
+          <tr><td>Inline Dynamometer</td><td>Tension 0–5 kN (or as needed)</td><td>Each</td><td>1</td><td>Record pulling tension</td></tr>
+          <tr><td>Spindle Stands/Drum Jacks</td><td>Rated for drum mass; with brake</td><td>Pair</td><td>2</td><td>Two drums concurrently</td></tr>
+          <tr><td>Cable Rollers & Corner Blocks</td><td>Heavy-duty set</td><td>Set</td><td>2</td><td>Route control</td></tr>
+          <tr><td>OTDR</td><td>1310/1550 nm; event/IL analysis</td><td>Each</td><td>1</td><td>For FO checks (interface)</td></tr>
+          <tr><td>Megger (IR Tester)</td><td>5 kV DC; calibrated</td><td>Each</td><td>1</td><td>IR testing</td></tr>
+          <tr><td>VLF Test Set</td><td>0.1 Hz, suitable for 12/20 kV; calibrated</td><td>Each</td><td>1</td><td>Withstand @ 2×U0</td></tr>
+          <tr><td>Earth Tester</td><td>Clamp or 3-point method; calibrated</td><td>Each</td><td>1</td><td>Earthing tests</td></tr>
+          <tr><td>Secondary Injection Test Set</td><td>Protection relay testing; calibrated</td><td>Each</td><td>1</td><td>Protection verification</td></tr>
+          <tr><td>Thermal Camera</td><td>320×240 or better; calibrated</td><td>Each</td><td>1</td><td>Post-energization scan</td></tr>
+          <tr><td>Confined Space Gas Detector</td><td>4-gas monitor; calibrated</td><td>Each</td><td>1</td><td>Pit entry safety</td></tr>
+          <tr><td>LOTO Kit</td><td>Hasps, tags, locks, testers</td><td>Set</td><td>2</td><td>Safety</td></tr>
+          <tr><td>Lifting Slings/Spreader</td><td>Rated slings and spreader bar</td><td>Set</td><td>2</td><td>Drum/enclosure lifts</td></tr>
+          <tr><td>Hand Tools Set</td><td>Insulated tools: cutters, strippers, spanners</td><td>Set</td><td>2</td><td>General installation</td></tr>
+        </tbody>
+      </table>
+      <div class="small">Notes: Quantities are based on tender scope in <code>deliverables/STS_Tender_V3_1_Electrical.md</code>. Cable OD assumed ≈ 65 mm per Prysmian Protolon(SMK)-LWL table. Final enclosure size, gland thread, and drum dimensions to be validated during IFC with selected cable datasheet and OEM drum standard.</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+npm verbose cli /opt/homebrew/Cellar/node/23.3.0/bin/node /opt/homebrew/bin/npm
+npm info using npm@10.9.0
+npm info using node@v23.3.0
+npm verbose title npm ci
+npm verbose argv "ci" "--no-fund" "--no-audit" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:/Users/olutobi/.npm/_logs/2025-08-23T08_50_05_317Z-
+npm verbose logfile /Users/olutobi/.npm/_logs/2025-08-23T08_50_05_317Z-debug-0.log
+(node:61307) ExperimentalWarning: CommonJS module /opt/homebrew/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /opt/homebrew/lib/node_modules/npm/node_modules/supports-color/index.js using require().
+Support for loading ES Module in require() is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm http fetch GET 200 https://registry.npmjs.org/puppeteer-core 11ms (cache hit)
+npm verbose stack Error: could not resolve
+npm verbose stack     at PlaceDep.failPeerConflict (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:503:25)
+npm verbose stack     at new PlaceDep (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/place-dep.js:157:21)
+npm verbose stack     at #buildDepStep (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:920:18)
+npm verbose stack     at async Arborist.buildIdealTree (/opt/homebrew/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:181:7)
+npm verbose stack     at async CI.exec (/opt/homebrew/lib/node_modules/npm/lib/commands/ci.js:63:5)
+npm verbose stack     at async Npm.exec (/opt/homebrew/lib/node_modules/npm/lib/npm.js:207:9)
+npm verbose stack     at async module.exports (/opt/homebrew/lib/node_modules/npm/lib/cli/entry.js:74:5)
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: chrome-aws-lambda@10.1.0
+npm error Found: puppeteer-core@24.16.2
+npm error node_modules/puppeteer-core
+npm error   puppeteer-core@"^24.10.2" from the root project
+npm error   puppeteer-core@"24.16.2" from puppeteer@24.16.2
+npm error   node_modules/puppeteer
+npm error     dev puppeteer@"^24.16.2" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer puppeteer-core@"^10.1.0" from chrome-aws-lambda@10.1.0
+npm error node_modules/chrome-aws-lambda
+npm error   chrome-aws-lambda@"^10.1.0" from the root project
+npm error
+npm error Conflicting peer dependency: puppeteer-core@10.4.0
+npm error node_modules/puppeteer-core
+npm error   peer puppeteer-core@"^10.1.0" from chrome-aws-lambda@10.1.0
+npm error   node_modules/chrome-aws-lambda
+npm error     chrome-aws-lambda@"^10.1.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/olutobi/.npm/_logs/2025-08-23T08_50_05_317Z-eresolve-report.txt
+npm verbose cwd /Users/olutobi/CascadeProjects/compliance-guardian-mvp
+npm verbose os Darwin 24.5.0
+npm verbose node v23.3.0
+npm verbose npm  v10.9.0
+npm verbose exit 1
+npm verbose code 1
+npm error A complete log of this run can be found in: /Users/olutobi/.npm/_logs/2025-08-23T08_50_05_317Z-debug-0.log

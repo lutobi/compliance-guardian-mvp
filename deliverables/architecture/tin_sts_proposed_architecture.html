@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>TiN STS Proposed Architecture</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Proposed electrical and communications architecture for TiN STS04–STS06, including Control Room, MV protection, and FO star topology to CTP5/CTP6." />
+  <style>
+  :root {
+    --bg: #fafbfc;
+    --panel: #ffffff;
+    --panel-alt: #f3f5f7;
+    --stroke: #a3afbf;
+    --text: #0f172a;   /* higher contrast for print */
+    --muted: #1f2937;  /* darker label for print */
+    --muted2: #475569; /* secondary */
+    /* Communications palette (cool) */
+    --comms-primary: #0ea5e9;  /* cyan */
+    --comms-accent:  #0284c7;  /* blue-cyan */
+    --comms-fill:    #e0f2fe;  /* light cyan */
+    /* Electrical palette (red) */
+    --elec-primary:  #ef4444;  /* red-500 */
+    --elec-accent:   #b91c1c;  /* red-700 */
+    --elec-fill:     #fee2e2;  /* red-100 */
+    /* General accents */
+    --green: #16a34a;
+    --green2: #22c55e;
+    --blue: #2563eb;
+    --shadow: 0 1px 2px rgba(0,0,0,.08), 0 6px 16px rgba(0,0,0,.06);
+    /* SCADA layer */
+    --scada-primary: #7c3aed; /* violet-600 */
+    --scada-accent:  #a78bfa; /* violet-300 */
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+  header { padding: 20px 16px; }
+  header h1 { margin: 0 0 6px; font-size: 22px; }
+  header p { margin: 0; color: var(--muted2); }
+  .wrap { max-width: 1400px; margin: 8px auto 24px; padding: 0 16px 24px; }
+
+  svg { width: 100%; height: auto; background: var(--bg); }
+
+  /* Panels */
+  .panel { fill: var(--panel); stroke: var(--stroke); stroke-width: 1.5; rx: 14; }
+  .panel.alt { fill: var(--panel-alt); }
+  .zone-title { font: 600 18px/1.25 Inter, ui-sans-serif; fill: var(--text); }
+  .sub-title  { font: 600 15px/1.25 Inter, ui-sans-serif; fill: var(--text); }
+  .label      { font: 13px/1.35 Inter, ui-sans-serif; fill: var(--muted); }
+  .small      { font: 12px/1.3 Inter, ui-sans-serif;  fill: var(--muted2); }
+  /* Domain accents */
+  .panel.elec  { stroke: var(--elec-accent); stroke-width: 2; }
+  .panel.comms { stroke: var(--comms-accent); stroke-width: 2; }
+  .zone-title.elec  { fill: var(--elec-accent); }
+  .zone-title.comms { fill: var(--comms-accent); }
+
+  /* Network lines: keep Control Network green */
+  .net  { stroke: var(--green);  stroke-width: 3.2; fill: none; }
+  .net2 { stroke: var(--green2); stroke-width: 3.2; fill: none; stroke-dasharray: 6 6; }
+
+  /* Icons (stroked) */
+  .ico         { stroke: #0b1220; stroke-width: 1.5; fill: #fff; }
+  /* Communications (cool) */
+  .ico-fill    { fill: #dbeafe; stroke: #2563eb; }
+  .ico-switch  { fill: #dcfce7; stroke: var(--green); }
+  .ico-fo      { fill: var(--comms-fill); stroke: var(--comms-accent); }
+  /* Electrical (warm) */
+  .ico-jb      { fill: #fff1e6; stroke: #f97316; }
+  .ico-relay   { fill: #ffe4e6; stroke: #e11d48; }
+  /* Gateway (neutral-warm) */
+  .ico-gw      { fill: #fefce8; stroke: #a16207; }
+
+  /* Link dots */
+  .tap { fill: var(--green); }
+
+  /* Soft drop shadows via filter */
+  .shadow { filter: drop-shadow(0 2px 6px rgba(0,0,0,.08)) drop-shadow(0 10px 24px rgba(0,0,0,.06)); }
+
+  /* Legend */
+  .legend rect { rx: 8; }
+
+  footer { max-width: 1400px; margin: 0 auto; padding: 12px 16px 28px; color: var(--muted2); font-size: 12px; }
+
+  /* Print tweaks: white background and strong text smoothing */
+  @media print {
+    body { background: #fff; color: var(--text); }
+    svg  { background: #fff; }
+  }
+  /* SCADA layer styles */
+  .scada-link { stroke: var(--scada-primary); stroke-width: 2.4; fill: none; stroke-dasharray: 8 6; marker-end: url(#arrow-scada); }
+  .badge { fill: var(--panel); stroke: var(--scada-primary); stroke-width: 1.5; rx: 6; }
+  .badge text { font: 600 12px/1.2 Inter, ui-sans-serif; fill: var(--scada-primary); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>TiN STS04–STS06 — Proposed Electrical &amp; Communications Architecture</h1>
+  <p>Control Room (Cargo Building), MV Protection &amp; Power at CTP5/CTP6, and OS2 FO Star Topology with read‑only integrations.</p>
+</header>
+<div class="wrap">
+  <svg viewBox="0 0 1600 1100" role="img" aria-label="Proposed architecture diagram: Control Room, MV protection at CTP5/CTP6, FO star topology, gateway and external services">
+
+    <defs>
+      <!-- Arrowhead for SCADA flows -->
+      <marker id="arrow-scada" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--scada-primary)"></path>
+      </marker>
+    </defs>
+
+    <!-- Control Room -->
+    <g transform="translate(480,30)" class="shadow" aria-labelledby="cr-title">
+      <rect class="panel" width="640" height="120"></rect>
+      <text id="cr-title" x="20" y="30" class="zone-title">Control Room — Cargo Building</text>
+
+      <!-- Engineering Workstation -->
+      <g transform="translate(20,50)" aria-label="Engineering Workstation">
+        <rect class="ico-fill" width="70" height="46" rx="6"></rect>
+        <rect x="18" y="46" width="34" height="5" fill="#2563eb" aria-hidden="true"></rect>
+        <text x="88" y="20" class="label">Engineering Workstation</text>
+        <text x="88" y="38" class="small">Design · Settings · Tools</text>
+      </g>
+
+      <!-- SCADA / Historian -->
+      <g transform="translate(280,50)" aria-label="SCADA and Historian (read-only)">
+        <rect class="ico" width="60" height="46" rx="6" fill="#eef2ff" stroke="#3730a3"></rect>
+        <rect x="8" y="10" width="44" height="8" fill="#c7d2fe" aria-hidden="true"></rect>
+        <rect x="8" y="26" width="44" height="16" fill="#e0e7ff" aria-hidden="true"></rect>
+        <text x="74" y="20" class="label">SCADA / Historian</text>
+        <text x="74" y="38" class="small">Read‑only OT visibility</text>
+      </g>
+    </g>
+
+    <!-- Control Network Spine -->
+    <g aria-label="Control Network (OT LAN)">
+      <path class="net" d="M100 220 H1500"></path>
+      <circle class="tap" cx="450" cy="220" r="5"></circle>
+      <circle class="tap" cx="1150" cy="220" r="5"></circle>
+      <text x="108" y="210" class="small">Control Network — OT LAN</text>
+    </g>
+
+    <!-- LEFT DOMAIN: Electrical Protection & Power -->
+    <g transform="translate(60,260)" class="shadow" aria-labelledby="mv-title">
+      <rect class="panel elec" width="700" height="620"></rect>
+      <text id="mv-title" x="20" y="32" class="zone-title elec">Electrical Protection &amp; Power (MV)</text>
+
+      <!-- Main Location -->
+      <g transform="translate(20,60)" class="shadow" aria-labelledby="mv-main-title">
+        <rect class="panel alt" width="660" height="180"></rect>
+        <text id="mv-main-title" x="16" y="28" class="sub-title">Main Location — Protection Room</text>
+
+        <!-- Protection Relays -->
+        <g transform="translate(16,54)" aria-label="MV Protection Relays">
+          <rect class="ico-relay" width="60" height="60" rx="6"></rect>
+          <rect x="10" y="12" width="40" height="12" fill="#fecdd3" stroke="#be123c" aria-hidden="true"></rect>
+          <rect x="10" y="32" width="40" height="18" fill="#ffe4e6" stroke="#be123c" aria-hidden="true"></rect>
+          <text x="76" y="24" class="label">Protection Relays</text>
+          <text x="76" y="44" class="small">CT/VT · Settings</text>
+        </g>
+
+        <!-- Secondary Injection -->
+        <g transform="translate(270,54)" aria-label="Secondary Injection Test Access">
+          <rect class="ico" width="60" height="60" rx="6" fill="#fffaf0" stroke="#92400e"></rect>
+          <circle cx="30" cy="30" r="12" fill="#fde68a" stroke="#f59e0b" aria-hidden="true"></circle>
+          <text x="76" y="24" class="label">Secondary Injection</text>
+          <text x="76" y="44" class="small">Test Access</text>
+        </g>
+
+        <!-- Settings DB -->
+        <g transform="translate(520,54)" aria-label="Protection Settings Database">
+          <rect class="ico" width="60" height="60" rx="6" fill="#ecfeff" stroke="#0ea5e9"></rect>
+          <rect x="14" y="16" width="32" height="28" fill="#bae6fd" stroke="#0284c7" aria-hidden="true"></rect>
+          <text x="76" y="24" class="label">Settings Database</text>
+          <text x="76" y="44" class="small">Policies · Records</text>
+        </g>
+      </g>
+
+      <!-- New Location: CTP5 (STS04) -->
+      <g transform="translate(20,270)" class="shadow" aria-labelledby="mv-ctp5-title">
+        <rect class="panel alt" width="320" height="250"></rect>
+        <text id="mv-ctp5-title" x="16" y="28" class="sub-title">New Location 1 — CTP5 · STS04</text>
+
+        <!-- Junction Box -->
+        <g transform="translate(16,56)" aria-label="Stainless Junction Box and Drum Assembly">
+          <rect class="ico-jb" width="70" height="52" rx="8"></rect>
+          <rect x="10" y="14" width="50" height="8" fill="#fed7aa" stroke="#f97316" aria-hidden="true"></rect>
+          <rect x="10" y="30" width="50" height="12" fill="#ffedd5" stroke="#f97316" aria-hidden="true"></rect>
+          <text x="90" y="26" class="label">Stainless JB + Drum</text>
+          <text x="90" y="44" class="small">C5M · IP67 · IK10</text>
+        </g>
+
+        <!-- MV Cable -->
+        <g transform="translate(16,132)" aria-label="MV Cable Pull and Termination">
+          <rect class="ico" width="70" height="46" rx="8" fill="#f8fafc" stroke="#334155"></rect>
+          <line x1="8" y1="20" x2="62" y2="20" stroke="#475569" stroke-width="3" aria-hidden="true"></line>
+          <text x="90" y="20" class="label">MV Pull &amp; Term</text>
+          <text x="90" y="38" class="small">IR/Cont · VLF</text>
+        </g>
+      </g>
+
+      <!-- New Location: CTP6 (STS05/STS06) -->
+      <g transform="translate(360,270)" class="shadow" aria-labelledby="mv-ctp6-title">
+        <rect class="panel alt" width="320" height="250"></rect>
+        <text id="mv-ctp6-title" x="16" y="28" class="sub-title">New Location 2 — CTP6 · STS05/STS06</text>
+
+        <g transform="translate(16,56)" aria-label="Stainless Junction Boxes and Drum Assemblies">
+          <rect class="ico-jb" width="70" height="52" rx="8"></rect>
+          <rect x="10" y="14" width="50" height="8" fill="#fed7aa" stroke="#f97316" aria-hidden="true"></rect>
+          <rect x="10" y="30" width="50" height="12" fill="#ffedd5" stroke="#f97316" aria-hidden="true"></rect>
+          <text x="90" y="26" class="label">Stainless JBs + Drums</text>
+          <text x="90" y="44" class="small">Labeling · Bonding</text>
+        </g>
+
+        <g transform="translate(16,132)" aria-label="Feeder Testing">
+          <rect class="ico" width="70" height="46" rx="8" fill="#f8fafc" stroke="#334155"></rect>
+          <line x1="8" y1="20" x2="62" y2="20" stroke="#475569" stroke-width="3" aria-hidden="true"></line>
+          <text x="90" y="20" class="label">Feeder Testing</text>
+          <text x="90" y="38" class="small">IR/Cont · VLF</text>
+        </g>
+      </g>
+
+      <!-- Vertical drop from Control Network to Electrical Main -->
+      <path class="net" d="M450 220 V260" aria-hidden="true"></path>
+      <circle class="tap" cx="450" cy="260" r="5" aria-hidden="true"></circle>
+    </g>
+
+    <!-- RIGHT DOMAIN: Crane Control & Comms (PCS/OT) -->
+    <g transform="translate(820,260)" class="shadow" aria-labelledby="pcs-title">
+      <rect class="panel comms" width="720" height="620"></rect>
+      <text id="pcs-title" x="20" y="32" class="zone-title comms">Crane Control &amp; Communications (PCS / OT)</text>
+
+      <!-- Main Location -->
+      <g transform="translate(20,60)" class="shadow" aria-labelledby="pcs-main-title">
+        <rect class="panel alt" width="680" height="180"></rect>
+        <text id="pcs-main-title" x="16" y="28" class="sub-title">Main Location — Cargo Building · ICT Rack</text>
+
+        <!-- Core Switch -->
+        <g transform="translate(16,54)" aria-label="Core Switch (OT LAN / VLANs)">
+          <rect class="ico-switch" width="66" height="46" rx="6"></rect>
+          <rect x="10" y="12" width="46" height="8" fill="#bbf7d0" stroke="#16a34a" aria-hidden="true"></rect>
+          <rect x="10" y="28" width="46" height="6" fill="#dcfce7" stroke="#16a34a" aria-hidden="true"></rect>
+          <text x="84" y="24" class="label">Core Switch</text>
+          <text x="84" y="44" class="small">OT LAN · VLANs</text>
+        </g>
+
+        <!-- FO Patch -->
+        <g transform="translate(270,54)" aria-label="Fiber Patch (LC/UPC, Maps)">
+          <rect class="ico" width="60" height="46" rx="6" fill="#f0f9ff" stroke="#0369a1"></rect>
+          <circle cx="30" cy="23" r="11" fill="#bae6fd" stroke="#0284c7" aria-hidden="true"></circle>
+          <text x="76" y="24" class="label">FO Patch</text>
+          <text x="76" y="44" class="small">LC/UPC · Maps</text>
+        </g>
+
+        <!-- Labeling DB -->
+        <g transform="translate(520,54)" aria-label="Labeling Database (TIA-606 / Policy)">
+          <rect class="ico" width="60" height="46" rx="6" fill="#eef2ff" stroke="#3730a3"></rect>
+          <rect x="12" y="14" width="36" height="18" fill="#c7d2fe" stroke="#6366f1" aria-hidden="true"></rect>
+          <text x="76" y="24" class="label">Labeling DB</text>
+          <text x="76" y="44" class="small">TIA‑606 · Policy</text>
+        </g>
+      </g>
+
+      <!-- New Location: CTP5 -->
+      <g transform="translate(20,270)" class="shadow" aria-labelledby="pcs-ctp5-title">
+        <rect class="panel alt" width="330" height="250"></rect>
+        <text id="pcs-ctp5-title" x="16" y="28" class="sub-title">New Location 1 — CTP5 · STS04</text>
+
+        <g transform="translate(16,56)" aria-label="IP68 Fiber Closure with Splice Trays and Pigtails">
+          <rect class="ico-fo" width="70" height="52" rx="8"></rect>
+          <rect x="10" y="14" width="50" height="10" fill="#bae6fd" stroke="#0891b2" aria-hidden="true"></rect>
+          <rect x="10" y="32" width="50" height="12" fill="#e0f2fe" stroke="#0891b2" aria-hidden="true"></rect>
+          <text x="90" y="26" class="label">IP68 FO Closure</text>
+          <text x="90" y="44" class="small">Trays · Pigtails</text>
+        </g>
+
+        <g transform="translate(16,132)" aria-label="OS2 Single-Mode Star Leg with Clean Terminations">
+          <rect class="ico" width="70" height="46" rx="8" fill="#f8fafc" stroke="#334155"></rect>
+          <line x1="8" y1="20" x2="62" y2="20" stroke="#475569" stroke-width="3" aria-hidden="true"></line>
+          <text x="90" y="22" class="label">OS2 Star Leg</text>
+          <text x="90" y="40" class="small">Clean Terminations</text>
+        </g>
+      </g>
+
+      <!-- New Location: CTP6 -->
+      <g transform="translate(370,270)" class="shadow" aria-labelledby="pcs-ctp6-title">
+        <rect class="panel alt" width="330" height="250"></rect>
+        <text id="pcs-ctp6-title" x="16" y="28" class="sub-title">New Location 2 — CTP6 · STS05/STS06</text>
+
+        <g transform="translate(16,56)" aria-label="IP68 Fiber Closure with disciplined splice trays">
+          <rect class="ico-fo" width="70" height="52" rx="8"></rect>
+          <rect x="10" y="14" width="50" height="10" fill="#bae6fd" stroke="#0891b2" aria-hidden="true"></rect>
+          <rect x="10" y="32" width="50" height="12" fill="#e0f2fe" stroke="#0891b2" aria-hidden="true"></rect>
+          <text x="90" y="26" class="label">IP68 FO Closure</text>
+          <text x="90" y="44" class="small">Splice Discipline</text>
+        </g>
+
+        <g transform="translate(16,132)" aria-label="OS2 Single-Mode Star Leg with polarity and insertion loss control">
+          <rect class="ico" width="70" height="46" rx="8" fill="#f8fafc" stroke="#334155"></rect>
+          <line x1="8" y1="20" x2="62" y2="20" stroke="#475569" stroke-width="3" aria-hidden="true"></line>
+          <text x="90" y="22" class="label">OS2 Star Leg</text>
+          <text x="90" y="40" class="small">Polarity · IL</text>
+        </g>
+      </g>
+
+      <!-- Vertical drop from Control Network to Comms Main -->
+      <path class="net" d="M1150 220 V260" aria-hidden="true"></path>
+      <circle class="tap" cx="1150" cy="260" r="5" aria-hidden="true"></circle>
+    </g>
+
+    <!-- Integration / Gateway -->
+    <g transform="translate(620,920)" class="shadow" aria-labelledby="gw-title">
+      <rect class="panel" width="360" height="120"></rect>
+      <text id="gw-title" x="16" y="28" class="sub-title">Gateway / Integration</text>
+      <g transform="translate(16,46)" aria-label="Gateway / Integration">
+        <rect class="ico-gw" width="70" height="52" rx="8"></rect>
+        <rect x="14" y="14" width="42" height="10" fill="#fef9c3" stroke="#ca8a04" aria-hidden="true"></rect>
+        <rect x="14" y="30" width="42" height="12" fill="#feeeb2" stroke="#ca8a04" aria-hidden="true"></rect>
+        <text x="90" y="22" class="label">Protocol / Logs Bridge</text>
+      </g>
+    </g>
+
+
+    <!-- SCADA Layer: read-only flows and protocol callouts -->
+    <g id="scada-layer" aria-label="SCADA Layer (read-only flows)">
+      <!-- Protocol badges near sources -->
+      <!-- Electrical relays badge -->
+      <g transform="translate(170,392)">
+        <rect class="badge" width="170" height="24"></rect>
+        <text x="8" y="16">IEC‑104 / OPC UA (RO)</text>
+      </g>
+      <!-- Gateway badge -->
+      <g transform="translate(690,940)">
+        <rect class="badge" width="110" height="24"></rect>
+        <text x="8" y="16">OPC UA (RO)</text>
+      </g>
+
+      <!-- Read-only data flows to SCADA/Historian (in Control Room) -->
+      <!-- From Protection Relays (approx 126,404) to SCADA box center (approx 790,103) -->
+      <path class="scada-link" d="M126 404 C 240 300, 480 180, 790 103" aria-label="Relays to SCADA (read-only)"></path>
+      <!-- From Gateway (approx 671,992) to SCADA (790,103) with a high arc -->
+      <path class="scada-link" d="M671 992 C 680 700, 740 360, 790 103" aria-label="Gateway to SCADA (read-only)"></path>
+    </g>
+
+    <!-- Legend -->
+    <g transform="translate(60,920)" class="legend shadow" aria-labelledby="legend-title">
+      <rect class="panel" width="500" height="120"></rect>
+      <text id="legend-title" x="16" y="28" class="sub-title">Legend</text>
+
+      <g transform="translate(16,46)">
+        <rect class="ico-switch" width="30" height="22" rx="4"></rect>
+        <text x="44" y="16" class="label">Core/Access Switch</text>
+      </g>
+      <g transform="translate(170,46)">
+        <rect class="ico-fo" width="30" height="22" rx="4"></rect>
+        <text x="44" y="16" class="label">FO Closure / Patch</text>
+      </g>
+      <g transform="translate(330,46)">
+        <rect class="ico-jb" width="30" height="22" rx="4"></rect>
+        <text x="44" y="16" class="label">Junction Box / Drum</text>
+      </g>
+      <g transform="translate(16,80)">
+        <line x1="0" y1="0" x2="30" y2="0" class="net"></line>
+        <text x="44" y="4" class="label">Control Network (OT LAN)</text>
+      </g>
+      <g transform="translate(260,80)">
+        <line x1="0" y1="0" x2="30" y2="0" class="scada-link" style="marker-end:none; stroke-dasharray:6 4"></line>
+        <text x="44" y="4" class="label">SCADA Layer (Read‑only)</text>
+      </g>
+    </g>
+  </svg>
+</div>
+<footer>
+  <p>File: deliverables/architecture/tin_sts_proposed_architecture.html · View in a modern browser for best results. You can export to PDF via the browser or capture a high‑DPI PNG using devtools.</p>
+</footer>
+</body>
+</html>

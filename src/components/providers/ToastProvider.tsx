@@ -1,8 +1,19 @@
 'use client';
 
 import React from 'react';
-import { ToastContainer, toast, Slide, ToastOptions } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster, toast } from 'sonner';
+// Import the toast context hook for consistency
+import { useToast } from '@/components/ui/toast-context';
+
+/**
+ * Type definition for toast options
+ */
+type ToastOptions = {
+  duration?: number;
+  description?: string;
+  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'top-center' | 'bottom-center';
+  [key: string]: any;
+};
 
 /**
  * Toast notification functions with consistent styling
@@ -14,13 +25,7 @@ export const notify = {
   success: (message: string, options?: ToastOptions) =>
     toast.success(message, {
       position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
+      duration: 5000,
       ...options,
     }),
 
@@ -30,13 +35,7 @@ export const notify = {
   error: (message: string, options?: ToastOptions) =>
     toast.error(message, {
       position: 'top-right',
-      autoClose: 8000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
+      duration: 8000,
       ...options,
     }),
 
@@ -46,13 +45,7 @@ export const notify = {
   warning: (message: string, options?: ToastOptions) =>
     toast.warning(message, {
       position: 'top-right',
-      autoClose: 6000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
+      duration: 6000,
       ...options,
     }),
 
@@ -62,36 +55,25 @@ export const notify = {
   info: (message: string, options?: ToastOptions) =>
     toast.info(message, {
       position: 'top-right',
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
+      duration: 5000,
       ...options,
     }),
 };
 
 /**
- * ToastProvider component to setup ToastContainer with consistent styling
+ * ToastProvider component to setup Toaster with consistent styling
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
-      <ToastContainer
+      <Toaster 
         position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
+        expand={false}
+        richColors
+        closeButton
         theme="light"
-        transition={Slide}
+        duration={5000}
       />
     </>
   );

@@ -1,0 +1,343 @@
+backups/auth_backup_20250812_121655/auth/multi-tenant-auth.ts(163,28): error TS18047: 'currentMembership' is possibly 'null'.
+backups/auth_backup_20250812_121655/auth/server.ts(72,50): error TS2339: Property 'type' does not exist on type '{ name: any; type: any; }[]'.
+backups/auth_backup_20250812_121655/auth/server.ts(89,29): error TS2339: Property 'name' does not exist on type '{ name: any; type: any; }[]'.
+components/ui/alert-dialog.tsx(14,3): error TS2339: Property 'className' does not exist on type 'AlertDialogPortalProps'.
+components/ui/alert-dialog.tsx(18,32): error TS2322: Type '{ children: Element; container?: Element | DocumentFragment | null | undefined; forceMount?: true | undefined; className: string; }' is not assignable to type 'IntrinsicAttributes & AlertDialogPortalProps'.
+  Property 'className' does not exist on type 'IntrinsicAttributes & AlertDialogPortalProps'.
+components/ui/calendar.tsx(5,27): error TS2307: Cannot find module 'react-day-picker' or its corresponding type declarations.
+scripts/generateSeedSql.ts(14,25): error TS2339: Property 'categories' does not exist on type 'FrameworkData'.
+scripts/reset-frameworks.ts(32,22): error TS2339: Property 'categories' does not exist on type 'FrameworkData'.
+src/app/api/evidence/route.ts(99,24): error TS2304: Cannot find name 'requirePermission'.
+src/app/api/evidence/route.ts(102,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(106,22): error TS2552: Cannot find name 'createWorkspaceScopedClient'. Did you mean 'getWorkspaceScopedClient'?
+src/app/api/evidence/route.ts(112,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(143,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(161,12): error TS2304: Cannot find name 'createSuccessResponse'.
+src/app/api/evidence/route.ts(164,12): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(177,24): error TS2304: Cannot find name 'requirePermission'.
+src/app/api/evidence/route.ts(180,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(184,22): error TS2304: Cannot find name 'createWorkspaceScopedClient'.
+src/app/api/evidence/route.ts(188,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(202,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(210,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(232,14): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/evidence/route.ts(248,12): error TS2304: Cannot find name 'createSuccessResponse'.
+src/app/api/evidence/route.ts(251,12): error TS2304: Cannot find name 'createErrorResponse'.
+src/app/api/monitoring/filesystem/route.ts(12,19): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint & { path: string; }'.
+src/app/api/monitoring/filesystem/route.ts(25,44): error TS2339: Property 'threshold' does not exist on type 'MonitoringPoint & { path: string; }'.
+src/app/api/monitoring/filesystem/route.ts(38,47): error TS2339: Property 'threshold' does not exist on type 'MonitoringPoint & { path: string; }'.
+src/app/api/monitoring/filesystem/route.ts(50,54): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint & { path: string; }'.
+src/app/auth/callback/route.ts(67,42): error TS2339: Property 'capabilities' does not exist on type '{ id: any; name: any; capabilities: any; }[]'.
+src/app/auth/callback/route.ts(93,42): error TS2339: Property 'name' does not exist on type '{ id: any; name: any; capabilities: any; }[]'.
+src/app/customer/assessments/[id]/edit/page.tsx(12,11): error TS2339: Property 'id' does not exist on type 'Record<string, string | string[]> | null'.
+src/app/dashboard/assessments/[id]/edit/page.tsx(16,11): error TS2339: Property 'id' does not exist on type 'Record<string, string | string[]> | null'.
+src/app/dashboard/iso27001/a92/page.tsx(53,30): error TS2339: Property 'id' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(57,28): error TS2339: Property 'id' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(57,43): error TS2339: Property 'title' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(62,27): error TS2339: Property 'status' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(63,27): error TS2339: Property 'status' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(66,26): error TS2339: Property 'status' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(66,67): error TS2339: Property 'status' does not exist on type 'never'.
+src/app/dashboard/iso27001/a92/page.tsx(71,24): error TS2339: Property 'metrics' does not exist on type 'never'.
+src/app/dashboard/monitoring/setup/page.tsx(30,31): error TS2551: Property 'createMonitoring' does not exist on type 'MonitoringService'. Did you mean 'createMonitoringPoint'?
+src/app/dashboard/page.tsx(246,28): error TS2322: Type 'MonitoringItem[]' is not assignable to type 'FrameworkStatusItem[]'.
+  Type 'MonitoringItem' is missing the following properties from type 'FrameworkStatusItem': name, complianceRate, totalControls, compliantCount
+src/app/dashboard/settings/general/page.tsx(104,38): error TS2322: Type 'Dispatch<SetStateAction<"MM/dd/yyyy" | "dd/MM/yyyy" | "yyyy-MM-dd">>' is not assignable to type '(value: string) => void'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'string' is not assignable to type 'SetStateAction<"MM/dd/yyyy" | "dd/MM/yyyy" | "yyyy-MM-dd">'.
+src/app/dashboard/settings/general/page.tsx(117,38): error TS2322: Type 'Dispatch<SetStateAction<"12h" | "24h">>' is not assignable to type '(value: string) => void'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'string' is not assignable to type 'SetStateAction<"12h" | "24h">'.
+src/app/dashboard/settings/layout.tsx(20,20): error TS18047: 'pathname' is possibly 'null'.
+src/app/frameworks/[slug]/framework-page.tsx(76,60): error TS2339: Property 'data' does not exist on type 'Framework'.
+src/app/frameworks/[slug]/framework-page.tsx(80,53): error TS2339: Property 'data' does not exist on type 'Framework'.
+src/app/frameworks/[slug]/framework-page.tsx(86,56): error TS2339: Property 'data' does not exist on type 'Framework'.
+src/app/frameworks/[slug]/framework-page.tsx(87,59): error TS2339: Property 'data' does not exist on type 'Framework'.
+src/app/frameworks/[slug]/framework-page.tsx(95,56): error TS2339: Property 'slug' does not exist on type 'Framework'.
+src/app/invite/accept/page.tsx(65,17): error TS18047: 'searchParams' is possibly 'null'.
+src/app/invite/accept/page.tsx(154,57): error TS2345: Argument of type '{ name: string; }' is not assignable to parameter of type 'string'.
+src/app/learning/privacy/hipaa/page.tsx(178,30): error TS18048: 'example.tips' is possibly 'undefined'.
+src/app/monitoring/page.tsx(190,37): error TS2339: Property 'updateMonitoringConfigurationStatus' does not exist on type 'MonitoringService'.
+src/app/monitoring/page.tsx(195,41): error TS2339: Property 'getMonitoringConfigurations' does not exist on type 'MonitoringService'.
+src/app/monitoring/page.tsx(253,27): error TS2304: Cannot find name 'MonitoringConfiguration'.
+src/app/monitoring/page.tsx(270,31): error TS2339: Property 'saveMonitoringConfiguration' does not exist on type 'MonitoringService'.
+src/app/monitoring/page.tsx(293,35): error TS2339: Property 'getMonitoringConfigurations' does not exist on type 'MonitoringService'.
+src/app/monitoring/page.tsx(499,60): error TS2345: Argument of type '{ controlId: any; subcontrolIds: any; progress: number; }' is not assignable to parameter of type 'never'.
+src/app/monitoring/page.tsx(500,56): error TS18046: 'control' is of type 'unknown'.
+src/app/monitoring/page.tsx(501,60): error TS18046: 'control' is of type 'unknown'.
+src/app/monitoring/page.tsx(537,61): error TS18046: 'control' is of type 'unknown'.
+src/app/monitoring/page.tsx(546,72): error TS18046: 'control' is of type 'unknown'.
+src/app/onboarding/page.tsx(19,27): error TS2307: Cannot find module '@/components/ui/separator' or its corresponding type declarations.
+src/app/workspace/[slug]/dashboard/page.tsx(67,25): error TS18047: 'params' is possibly 'null'.
+src/app/workspace/[slug]/dashboard/page.tsx(90,40): error TS2339: Property 'member_count' does not exist on type 'Workspace'.
+src/app/workspace/[slug]/layout.tsx(51,25): error TS18047: 'params' is possibly 'null'.
+src/app/workspace/[slug]/settings/page.tsx(80,25): error TS18047: 'params' is possibly 'null'.
+src/components/auth/LoginForm.tsx(9,41): error TS2307: Cannot find module '@/components/ui/alert' or its corresponding type declarations.
+src/components/auth/LoginForm.tsx(40,44): error TS2339: Property 'capabilities' does not exist on type '{ capabilities: any; }[]'.
+src/components/dashboard/CustomerDashboard.tsx(11,34): error TS2307: Cannot find module './ComplianceStatus' or its corresponding type declarations.
+src/components/dashboard/CustomerDashboard.tsx(12,36): error TS2307: Cannot find module './MonitoringOverview' or its corresponding type declarations.
+src/components/dashboard/CustomerDashboard.tsx(13,30): error TS2307: Cannot find module './TeamActivity' or its corresponding type declarations.
+src/components/dashboard/CustomerDashboard.tsx(14,31): error TS2307: Cannot find module './UpcomingTasks' or its corresponding type declarations.
+src/components/FrameworkDetail.tsx(24,9): error TS2322: Type '{ id: string; name: string; description: string; version: string; categories: string[]; }' is not assignable to type 'IntrinsicAttributes & FrameworkClientProps'.
+  Property 'name' does not exist on type 'IntrinsicAttributes & FrameworkClientProps'.
+src/components/frameworks/ControlDetail.tsx(51,74): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/frameworks/ControlDetail.tsx(55,20): error TS18048: 'status' is possibly 'undefined'.
+src/components/frameworks/ControlDetail.tsx(73,20): error TS2551: Property 'reference_links' does not exist on type 'Control'. Did you mean 'references'?
+src/components/frameworks/ControlDetail.tsx(73,47): error TS2551: Property 'reference_links' does not exist on type 'Control'. Did you mean 'references'?
+src/components/frameworks/ControlDetail.tsx(79,28): error TS2551: Property 'reference_links' does not exist on type 'Control'. Did you mean 'references'?
+src/components/frameworks/ControlDetail.tsx(96,20): error TS2551: Property 'dependency_ids' does not exist on type 'Control'. Did you mean 'dependencies'?
+src/components/frameworks/ControlDetail.tsx(96,46): error TS2551: Property 'dependency_ids' does not exist on type 'Control'. Did you mean 'dependencies'?
+src/components/frameworks/ControlDetail.tsx(102,28): error TS2551: Property 'dependency_ids' does not exist on type 'Control'. Did you mean 'dependencies'?
+src/components/frameworks/ControlDetail.tsx(117,35): error TS2339: Property 'updated_at' does not exist on type 'Control'.
+src/components/frameworks/ControlHierarchy.tsx(4,10): error TS2305: Module '"@/types/control"' has no exported member 'ControlHierarchy'.
+src/components/frameworks/FrameworkComparison.tsx(15,8): error TS1261: Already included file name '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/table.tsx' differs from file name '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/Table.tsx' only in casing.
+  The file is in the program because:
+    Imported via '@/components/ui/table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/frameworks/FrameworkComparison.tsx'
+    Imported via '@/components/ui/Table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/DataGrid.tsx'
+    Matched by include pattern '**/*.tsx' in 'tsconfig.json'
+    Imported via '@/components/ui/table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/users/UserTable.tsx'
+src/components/frameworks/FrameworkComparison.tsx(29,11): error TS2339: Property 'frameworks' does not exist on type '{ data: FrameworkData | null; error: Error | null; loading: boolean; }'.
+src/components/frameworks/FrameworkComparison.tsx(29,35): error TS2554: Expected 1 arguments, but got 0.
+src/components/layout/CustomerLayout.tsx(5,24): error TS2307: Cannot find module '../navigation/Header' or its corresponding type declarations.
+src/components/layout/CustomerShell.tsx(3,10): error TS2305: Module '"../navigation/CustomerSidebar"' has no exported member 'CustomerSidebar'.
+src/components/layout/CustomerShell.tsx(25,30): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/layout/CustomerShell.tsx(53,18): error TS2304: Cannot find name 'DynamicModule'.
+src/components/layout/SystemLayout.tsx(4,24): error TS2307: Cannot find module '../navigation/Header' or its corresponding type declarations.
+src/components/learning/CategoryPage.tsx(37,21): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/learning/CategoryPage.tsx(37,43): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/learning/CategoryPage.tsx(129,48): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/learning/CategoryPage.tsx(130,38): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/learning/CategoryPage.tsx(154,48): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/learning/CategoryPage.tsx(156,34): error TS2339: Property 'completion' does not exist on type 'FrameworkRegistryItem'.
+src/components/monitoring/IntegrationSetup.tsx(149,28): error TS2322: Type 'Record<string, string>' is not assignable to type 'string'.
+src/components/monitoring/IntegrationSetup.tsx(158,28): error TS2322: Type 'Record<string, string>' is not assignable to type 'string'.
+src/components/monitoring/IntegrationSetup.tsx(204,26): error TS2322: Type 'Record<string, string>' is not assignable to type 'string'.
+src/components/monitoring/IntegrationSetup.tsx(210,26): error TS2322: Type 'Record<string, string>' is not assignable to type 'string'.
+src/components/monitoring/IntegrationSetup.tsx(213,31): error TS2339: Property 'configureIntegration' does not exist on type 'MonitoringService'.
+src/components/monitoring/MonitoringPointSetup.tsx(8,27): error TS2724: '"@/types/monitoring"' has no exported member named 'MonitoringPointType'. Did you mean 'MonitoringPoint'?
+src/components/monitoring/MonitoringPointSetup.tsx(104,49): error TS2339: Property 'getAvailableMetrics' does not exist on type 'MonitoringService'.
+src/components/monitoring/MonitoringPointSetup.tsx(128,9): error TS2353: Object literal may only specify known properties, and 'control_id' does not exist in type 'Omit<MonitoringPoint, "created_at" | "id" | "updated_at">'.
+src/components/monitoring/SmartMonitoringSetup.tsx(54,7): error TS2322: Type '"semi"' is not assignable to type 'AutomationLevel'.
+src/components/monitoring/SmartMonitoringSetup.tsx(71,26): error TS2345: Argument of type 'Framework | undefined' is not assignable to parameter of type 'SetStateAction<Framework | null>'.
+  Type 'undefined' is not assignable to type 'SetStateAction<Framework | null>'.
+src/components/monitoring/SmartMonitoringSetup.tsx(176,32): error TS2339: Property 'categories' does not exist on type 'Framework'.
+src/components/monitoring/SmartMonitoringSetup.tsx(180,38): error TS2339: Property 'categories' does not exist on type 'Framework'.
+src/components/monitoring/SmartMonitoringSetup.tsx(188,38): error TS2339: Property 'categories' does not exist on type 'Framework'.
+src/components/monitoring/SmartMonitoringSetup.tsx(190,43): error TS2339: Property 'categories' does not exist on type 'Framework'.
+src/components/monitoring/SmartMonitoringSetup.tsx(208,34): error TS2339: Property 'id' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(211,70): error TS2339: Property 'id' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(215,64): error TS2339: Property 'id' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(218,68): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(220,34): error TS2339: Property 'description' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(314,71): error TS2339: Property 'id' does not exist on type 'never'.
+src/components/monitoring/SmartMonitoringSetup.tsx(318,39): error TS2339: Property 'name' does not exist on type 'never'.
+src/components/theme/CustomerThemeProvider.tsx(8,34): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/theme/CustomerThemeProvider.tsx(9,34): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/theme/CustomerThemeProvider.tsx(10,36): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/theme/CustomerThemeProvider.tsx(11,33): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/theme/CustomerThemeProvider.tsx(12,37): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/theme/CustomerThemeProvider.tsx(13,31): error TS2339: Property 'branding' does not exist on type 'CustomerWorkspace'.
+src/components/ui/DataGrid.tsx(12,8): error TS1149: File name '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/Table.tsx' differs from already included file name '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/table.tsx' only in casing.
+  The file is in the program because:
+    Imported via '@/components/ui/table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/frameworks/FrameworkComparison.tsx'
+    Imported via '@/components/ui/Table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/ui/DataGrid.tsx'
+    Matched by include pattern '**/*.tsx' in 'tsconfig.json'
+    Imported via '@/components/ui/table' from file '/Users/olutobi/CascadeProjects/compliance-guardian-mvp/src/components/users/UserTable.tsx'
+src/components/users/UserManagement.tsx(13,10): error TS2305: Module '"@/types/core"' has no exported member 'UserRole'.
+src/components/users/UserManagement.tsx(27,22): error TS2304: Cannot find name 'createClientComponentClient'.
+src/components/users/UserManagement.tsx(45,11): error TS2304: Cannot find name 'addUser'.
+src/components/users/UserManagement.tsx(87,9): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/components/users/UserTable.tsx(42,22): error TS2304: Cannot find name 'createClientComponentClient'.
+src/components/users/UserTable.tsx(51,22): error TS2304: Cannot find name 'createClientComponentClient'.
+src/data/frameworks.ts(14,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(15,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(16,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(20,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; controlNumber: string; description: string; subcontrols: { id: string; controlNumber: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(21,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(22,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(23,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(24,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(25,3): error TS2741: Property 'last_synced_at' is missing in type '{ readonly id: "nist-800-53"; readonly name: "NIST SP 800-53"; readonly version: "5.1.1+u4"; readonly description: "NIST Special Publication 800-53 Revision 5.1.1 LOW IMPACT BASELINE"; readonly categories: readonly [...]; readonly controls: readonly [...]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(26,3): error TS2741: Property 'last_synced_at' is missing in type '{ id: string; name: string; version: string; description: string; categories: string[]; controls: { id: string; name: string; description: string; subcontrols: { id: string; name: string; description: string; }[]; }[]; }' but required in type 'FrameworkData'.
+src/data/frameworks.ts(30,14): error TS2322: Type '{ id: string; name: string; description: string; version: string; categories: any; updated_at: any; }[]' is not assignable to type 'Framework[]'.
+  Type '{ id: string; name: string; description: string; version: string; categories: any; updated_at: any; }' is missing the following properties from type 'Framework': controls, last_synced_at
+src/data/frameworks.ts(35,20): error TS2339: Property 'categories' does not exist on type 'FrameworkData'.
+src/data/frameworks.ts(36,20): error TS2339: Property 'updated_at' does not exist on type 'FrameworkData'.
+src/data/frameworks/iso27001-enhanced/index.ts(33,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(39,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(53,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(59,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(73,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(79,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(85,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(99,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(105,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(111,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(125,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(131,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(137,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(143,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(157,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(163,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(177,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(183,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(197,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(203,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(209,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(215,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(221,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(227,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(241,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(247,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(261,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(267,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(273,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(287,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(293,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(307,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(321,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(327,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(341,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/frameworks/iso27001-enhanced/index.ts(347,11): error TS2353: Object literal may only specify known properties, and 'controlNumber' does not exist in type 'Control'.
+src/data/learning/frameworks/ccpa.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/ccpa.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/ccpa.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/ccpa.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/cloud-security.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/cloud-security.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/cloud-security.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/cloud-security.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/csa-ccm.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/csa-ccm.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/csa-ccm.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/csa-ccm.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/hipaa.ts(88,5): error TS2739: Type '{ id: string; name: string; description: string; examples: { scenario: string; implementation: string; evidence: string; tips: string[]; }[]; }' is missing the following properties from type 'ControlLearning': commonChallenges, bestPractices
+src/data/learning/frameworks/hipaa.ts(115,5): error TS2739: Type '{ id: string; name: string; description: string; examples: { scenario: string; implementation: string; evidence: string; tips: string[]; }[]; }' is missing the following properties from type 'ControlLearning': commonChallenges, bestPractices
+src/data/learning/frameworks/iso-27001.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/iso-27001.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/iso-27001.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/iso-27001.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/iso-42001.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/iso-42001.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/iso-42001.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/iso-42001.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-800-53.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/nist-800-53.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-800-53.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-800-53.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-ai-rmf.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/nist-ai-rmf.ts(248,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-ai-rmf.ts(253,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/nist-ai-rmf.ts(258,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/soc2.ts(7,3): error TS2741: Property 'targetAudience' is missing in type '{ description: string; importance: string; applicability: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }' but required in type '{ description: string; importance: string; applicability: string[]; targetAudience: string[]; benefits: string[]; timeline: string; costConsiderations: string[]; }'.
+src/data/learning/frameworks/soc2.ts(227,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/soc2.ts(232,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/learning/frameworks/soc2.ts(237,7): error TS2741: Property 'type' is missing in type '{ title: string; description: string; url: string; }' but required in type 'Resource'.
+src/data/registry.ts(21,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(32,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(43,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(54,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(65,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(76,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(87,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(98,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(109,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(120,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/data/registry.ts(131,5): error TS2561: Object literal may only specify known properties, but 'categories' does not exist in type 'FrameworkRegistryItem'. Did you mean to write 'category'?
+src/db/schema.ts(1,10): error TS2305: Module '"@/types/framework"' has no exported member 'FrameworkControl'.
+src/examples/iso27001/access-control/setup-a92-monitoring.ts(190,17): error TS2345: Argument of type '{ id: string; title: string; status: "compliant" | "non-compliant" | "partial"; metrics: any[]; }' is not assignable to parameter of type 'never'.
+src/examples/iso27001/access-control/user-access-api.ts(1,21): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/hooks/useAssessmentEvidenceQuery.ts(22,27): error TS2345: Argument of type 'Partial<Evidence>' is not assignable to parameter of type '{ controlId: string; assessmentId?: string | undefined; subcontrolId: string; frameworkId: string; notes?: string | undefined; tags?: string[] | undefined; files?: EvidenceFile[] | undefined; controlName?: string | undefined; }'.
+  Types of property 'controlId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/hooks/useNotificationRules.ts(16,38): error TS2559: Type '(rule: Omit<NotificationRule, "workspace_id" | "created_at" | "id" | "updated_at">) => Promise<NotificationRule>' has no properties in common with type 'UseMutationOptions<unknown, Error, void, unknown>'.
+src/hooks/useNotificationRules.ts(17,52): error TS2559: Type 'string[]' has no properties in common with type 'InvalidateQueryFilters<readonly unknown[]>'.
+src/hooks/useNotificationRules.ts(21,5): error TS2559: Type '({ id, updates }: { id: string; updates: Partial<NotificationRule>; }) => Promise<NotificationRule>' has no properties in common with type 'UseMutationOptions<unknown, Error, void, unknown>'.
+src/hooks/useNotificationRules.ts(23,54): error TS2559: Type 'string[]' has no properties in common with type 'InvalidateQueryFilters<readonly unknown[]>'.
+src/hooks/useNotificationRules.ts(26,38): error TS2559: Type '(id: string) => Promise<void>' has no properties in common with type 'UseMutationOptions<unknown, Error, void, unknown>'.
+src/hooks/useNotificationRules.ts(27,52): error TS2559: Type 'string[]' has no properties in common with type 'InvalidateQueryFilters<readonly unknown[]>'.
+src/hooks/useNotificationRules.ts(36,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<unknown, Error, void, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<unknown, Error, void, unknown>, { mutate: UseMutateFunction<unknown, Error, void, unknown>; }> & { ...; }'.
+src/hooks/useNotificationRules.ts(38,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<unknown, Error, void, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<unknown, Error, void, unknown>, { mutate: UseMutateFunction<unknown, Error, void, unknown>; }> & { ...; }'.
+src/hooks/useNotificationRules.ts(40,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<unknown, Error, void, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<unknown, Error, void, unknown>, { mutate: UseMutateFunction<unknown, Error, void, unknown>; }> & { ...; }'.
+src/hooks/useTeam.ts(37,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<TeamMember, Error, Omit<TeamMember, "id" | "status" | "invited_at" | "accepted_at">, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<TeamMember, Error, Omit<TeamMember, "id" | "status" | "invited_at" | "accepted_at">, unknown>, { ...; }> & { ...; }'.
+src/hooks/useTeam.ts(39,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<TeamMember, Error, { id: string; updates: Partial<TeamMember>; }, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<TeamMember, Error, { id: string; updates: Partial<TeamMember>; }, unknown>, { ...; }> & { ...; }'.
+src/hooks/useTeam.ts(41,32): error TS2339: Property 'isLoading' does not exist on type 'UseMutationResult<void, Error, string, unknown>'.
+  Property 'isLoading' does not exist on type 'Override<MutationObserverIdleResult<void, Error, string, unknown>, { mutate: UseMutateFunction<void, Error, string, unknown>; }> & { ...; }'.
+src/lib/api.ts(168,44): error TS2339: Property 'assessments' does not exist on type '{ frameworks: { Row: { id: string; name: string; version: string; description?: string | undefined; slug?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; }; Insert: { ...; }; Update: { ...; }; }; controls: { ...; }; evidence: { ...; }; monitoring: { ...; }; }'.
+src/lib/api.ts(193,59): error TS2339: Property 'assessments' does not exist on type '{ frameworks: { Row: { id: string; name: string; version: string; description?: string | undefined; slug?: string | undefined; created_at?: string | undefined; updated_at?: string | undefined; }; Insert: { ...; }; Update: { ...; }; }; controls: { ...; }; evidence: { ...; }; monitoring: { ...; }; }'.
+src/lib/auth/multi-tenant-auth.ts(79,25): error TS2304: Cannot find name 'cookies'.
+src/lib/auth/multi-tenant-auth.ts(163,28): error TS18047: 'currentMembership' is possibly 'null'.
+src/lib/auth/multi-tenant-auth.ts(438,23): error TS2304: Cannot find name 'cookies'.
+src/lib/auth/MultiTenantContext.tsx(157,28): error TS18047: 'currentMembership' is possibly 'null'.
+src/lib/auth/server.ts(72,50): error TS2339: Property 'type' does not exist on type '{ name: any; type: any; }[]'.
+src/lib/auth/server.ts(89,29): error TS2339: Property 'name' does not exist on type '{ name: any; type: any; }[]'.
+src/lib/auth/session-cache.ts(129,5): error TS2322: Type 'WorkspaceMembership | null' is not assignable to type 'null'.
+  Type 'WorkspaceMembership' is not assignable to type 'null'.
+src/lib/auth/session-cache.ts(132,43): error TS2339: Property 'workspace' does not exist on type 'never'.
+src/lib/auth/session-cache.ts(135,5): error TS2322: Type 'WorkspaceMembership | null' is not assignable to type 'null'.
+  Type 'WorkspaceMembership' is not assignable to type 'null'.
+src/lib/auth/session-cache.ts(139,43): error TS2339: Property 'workspace' does not exist on type 'never'.
+src/lib/auth/session-cache.ts(142,5): error TS2322: Type 'WorkspaceMembership | null' is not assignable to type 'null'.
+  Type 'WorkspaceMembership' is not assignable to type 'null'.
+src/lib/auth/session-cache.ts(143,43): error TS2339: Property 'workspace' does not exist on type 'never'.
+src/lib/features/index.ts(60,20): error TS2304: Cannot find name 'useAuth'.
+src/lib/features/index.ts(61,19): error TS2304: Cannot find name 'useContext'.
+src/lib/features/index.ts(61,30): error TS2304: Cannot find name 'WorkspaceContext'.
+src/lib/workspace/context.tsx(31,31): error TS2339: Property 'context' does not exist on type '{ name: string; capabilities: { type: "system" | "customer"; features: string[]; access: string[]; }; }'.
+src/middleware-multitenant.ts(157,32): error TS2339: Property 'subscription_status' does not exist on type '{ id: any; slug: any; name: any; type: any; subscription_status: any; }[]'.
+src/middleware-multitenant.ts(164,67): error TS2339: Property 'id' does not exist on type '{ id: any; slug: any; name: any; type: any; subscription_status: any; }[]'.
+src/services/AuthService.ts(208,5): error TS2322: Type '{ data: { session: Session; }; error: null; } | { data: { session: null; }; error: AuthError; } | { data: { session: null; }; error: null; }' is not assignable to type 'AuthTokenResponse'.
+  Type '{ data: { session: Session; }; error: null; }' is not assignable to type 'AuthTokenResponse'.
+    Type '{ data: { session: Session; }; error: null; }' is not assignable to type '{ data: { user: User; session: Session; }; error: null; }'.
+      Types of property 'data' are incompatible.
+        Property 'user' is missing in type '{ session: Session; }' but required in type '{ user: User; session: Session; }'.
+src/services/AuthService.ts(257,12): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(values: { id: string; email: string; role_id: any; }, options?: { onConflict?: string | undefined; ignoreDuplicates?: boolean | undefined; count?: "exact" | "planned" | "estimated" | undefined; } | undefined): PostgrestFilterBuilder<...>', gave the following error.
+    Type 'string[]' is not assignable to type 'string'.
+  Overload 2 of 2, '(values: any[], options?: { onConflict?: string | undefined; ignoreDuplicates?: boolean | undefined; count?: "exact" | "planned" | "estimated" | undefined; defaultToNull?: boolean | undefined; } | undefined): PostgrestFilterBuilder<...>', gave the following error.
+    Object literal may only specify known properties, and 'id' does not exist in type 'any[]'.
+src/services/comparison.ts(14,29): error TS2339: Property 'title' does not exist on type 'Control'.
+src/services/comparison.ts(15,29): error TS2339: Property 'title' does not exist on type 'Control'.
+src/services/comparison.ts(76,7): error TS2322: Type '(string | undefined)[]' is not assignable to type 'string[]'.
+  Type 'string | undefined' is not assignable to type 'string'.
+    Type 'undefined' is not assignable to type 'string'.
+src/services/comparison.ts(97,16): error TS2339: Property 'industries' does not exist on type 'FrameworkData'.
+src/services/comparison.ts(97,46): error TS2339: Property 'industries' does not exist on type 'FrameworkData'.
+src/services/control.ts(2,19): error TS2305: Module '"@/types/control"' has no exported member 'ControlHierarchy'.
+src/services/control.ts(110,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '"postgres_changes"' is not assignable to parameter of type '"system"'.
+src/services/framework.ts(25,7): error TS2353: Object literal may only specify known properties, and 'slug' does not exist in type 'Framework'.
+src/services/framework.ts(46,5): error TS2322: Type '{ id: any; slug: any; data: { name: any; version: any; description: any; categories: any; }; }[]' is not assignable to type 'Framework[]'.
+  Type '{ id: any; slug: any; data: { name: any; version: any; description: any; categories: any; }; }' is missing the following properties from type 'Framework': name, description, version, controls, last_synced_at
+src/services/integrations/CloudWatchIntegration.ts(2,27): error TS2305: Module '"@/types/monitoring"' has no exported member 'StatusResult'.
+src/services/integrations/CloudWatchIntegration.ts(26,50): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint'.
+src/services/integrations/CloudWatchIntegration.ts(27,31): error TS2339: Property 'threshold' does not exist on type 'MonitoringPoint'.
+src/services/integrations/CloudWatchIntegration.ts(27,60): error TS2339: Property 'threshold' does not exist on type 'MonitoringPoint'.
+src/services/integrations/FileSystemIntegration.ts(2,27): error TS2305: Module '"@/types/monitoring"' has no exported member 'StatusResult'.
+src/services/integrations/FileSystemIntegration.ts(13,45): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint'.
+src/services/integrations/HttpEndpointIntegration.ts(2,27): error TS2305: Module '"@/types/monitoring"' has no exported member 'StatusResult'.
+src/services/integrations/HttpEndpointIntegration.ts(13,49): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint'.
+src/services/integrations/HttpEndpointIntegration.ts(58,53): error TS2339: Property 'metric' does not exist on type 'MonitoringPoint'.
+src/services/integrations/HttpEndpointIntegration.ts(59,44): error TS2339: Property 'threshold' does not exist on type 'MonitoringPoint'.
+src/services/integrations/HttpEndpointIntegration.ts(178,42): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(input: string | Request | URL, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'string | Request | URL'.
+  Overload 2 of 2, '(input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'URL | RequestInfo'.
+src/services/integrations/MonitoringIntegration.ts(1,27): error TS2305: Module '"@/types/monitoring"' has no exported member 'StatusResult'.
+src/services/monitoring.ts(127,14): error TS2339: Property 'type' does not exist on type 'Evidence'.
+src/services/monitoring.ts(135,57): error TS2345: Argument of type 'Evidence' is not assignable to parameter of type 'EvidenceRequirement'.
+  Type 'Evidence' is missing the following properties from type 'EvidenceRequirement': type, description, frequency, retention
+src/services/storage.ts(34,31): error TS2339: Property 'timestamp' does not exist on type 'Evidence'.
+src/utils/framework-parser.ts(53,7): error TS2353: Object literal may only specify known properties, and 'categories' does not exist in type 'EnhancedFramework'.
+src/utils/framework-validation.ts(33,47): error TS2345: Argument of type 'Evidence' is not assignable to parameter of type 'EvidenceRequirement'.
+  Type 'Evidence' is missing the following properties from type 'EvidenceRequirement': type, description, frequency, retention

@@ -136,7 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (profile.userType === 'system') {
         await router.push('/dashboard');
       } else if (profile.userType === 'customer') {
-        await router.push(profile.workspaceId ? '/customer/dashboard' : '/customer/select-workspace');
+        // Route to dashboard; page-level logic will redirect to workspace slug or selection
+        await router.push(profile.workspaceId ? '/dashboard' : '/workspace/select');
       } else {
         await router.push('/auth/login');
       }
@@ -170,15 +171,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await authService.signOut();
       if (error) throw error;
       setUser(null);
-      
-      // Use direct navigation for more reliability during sign-out
-      window.location.href = '/auth/login';
+      // Use client-side navigation to avoid full reload
+      router.replace('/auth/login');
     } catch (error) {
       console.error('Error signing out:', error);
       setLoading(false);
       throw error;
     }
-  }, [authService]);
+  }, [authService, router]);
 
   const resetPassword = useCallback(async (email: string): Promise<void> => {
     try {

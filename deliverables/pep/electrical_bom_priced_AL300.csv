@@ -1,0 +1,63 @@
+Category,Item,Specification,Unit,Quantity,Unit Cost (USD),Total (USD),Notes
+Materials,CTP6 MV Junction Box A (STS05),SS316/SS304 C5M IP67/IK10 with filtered breather; Cu earth bar; 1000x800x400 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,4800,4800,Includes accessories and earth bar — Sources: Rittal AX SS wall enclosure family https://www.rittal.com/com-en/products/PG20231215SCH101/PG20231512SCH301; nVent HOFFMAN SS wall enclosure family https://hoffman.nvent.com/products/stainless-steel-wall-mounted-industrial-enclosures
+Materials,CTP6 MV Junction Box B (STS06),SS316/SS304 C5M IP67/IK10 with filtered breather; Cu earth bar; 1000x800x400 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,4800,4800,Includes accessories and earth bar — Sources: Rittal AX SS wall enclosure family https://www.rittal.com/com-en/products/PG20231215SCH101/PG20231512SCH301; nVent HOFFMAN SS wall enclosure family https://hoffman.nvent.com/products/stainless-steel-wall-mounted-industrial-enclosures
+Materials,CTP5 MV Junction Box (STS04),SS316/SS304 C5M IP67/IK10 with filtered breather; Cu earth bar; 1000x800x400 mm; GA: ga_jb_ctp5_ctp6.html,Each,1,4800,4800,Includes accessories and earth bar — Sources: Rittal AX SS wall enclosure family https://www.rittal.com/com-en/products/PG20231215SCH101/PG20231512SCH301; nVent HOFFMAN SS wall enclosure family https://hoffman.nvent.com/products/stainless-steel-wall-mounted-industrial-enclosures
+Materials,Cable Drum Assemblies,Marine-rated drum + tail assembly sized to cable OD; GA: ga_drum_mv.html,Each,3,1800,5400,One per STS04/05/06 — Sources: ReelPower Industrial steel reels https://www.reelpowerind.com/steel-reels; Sonoco metal reels https://www.sonoco.com/products/industrial-products/reels-and-spools/metal-reels
+Materials,MV XLPE Cable (11 kV class),IEC 60502-2; 3 × 1C 300 mm² Aluminum; armored/sheath per route; OD per core per datasheet,M,1200,48,57600,Alternate Option Locked: 3 × 1C 300 mm² Al; budgetary unit rate; glands/drum per per-core OD
+Materials,MV Termination Kits (Indoor/Outdoor),IEC 60502-2 stress-control; single-core kits incl. boots; 12/20 kV,Set,36,350,12600,Heat-shrink preferred; cold-shrink acceptable on approval; 3 cores per termination point (indoor/outdoor as applicable)
+Materials,Double-Compression Cable Glands,Single-core; IP67; non-magnetic; thread per per-core OD (M75–M90),Each,54,120,6480,Three per termination point; confirm exact thread with cable datasheet
+Materials,Armor/Braid Bonding Kits,Compatible with gland (single-core),Each,18,45,810,If required by cable type
+Materials,Cable Lugs,Al or bimetal; 300 mm²; crimp/shear-bolt,Each,108,12,1296,Sized to 300 mm² Al; quantity scaled for 3 cores
+Materials,Cable Cleats (trefoil/flat),Non-magnetic stainless/composite cleats,Each,120,25,3000,Trefoil/flat per route; spacing per OEM and fault level
+Materials,Sheath Bonding Components,Single-point/cross-bonding kits incl. link boxes if required,Set,6,350,2100,Policy to be confirmed with TiN; provisional allowance
+Materials,Cu Earth Conductor,25–35 mm² tinned copper to grid,M,60,6,360,Allow for routing to earth grid
+Materials,Cu Earth Bar with Test Link,Pre-drilled with labeled test link,Each,3,120,360,One per JB (spare allowed)
+Materials,Filtered Breathers,IP-rated low differential pressure,Each,6,35,210,Two per JB
+Materials,Neoprene Gaskets/Seals,Door and gland plate gaskets,Set,3,25,75,Replacement/spares
+Materials,Blanking Plugs,IP-rated for unused entries,Each,24,8,192,Allowance per JB
+Materials,Surge Protection (MV pit),MOV/surge diverter suitable for 11 kV,Each,3,600,1800,If required by design
+Materials,Fasteners & Fixings,A4-80 SS bolts/washers/isolators,Set,6,45,270,Mounting + spares
+Materials,Mounting Backplates/Frames,SS316 backplate/frame,Each,3,150,450,For JB mounting
+Materials,Cable Support Saddles,For strain relief near entry,Each,12,20,240,Per entry points
+Materials,Cable Route Markers,UV-stable route tags/plates,Each,30,3,90,At pit entries and intervals
+Materials,Labels & Plates,UV-stable engraved phenolic labels,Set,3,40,120,JB IDs/feeder IDs
+Materials,Phase ID Sleeves,Heat-shrink phase markers (L1/L2/L3/PE),Set,6,12,72,Per termination set
+Materials,Desiccant Packs,Moisture control packs,Each,12,3,36,For enclosures
+Materials,Sealants/Compounds,IP-rated sealing compound,Cartridge,6,9,54,Allowance
+Materials,Cable Lubricant,Approved pulling lubricant,Bottle,6,12,72,Allowance
+Materials,Mechanical Protection at Pit Exits,Grommets/bushings/rub blocks,Set,6,40,240,Allowance for exits/bends
+Materials,Portable Earths,Rated for prospective fault current,Set,2,350,700,Site isolation safety
+Materials,Padlocks & LOTO Hasps,For LOTO kits,Set,2,120,240,Safety equipment
+Materials,Warning Signage,Electrical hazard/ID signage,Set,3,45,135,Per pit/JB
+Tools/Equipment,Hydraulic Crimper + Die Set,12–400 mm² range; calibrated; with dielist,Each,1,1800,1800,Selected: Cembre HT131-C (or Klauke/Greenlee equivalent), Supplier: RS/TestEquity — New purchase — Source: https://products.cembre.com/en/row/product/ht131-c
+Tools/Equipment,Heat Gun/Heat Blower,Industrial grade with temp control,Each,2,80,160,Selected: Steinel HL 2020 E (or Makita HG6031VK), Supplier: RS/Amazon Business — New purchase — Source: https://www.steinel.net/en/heat-tools/products/heat-guns/professional-heat-guns/hl-2020-e-110025597.html
+Tools/Equipment,Torque Wrench Set,Range 5–200 Nm with calibration,Set,2,280,560,Selected: Norbar 5–200 Nm set (or Wera A5), Supplier: RS/Grainger — New purchase — Source: https://www.protorquetools.com/norbar-1-2-dr-30-150-ft-lbs-40-200-nm-micrometer-adj-torque-wrench-dual-scale/
+Tools/Equipment,Capstan Winch,With controlled speed,Each,1,3500,3500,Selected: Portable Winch Co. PCW5000 (gas) or electric equivalent, Supplier: Rigging distributors — New purchase — Source: https://www.portablewinch.com/products/pcw5000-a-gas-powered-winch-with-accessories
+Tools/Equipment,Inline Dynamometer,Tension measurement 0–5 kN,Each,1,900,900,Selected: Dillon EDjunior (5 kN class), Supplier: Lifting distributors — New purchase — Source: https://www.dillon-force.com/products/dynamometers/ed-junior
+Tools/Equipment,Spindle Stands/Drum Jacks,Rated; with brake,Pair,2,700,1400,Selected: Greenlee 690 (or iTOOLco), Supplier: Electrical distributors — New purchase — Source: https://www.greenlee.com/us/en/reel-jack-stands
+Tools/Equipment,Cable Rollers & Corner Blocks,Heavy-duty; set,Set,2,650,1300,Selected: Condux roller set + corner blocks, Supplier: Cable install suppliers — New purchase — Source: https://products.condux.com/product.php?id=20
+Tools/Equipment,OTDR (for FO interface),1310/1550 nm; event/IL analysis,Each,1,7500,7500,Selected: EXFO MaxTester 720C (1310/1550), Supplier: TestEquity/EXFO — New purchase — Source: https://www.exfo.com/en/products/discontinued-products/maxtester-720c/
+Tools/Equipment,Megger (IR Tester),5 kV DC insulation tester,Each,1,1200,1200,Selected: Megger MIT525 (5 kV), Supplier: Megger distributors — New purchase — Source: https://www.megger.com/en/products/5-kv-10-kv-and-15-kv-insulation-resistance-testers
+Tools/Equipment,VLF Test Set,0.1 Hz; 12/20 kV class,Each,1,18000,18000,Selected: HV Diagnostics HVA28 (or b2 HVA28), Supplier: OEM/authorized rep — New purchase — Source: https://www.hvdiagnostics.com/vlf-dc
+Tools/Equipment,Earth Tester,Clamp or 3-point method,Each,1,650,650,Selected: Megger DET4TC2 (3-point), Supplier: Megger distributors — New purchase — Source: https://www.megger.com/en/products/det4-series-four-terminal-earth/ground-resistance-testers
+Tools/Equipment,Secondary Injection Test Set,Protection relay testing,Each,1,8000,8000,Selected: Kingsine K68i (cost-effective), Supplier: Authorized dealer — New purchase — Source: https://www.kingsine.com/products/kingsine-k68i-protection-relay-test-set/
+Tools/Equipment,Thermal Camera,320x240 or better,Each,1,2500,2500,Selected: FLIR E54 (320×240), Supplier: Teledyne FLIR/TestEquity — New purchase — Source: https://www.flir.com/products/e54/?vertical=condition+monitoring&segment=solutions
+Tools/Equipment,Confined Space Gas Detector,4-gas monitor,Each,1,650,650,Selected: Honeywell BW MicroClip XL, Supplier: Honeywell Safety/Grainger — New purchase — Source: https://sps.honeywell.com/us/en/products/safety/gas-and-flame-detection/portables/honeywell-bw-microclip-series
+Tools/Equipment,LOTO Kit,Hasps, tags, locks, testers,Set,2,150,300,Selected: Brady Master Lock LOTO kit, Supplier: Brady/Grainger — New purchase — Source: https://www.bradyid.com/lockout-tagout/kits
+Tools/Equipment,Lifting Slings/Spreader,Rated slings/spreader bar,Set,2,600,1200,Selected: Crosby slings + spreader, Supplier: Rigging distributors — New purchase — Source: https://www.thecrosbygroup.com/catalog/chain-and-accessories/
+Tools/Equipment,Hand Tools Set,Insulated tools: cutters/strippers/spanners,Set,2,600,1200,Selected: Wiha/Knipex insulated set, Supplier: RS/KC Tool — New purchase — Source: https://www.wihatools.com/collections/insulated-tools
+Services,Engineering & Design,Basis of design, load calc, cable sizing,Each,1,8500,8500,Lump sum
+Services,Detailed CAD & As-Builts,GA drawings, redlines, as-builts,Each,1,3500,3500,Lump sum
+Services,Project Management,Planning, coordination, reporting,Each,1,6000,6000,Lump sum
+Services,Procurement Management,Vendor liaison, expediting,Each,1,3000,3000,Lump sum
+Services,Field Installation,Electricians/riggers, shifts and permits,Each,1,28000,28000,Lump sum
+Services,Testing & Commissioning,IR/VLF, interlocks, energization,Each,1,7500,7500,Lump sum
+Services,Training,Operator/maintenance training,Each,1,3000,3000,Lump sum
+Services,HSE Management,Method statements, permits, supervision,Each,1,2500,2500,Lump sum
+Services,QA/QC & Documentation,ITP/ITR, checklists, O&M,Each,1,3500,3500,Lump sum
+Services,Logistics & Handling,Freight, site handling, storage,Each,1,4000,4000,Lump sum
+Summary,Subtotal Materials,,Each,1,,90034,Auto-calculated for reference (reflects Al cable at 48 USD/m)
+Summary,Subtotal Tools/Equipment,,Each,1,,50820,Auto-calculated for reference
+Summary,Subtotal Services,,Each,1,,69500,Auto-calculated for reference
+Summary,Contingency (10% of above),,Each,1,,21035,10% contingency
+Summary,Grand Total (Estimated),,Each,1,,231389,Budgetary estimate pending confirmations

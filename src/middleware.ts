@@ -1,136 +1,341 @@
-import type { NextRequest } from 'next/server';
+/**
+ * MULTI-TENANT MIDDLEWARE
+ * 
+ * Handles authentication, workspace routing, and access control
+ * for the multi-tenant architecture
+ */
+
 import { NextResponse } from 'next/server';
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import type { NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { isPlatformAdmin } from '@/lib/auth/admin';
 
-export async function middleware(req: NextRequest) {
-  console.log(`DEBUG: middleware request ${req.method} ${req.nextUrl.pathname}`);
-  // Bypass favicon requests to avoid 500 errors
-  if (req.nextUrl.pathname === '/favicon.ico') {
-    // Return no content for favicon to avoid errors when file is missing
-    return new NextResponse(null, { status: 204 });
-  }
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+// Public routes that don't require authentication
+const publicRoutes = [
+  '/',
+  '/auth/login',
+  '/auth/signup', 
+  '/auth/callback',
+  '/api/auth/callback',
+  '/api/test/seed-user',
+  // Dev utilities (must be public so we can sync cookies before auth)
+  '/dev'
+];
 
-  // Refresh session if expired - required for Server Components
-  const { data: { session }, error } = await supabase.auth.getSession()
+// Authentication routes that redirect if already logged in
+const authRoutes = ['/auth/login', '/auth/signup'];
 
-  // Define protected paths that require authentication
-  const protectedPaths = [
-    '/dashboard',
-    '/compare',
-    '/learning',
-    '/profile',
-    '/settings',
-    '/monitoring'
-  ]
+// Routes that require workspace context
+const workspaceRoutes = ['/workspace'];
 
-  // System-only paths
-  const systemPaths = [
-    '/system',
-    '/frameworks'
-  ]
+// API routes that need special handling
+const apiRoutes = ['/api'];
 
-  // Customer-only paths
-  const customerPaths = [
-    '/customer'
-  ]
-
-  // Public paths that should always be accessible
-  const publicPaths = [
-    '/',
-    '/auth/login',
-    '/auth/signup',
-    '/auth/verify-email',
-    '/auth/callback',
-    '/icon'
-  ]
-
-  const path = req.nextUrl.pathname
-
-  // Check if the current path starts with any of the protected paths
-  const isProtectedPath = protectedPaths.some(p => path.startsWith(p))
-  const isSystemPath = systemPaths.some(p => path.startsWith(p))
-  const isCustomerPath = customerPaths.some(p => path.startsWith(p))
-  const isPublicPath = publicPaths.some(p => path === p || path.startsWith('/api/'))
-
-  // If trying to access a protected path while not authenticated
-  if ((isProtectedPath || isSystemPath || isCustomerPath) && !session) {
-    // Only redirect if not already on a public path
-    if (!isPublicPath) {
-      const redirectUrl = new URL('/auth/login', req.url)
-      redirectUrl.searchParams.set('returnUrl', req.url)
-      return NextResponse.redirect(redirectUrl)
-    }
+export async function middleware(request: NextRequest) {
+  // Ensure Authorization and other headers are forwarded to downstream handlers
+  const requestHeaders = new Headers(request.headers);
+  const auth = request.headers.get('authorization') || request.headers.get('Authorization');
+  if (auth && !requestHeaders.get('authorization')) {
+    requestHeaders.set('authorization', auth);
   }
 
-  // Handle role-based access for system and customer paths
-  if (session && !isPublicPath) {
-    try {
-      // Get user role from the session with optimized query
-      const { data: userData, error } = await supabase
-        .from('users')
-        .select(`
-          id, 
-          role_id, 
-          workspace_id,
-          roles:role_id (
-            id,
+  const pathname = request.nextUrl.pathname;
+
+  // Dev-only bypass for E2E tests when a special header or query param is present
+  const isE2E = request.headers.get('x-e2e') === '1' || request.nextUrl.searchParams.get('e2e') === '1';
+  try {
+    console.log('[MW] NODE_ENV=%s isE2E=%s path=%s cookies=%s', process.env.NODE_ENV, String(isE2E), pathname, Array.from(request.cookies.getAll() || []).map(c => c.name).join(','));
+  } catch {}
+  if (process.env.NODE_ENV !== 'production' && isE2E) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Hard-bypass middleware for auth sync and dev helper routes
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/dev')
+  ) {
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // We'll prepare response later after we possibly mutate requestHeaders for API routing
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          request.cookies.set({
             name,
-            capabilities
-          )
-        `)
-        .eq('id', session.user.id)
-        .single()
+            value,
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
+        },
+        remove(name: string, options: any) {
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+          response = NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          });
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
+        },
+      },
+    }
+  );
 
-      if (userData?.roles) {
-        // First try to get type from capabilities if available
-        const role = userData.roles as { capabilities?: { type?: string }, name?: string };
-        let userType = role.capabilities?.type;
+  // Get authentication state
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  try {
+    console.log('[MW] getUser user=%s authError=%s path=%s', user?.id || 'null', authError?.message || 'none', pathname);
+  } catch {}
+
+  // pathname already defined above
+
+  // Check route types
+  // Important: '/' would match every path with startsWith('/'), so handle it explicitly
+  const isPublicRoute = pathname === '/' || publicRoutes.some(route => route !== '/' && (pathname === route || pathname.startsWith(route)));
+  const isAuthRoute = authRoutes.includes(pathname);
+  const isWorkspaceRoute = workspaceRoutes.some(route => pathname.startsWith(route));
+  const isApiRoute = apiRoutes.some(route => pathname.startsWith(route));
+  
+  // Get the session to check if it's a new sign-in
+  const { data: { session } } = await supabase.auth.getSession();
+  const isNewSignIn = request.nextUrl.searchParams.has('isNewSignIn');
+
+  // If user is not authenticated and trying to access protected route, redirect to login
+  // But if Supabase cookies are present, allow pass-through to let client hydrate/session resolve
+  const hasSbCookie = (() => {
+    try {
+      return (request.cookies.getAll() || []).some(c => c.name.startsWith('sb-'));
+    } catch {
+      return false;
+    }
+  })();
+  if (!user && !publicRoutes.some(route => pathname.startsWith(route))) {
+    if (hasSbCookie) {
+      try { console.log('[MW] has sb-* cookie; skipping redirect to allow client hydration'); } catch {}
+      return response;
+    }
+    // Don't redirect if we're already going to login
+    if (!pathname.startsWith('/auth/login')) {
+      const loginUrl = new URL('/auth/login', request.url);
+      loginUrl.searchParams.set('redirectedFrom', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return response;
+  }
+
+  // Restrict all /system/* routes to platform admins only
+  if (pathname.startsWith('/system')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+    if (!isPlatformAdmin(user.email)) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    // Platform admins allowed to proceed
+    return response;
+  }
+
+  // If user is authenticated and trying to access auth routes, redirect to dashboard
+  if (user && authRoutes.some(route => pathname.startsWith(route))) {
+    // Special case: if this is a callback route or has special params, don't redirect
+    if (pathname.includes('/callback') || request.nextUrl.searchParams.has('code') || isNewSignIn) {
+      return response;
+    }
+
+    // Platform admin bypass: go to system dashboard
+    if (isPlatformAdmin(user.email)) {
+      return NextResponse.redirect(new URL('/system/dashboard', request.url));
+    }
+
+    // For authenticated users accessing auth pages, redirect to their workspace dashboard if available
+    try {
+      const { getOrFetchUserSession } = await import('@/lib/auth/session-cache');
+      const authenticatedUser = await getOrFetchUserSession(user.id, supabase);
+
+      const targetMembership = authenticatedUser?.memberships?.find(m => m.invitation_status === 'active');
+      const targetSlug = authenticatedUser?.currentWorkspace?.slug || targetMembership?.workspace?.slug;
+      if (targetSlug) {
+        return NextResponse.redirect(new URL(`/workspace/${targetSlug}/dashboard`, request.url));
+      }
+    } catch (e) {
+      try { console.warn('[MW] Auth route redirect failed to resolve workspace, falling back:', e); } catch {}
+    }
+
+    // Fallback: workspace selection
+    return NextResponse.redirect(new URL('/workspace/select', request.url));
+  }
+
+  // Handle workspace routes and authentication
+  if (user && (isWorkspaceRoute || pathname === '/dashboard' || pathname.startsWith('/admin'))) {
+    try {
+      // Use cached session data to avoid database queries on every request
+      const { getOrFetchUserSession } = await import('@/lib/auth/session-cache');
+      const authenticatedUser = await getOrFetchUserSession(user.id, supabase);
+
+      if (!authenticatedUser || !authenticatedUser.profile) {
+        console.error('No profile found for user:', user.id);
+        // Platform admin bypass onboarding
+        if (isPlatformAdmin(user.email)) {
+          return NextResponse.redirect(new URL('/system/dashboard', request.url));
+        }
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+
+      // If user has no workspace memberships, redirect to the selection page,
+      // which also handles creation. Avoid redirect loops.
+      if ((!authenticatedUser.memberships || authenticatedUser.memberships.length === 0) && pathname !== '/workspace/select') {
+        return NextResponse.redirect(new URL('/workspace/select', request.url));
+      }
+
+      // Restrict Frameworks list to platform admins
+      if (pathname.startsWith('/dashboard/frameworks') && !isPlatformAdmin(user.email)) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+
+      // Handle workspace-specific routes
+      const workspaceMatch = pathname.match(/^\/workspace\/([^\/]+)/);
+      if (workspaceMatch) {
+        const workspaceSlug = workspaceMatch[1];
         
-        // If not found in capabilities, try to infer from role name
-        if (!userType && role.name) {
-          const roleName = role.name.toLowerCase();
-          if (roleName.includes('system')) {
-            userType = 'system';
-          } else if (roleName.includes('customer')) {
-            userType = 'customer';
-          }
-        }
-        
-        // Only enforce path-based access control for specific paths
-        if (isSystemPath && userType !== 'system') {
-          return NextResponse.redirect(new URL('/dashboard', req.url))
+        // Skip validation for workspace selection page
+        if (workspaceSlug === 'select') {
+          return response;
         }
 
-        if (isCustomerPath && userType !== 'customer' && userType !== 'system') {
-          return NextResponse.redirect(new URL('/dashboard', req.url))
+        // Find membership for this workspace
+        const membership = authenticatedUser.memberships.find(
+          (m) => m.workspace.slug === workspaceSlug && m.invitation_status === 'active'
+        );
+
+        if (!membership) {
+          console.error(`User ${user.id} does not have access to workspace: ${workspaceSlug}`);
+          return NextResponse.redirect(new URL('/workspace/select', request.url));
         }
 
-        // Handle root path redirection for authenticated users
-        if (path === '/') {
-          return NextResponse.redirect(new URL('/dashboard', req.url))
+        // Add workspace context to headers for downstream use
+        response.headers.set('x-workspace-id', membership.workspace.id);
+        response.headers.set('x-workspace-slug', workspaceSlug);
+        response.headers.set('x-workspace-role', membership.role);
+        response.headers.set('x-user-id', user.id);
+
+        // Role-based route protection
+        const adminRoutes = ['/settings', '/team', '/billing'];
+        const isAdminRoute = adminRoutes.some(route => 
+          pathname.includes(route)
+        );
+
+        if (isAdminRoute && !['owner', 'admin'].includes(membership.role)) {
+          return NextResponse.redirect(new URL(`/workspace/${workspaceSlug}/dashboard`, request.url));
         }
       }
+
+      // Handle legacy dashboard redirect
+      if (pathname === '/dashboard') {
+        // Redirect to first available workspace
+        const firstMembership = authenticatedUser.memberships.find(m => m.invitation_status === 'active');
+        if (firstMembership) {
+          return NextResponse.redirect(
+            new URL(`/workspace/${firstMembership.workspace.slug}/dashboard`, request.url)
+          );
+        }
+      }
+
+      // Handle root redirect for authenticated users
+      if (pathname === '/') {
+        // Platform admin default landing
+        if (isPlatformAdmin(user.email)) {
+          return NextResponse.redirect(new URL('/system/dashboard', request.url));
+        }
+        try {
+          const { getOrFetchUserSession } = await import('@/lib/auth/session-cache');
+          const userForRoot = await getOrFetchUserSession(user.id, supabase);
+          const targetMembership = userForRoot?.memberships?.find(m => m.invitation_status === 'active');
+          const targetSlug = userForRoot?.currentWorkspace?.slug || targetMembership?.workspace?.slug;
+          if (targetSlug) {
+            return NextResponse.redirect(new URL(`/workspace/${targetSlug}/dashboard`, request.url));
+          }
+        } catch (e) {
+          try { console.warn('[MW] Root redirect failed to resolve workspace, falling back:', e); } catch {}
+        }
+        return NextResponse.redirect(new URL('/workspace/select', request.url));
+      }
+
     } catch (error) {
-      console.error('Error checking user role in middleware:', error)
-      // On error, allow the request to continue
-      return res
+      console.error('Middleware error:', error);
+      // On error, redirect to workspace selection to be safe
+      return NextResponse.redirect(new URL('/workspace/select', request.url));
     }
   }
 
-  // Add security headers
-  res.headers.set('X-Frame-Options', 'DENY')
-  res.headers.set('X-Content-Type-Options', 'nosniff')
-  res.headers.set('Referrer-Policy', 'same-origin')
-  res.headers.set(
-    'Permissions-Policy',
-    'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
-  )
+  // Handle API routes
+  if (isApiRoute) {
+    // Forward or inject Authorization into the forwarded REQUEST headers so route handlers can read it
+    const incomingAuth = request.headers.get('authorization');
+    if (incomingAuth) {
+      requestHeaders.set('authorization', incomingAuth);
+    } else if (session?.access_token) {
+      requestHeaders.set('authorization', `Bearer ${session.access_token}`);
+    } else if (user) {
+      // If we have a user but no explicit token, try to obtain a fresh session token from cookies
+      const { data: { session: freshSession } } = await supabase.auth.getSession();
+      if (freshSession?.access_token) {
+        requestHeaders.set('authorization', `Bearer ${freshSession.access_token}`);
+      }
+    }
 
-  return res
+    // Recreate response so the updated request headers are forwarded
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+
+    // Add user context if authenticated to the RESPONSE headers (optional diagnostics)
+    if (user) {
+      response.headers.set('x-user-id', user.id);
+      const workspaceSlug = request.nextUrl.searchParams.get('workspace');
+      if (workspaceSlug) {
+        response.headers.set('x-workspace-slug', workspaceSlug);
+      }
+    }
+  }
+
+  return response;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
-}
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/ (all Next.js internal assets: static, image, webpack-hmr, chunks, etc.)
+     * - favicon.ico (favicon file)
+     * - public (public files)
+     */
+    // Exclude Next internals and public endpoints used for auth sync and dev helper during dev
+    // Disable middleware for any /api/*, /auth/*, and /dev/* routes
+    '/((?!_next/|favicon.ico|public/|api/|auth/|dev).*)',
+  ],
+};
